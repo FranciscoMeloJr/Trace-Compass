@@ -29,9 +29,9 @@ public class ProfileTraversal {
             visitor.visit(current);
         }
     }
-    /**
-     * @param root
-     * @param visitor
+    /** This function makes the levelOrderTraversal of a tree, which contains a generic node
+     * @param root a tree first node to be traversed
+     * @param visitor a visitor pattern implementation
      */
     public static <T extends IProfileData> void levelOrderTraversal(Node<T> root, IProfileVisitor<T> visitor) {
         LinkedList<Node<T>> queue = new LinkedList<>();
@@ -44,5 +44,42 @@ public class ProfileTraversal {
             visitor.visit(current);
         }
     }
+    /** This function makes the levelOrderTraversal of a two trees that contains a generic node
+     * @param root1 and root2 the first two nodes to be traversed
+     * @param visitor a visitor pattern implementation
+     */
+    public static <T extends IProfileData> boolean levelOrderTraversalComparator(Node<T> root1, Node<T> root2, IProfileVisitor<T> visitor) {
+        LinkedList<Node<T>> queue = new LinkedList<>();
+        LinkedList<Node<T>> levelOrderFirst = new LinkedList<>();
+        LinkedList<Node<T>> levelOrderSecond = new LinkedList<>();
 
+        int i = 0;
+        queue.add(root1);
+        while (!queue.isEmpty()) {
+            Node<T> current = queue.poll();
+            for (Node<T> child : current.getChildren()) {
+                queue.add(child);
+            }
+            visitor.visit(current);
+            levelOrderFirst.add(current);
+        }
+        queue.add(root2);
+        while (!queue.isEmpty()) {
+            Node<T> current = queue.poll();
+            for (Node<T> child : current.getChildren()) {
+                queue.add(child);
+            }
+            visitor.visit(current);
+            levelOrderSecond.add(current);
+        }
+
+
+        for(Node<T> node: levelOrderFirst)
+        {
+            if(!node.equals(levelOrderSecond.get(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
