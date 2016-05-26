@@ -18,8 +18,8 @@ public class TestProfileTree {
 
     public class TestData implements IProfileData {
 
-        private final int fWeight;
-        private final String fLabel;
+        private int fWeight;
+        private String fLabel;
 
         public TestData(int weight, String label) {
             fWeight = weight;
@@ -32,6 +32,17 @@ public class TestProfileTree {
 
         public String getLabel() {
             return fLabel;
+        }
+
+        @Override
+        public void merge(IProfileData other) {
+            if (!(other instanceof TestData)) {
+                throw new IllegalArgumentException("wrong type for minus operation");
+            }
+            if (fLabel.equals(other)) {
+                TestData data = (TestData) other;
+                fWeight += data.getWeight();
+            }
         }
 
         @Override
@@ -51,8 +62,8 @@ public class TestProfileTree {
 
     private Node<TestData> fRoot;
 
-    String[] fLabels = { "A", "B", "C", "D", "E", "F", "G", "H", "I" };
-    String[][] fTreeDef = {
+    String[] fLabels1 = { "A", "B", "C", "D", "E", "F", "G", "H", "I" };
+    String[][] fTreeDef1 = {
             { "F", "B" },
             { "F", "G" },
             { "B", "A" },
@@ -69,12 +80,12 @@ public class TestProfileTree {
     @Before
     public void setup() {
         Map<String, Node<TestData>> map = new HashMap<>();
-        for (String label : fLabels) {
+        for (String label : fLabels1) {
             Node<TestData> node = Node.create(new TestData(0, label));
             map.put(label, node);
         }
         fRoot = map.get("F");
-        for (String[] item : fTreeDef) {
+        for (String[] item : fTreeDef1) {
             NonNullUtils.checkNotNull(map.get(item[0])).addChild(NonNullUtils.checkNotNull(map.get(item[1])));
         }
     }
