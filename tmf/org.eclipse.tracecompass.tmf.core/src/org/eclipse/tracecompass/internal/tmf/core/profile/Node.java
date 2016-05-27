@@ -50,16 +50,18 @@ public class Node<T extends IProfileData> {
     public int getNodeId() {
         return fId;
     }
+
     public void mergeNode(Node<T> node) {
         fProfileData.merge(node.fProfileData);
     }
+
     @Override
     public String toString() {
         return "(" + fId + "," + fProfileData + ")";
     }
 
     public boolean equals(Node<T> node) {
-        if ((fId == node.fId) &&(fProfileData.equals(node.fProfileData))) {
+        if ((fId == node.fId) && (fProfileData.equals(node.fProfileData))) {
             return true;
         }
         return false;
