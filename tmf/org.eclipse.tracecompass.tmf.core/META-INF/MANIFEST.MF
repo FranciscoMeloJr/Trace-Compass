@@ -68,4 +68,5 @@ Import-Package: com.google.common.base,
  com.google.common.cache,
  com.google.common.collect,
  com.google.common.hash;version="15.0.0",
- org.apache.commons.io
+ org.apache.commons.io,
+ org.eclipse.tracecompass.analysis.timing.core.segmentstore

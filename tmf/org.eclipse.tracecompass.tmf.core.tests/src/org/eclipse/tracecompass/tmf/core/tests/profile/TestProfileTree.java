@@ -49,13 +49,25 @@ public class TestProfileTree {
         public String getLabel() {
             return fLabel;
         }
+
         public void setWeight(int newfWeight) {
             fWeight = newfWeight;
         }
-
+        @Override
         public void setLabel(String newfLabel) {
             fLabel = newfLabel;
         }
+        @Override
+        public void setProfileData(IProfileData other)
+        {
+            if (!(other instanceof TestData)) {
+                throw new IllegalArgumentException("wrong type for minus operation");
+            }
+            TestData data = (TestData) other;
+            fLabel = data.fLabel;
+            fWeight = data.fWeight;
+        }
+
         @Override
         public void merge(IProfileData other) {
             if (!(other instanceof TestData)) {
@@ -149,12 +161,12 @@ public class TestProfileTree {
 
         Visitor visitor = new Visitor();
         Visitor visitor2 = new Visitor();
-        //Create the first tree:
+        // Create the first tree:
         ProfileTraversal.levelOrderTraversal(fRoot, visitor);
-        //Create the second tree:
+        // Create the second tree:
         ProfileTraversal.levelOrderTraversal(fRoot2, visitor2);
 
-        //Asset for Equals
+        // Asset for Equals
         assertEquals(fExpectedLevelorder.length, visitor.result.size());
         for (int i = 0; i < fExpectedLevelorder.length; i++) {
             assertEquals(fExpectedLevelorder[i], visitor.result.get(i).getProfileData().getLabel());

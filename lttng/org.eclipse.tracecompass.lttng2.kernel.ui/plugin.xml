@@ -63,4 +63,13 @@
          </analysisId>
       </parameterProvider>
    </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            class="org.eclipse.tracecompass.lttng2.kernel.ui.compare.CompareView"
+            id="org.eclipse.tracecompass.lttng2.kernel.ui.compare.compareview"
+            name="Compare View"
+            restorable="true">
+      </view>
+   </extension>
 </plugin>

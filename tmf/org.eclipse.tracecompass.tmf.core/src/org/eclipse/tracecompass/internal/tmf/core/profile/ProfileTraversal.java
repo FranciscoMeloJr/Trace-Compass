@@ -1,7 +1,9 @@
 package org.eclipse.tracecompass.internal.tmf.core.profile;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 /**
@@ -143,7 +145,7 @@ public class ProfileTraversal {
 
         // System.out.print("AL size:" + AL3.size());
 
-        // Collections.sort(AL2);
+        //Collections.sort((List<T>) convertedArrayList);
         mergedArrayList = mergeArrayList(convertedArrayList);
 
         q1 = convertArrayList(mergedArrayList);
@@ -202,6 +204,7 @@ public class ProfileTraversal {
 
     /**
      * This function merges nodes with the same label
+     *
      * @param tree
      *            is the tree to be used
      */
@@ -211,8 +214,7 @@ public class ProfileTraversal {
         queue.add(root);
         while (!queue.isEmpty()) {
             Node<T> current = queue.poll();
-            if(current.fProfileData.equals(node.fProfileData))
-            {
+            if (current.fProfileData.equals(node.fProfileData)) {
                 current.fProfileData.merge(node.fProfileData);
             }
             for (Node<T> child : current.getChildren()) {
@@ -241,8 +243,10 @@ public class ProfileTraversal {
     // Do the minus operation and return a new Queue
 
     /**
-     * @param N1 queue of the first tree
-     * @param N2 queue of the second tree
+     * @param N1
+     *            queue of the first tree
+     * @param N2
+     *            queue of the second tree
      * @return
      */
     public static <T extends IProfileData> Queue<Node<T>> doMinus(Queue<Node<T>> N1, Queue<Node<T>> N2) {
@@ -263,11 +267,12 @@ public class ProfileTraversal {
         }
         // System.out.print("while 2");
         Queue<Node<T>> newResult = eliminateNull(result);
-        //Queue<Node<T>> newResult2 = Print(newResult);
+        // Queue<Node<T>> newResult2 = Print(newResult);
 
         // System.out.print("print");
         return newResult;
     }
+
     /**
      * @param node1
      * @param node2
@@ -278,16 +283,18 @@ public class ProfileTraversal {
 
         Node<T> temp = new Node();
 
-
         if (node1.fProfileData.equals(node2.fProfileData)) {
             temp.fProfileData.setLabel(node1.fProfileData.getLabel());
-                IProfileData data = node1.fProfileData.minus(node2.fProfileData);
-                //System.out.println(a + " " + b + " " + total);
-                temp.setProfileData(data);
+            IProfileData data = node1.fProfileData.minus(node2.fProfileData);
+            // System.out.println(a + " " + b + " " + total);
+            temp.setProfileData(data);
         }
         return temp;
     }
-    /**This function eliminates the null:
+
+    /**
+     * This function eliminates the null:
+     *
      * @param queue
      * @return
      */
