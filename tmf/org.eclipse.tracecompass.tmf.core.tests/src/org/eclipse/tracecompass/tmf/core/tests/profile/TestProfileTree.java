@@ -3,6 +3,7 @@ package org.eclipse.tracecompass.tmf.core.tests.profile;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,6 +50,7 @@ public class TestProfileTree {
         public String getLabel() {
             return fLabel;
         }
+
         public void setWeight(int newfWeight) {
             fWeight = newfWeight;
         }
@@ -56,6 +58,7 @@ public class TestProfileTree {
         public void setLabel(String newfLabel) {
             fLabel = newfLabel;
         }
+
         @Override
         public void merge(IProfileData other) {
             if (!(other instanceof TestData)) {
@@ -78,7 +81,7 @@ public class TestProfileTree {
 
         @Override
         public String toString() {
-            return fLabel;
+            return fLabel + "," + fWeight;
         }
 
         @Override
@@ -118,27 +121,23 @@ public class TestProfileTree {
     String[] fExpectedPreorder = { "F", "B", "A", "D", "C", "E", "G", "I", "H" };
     String[] fExpectedLevelorder = { "F", "B", "G", "A", "D", "I", "C", "E", "H" };
 
-    @Before
-    public void setup() {
+    private Node<TestData> makeTree(String rootLabel, String[] labels, String[][] defs) {
         Map<String, Node<TestData>> map = new HashMap<>();
-        for (String label : fLabels1) {
+        for (String label : labels) {
             Node<TestData> node = Node.create(new TestData(0, label));
             map.put(label, node);
         }
-        fRoot = map.get("F");
-        for (String[] item : fTreeDef1) {
+        Node<TestData> root = map.get(rootLabel);
+        for (String[] item : defs) {
             NonNullUtils.checkNotNull(map.get(item[0])).addChild(NonNullUtils.checkNotNull(map.get(item[1])));
         }
+        return root;
+    }
 
-        Map<String, Node<TestData>> map2 = new HashMap<>();
-        for (String label : fLabels2) {
-            Node<TestData> node = Node.create(new TestData(0, label));
-            map2.put(label, node);
-        }
-        fRoot2 = map2.get("F");
-        for (String[] item : fTreeDef1) {
-            NonNullUtils.checkNotNull(map2.get(item[0])).addChild(NonNullUtils.checkNotNull(map2.get(item[1])));
-        }
+    @Before
+    public void setup() {
+        fRoot = makeTree("F", fLabels1, fTreeDef1);
+        fRoot2 = makeTree("F", fLabels2, fTreeDef2);
     }
 
     /**
@@ -149,17 +148,88 @@ public class TestProfileTree {
 
         Visitor visitor = new Visitor();
         Visitor visitor2 = new Visitor();
-        //Create the first tree:
+        // Create the first tree:
         ProfileTraversal.levelOrderTraversal(fRoot, visitor);
-        //Create the second tree:
+        // Create the second tree:
         ProfileTraversal.levelOrderTraversal(fRoot2, visitor2);
 
-        //Asset for Equals
+        // Asset for Equals
         assertEquals(fExpectedLevelorder.length, visitor.result.size());
         for (int i = 0; i < fExpectedLevelorder.length; i++) {
             assertEquals(fExpectedLevelorder[i], visitor.result.get(i).getProfileData().getLabel());
         }
+    }
 
+    @Test
+    public void testComparisonOfLists() {
+
+        Comparator<Node<TestData>> cmp = new Comparator<Node<TestData>>() {
+            @Override
+            public int compare(Node<TestData> arg0, Node<TestData> arg1) {
+                return arg0.getProfileData().getLabel().compareTo(arg1.getProfileData().getLabel());
+            }
+        };
+
+        ArrayList<Node<TestData>> lst1 = new ArrayList<>();
+        ArrayList<Node<TestData>> lst2 = new ArrayList<>();
+
+        lst1.add(Node.create(new TestData(10, "B")));
+        lst1.add(Node.create(new TestData(10, "A")));
+
+        lst2.add(Node.create(new TestData(20, "C")));
+        lst2.add(Node.create(new TestData(20, "B")));
+        lst2.add(Node.create(new TestData(20, "D")));
+
+        lst1.sort(cmp);
+        lst2.sort(cmp);
+
+        int i1 = 0, i2 = 0;
+
+        ArrayList<Node<TestData>> result = new ArrayList<>();
+
+        while (i1 < lst1.size() || i2 < lst2.size()) {
+            System.out.println(i1 + " " + i2);
+
+            Node<TestData> node1, node2;
+
+            if (i1 < lst1.size()) {
+                node1 = lst1.get(i1);
+            } else {
+                node1 = Node.create(new TestData(0, lst2.get(i2).getProfileData().getLabel()));
+            }
+
+            if (i2 < lst2.size()) {
+                node2 = lst2.get(i2);
+            } else {
+                node2 = Node.create(new TestData(0, lst1.get(i1).getProfileData().getLabel()));
+            }
+
+            int res = cmp.compare(node1, node2);
+            if (res == 0) {
+                System.out.println("equal nodes: " + node1 + " " + node2);
+                IProfileData data = node1.getProfileData().minus(node2.getProfileData());
+                result.add(Node.create((TestData) data));
+                i1++;
+                i2++;
+            } else if (res > 0) {
+                System.out.println("node1 greater than node2: " + node1 + " " + node2);
+                Node<TestData> defNode = Node.create(new TestData(0, node2.getProfileData().getLabel()));
+                IProfileData data = defNode.getProfileData().minus(node2.getProfileData());
+                result.add(Node.create((TestData) data));
+                i2++;
+            } else {
+                System.out.println("node1 less than node2: " + node1 + " " + node2);
+
+                Node<TestData> defNode = Node.create(new TestData(0, node1.getProfileData().getLabel()));
+                IProfileData data = node1.getProfileData().minus(defNode.getProfileData());
+                result.add(Node.create((TestData) data));
+
+                i1++;
+            }
+
+            System.out.println(result);
+
+        }
     }
 
 }

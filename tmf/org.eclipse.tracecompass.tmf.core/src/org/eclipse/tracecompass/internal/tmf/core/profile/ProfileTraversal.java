@@ -278,13 +278,14 @@ public class ProfileTraversal {
 
         Node<T> temp = new Node();
 
-
+/*
         if (node1.fProfileData.equals(node2.fProfileData)) {
             temp.fProfileData.setLabel(node1.fProfileData.getLabel());
                 IProfileData data = node1.fProfileData.minus(node2.fProfileData);
                 //System.out.println(a + " " + b + " " + total);
                 temp.setProfileData(data);
         }
+        */
         return temp;
     }
     /**This function eliminates the null:
