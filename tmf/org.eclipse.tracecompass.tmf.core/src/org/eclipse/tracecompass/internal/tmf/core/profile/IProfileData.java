@@ -6,4 +6,5 @@ public interface IProfileData {
     public void merge(IProfileData other);
     public boolean equals(IProfileData other);
     public String getLabel();
+    public int getWeight();
 }

@@ -1,13 +1,18 @@
 package org.eclipse.tracecompass.internal.tmf.core.profile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
+
+import org.eclipse.tracecompass.common.core.NonNullUtils;
+import org.eclipse.tracecompass.tmf.core.tests.profile.TestProfileTree.TestData;
 
 /**
  * @author frank
  *
  */
+
 public class ProfileTraversal {
 
     /**
@@ -75,53 +80,96 @@ public class ProfileTraversal {
             }
             result.add(current);
         }
+
+        System.out.println(result);
+        return result;
+    }
+
+    public static <T extends IProfileData> Queue<Node<T>> levelOrderTraversalComparator(Node<T> root1, Node<T> root2) {
+        LinkedList<Node<T>> queue1 = new LinkedList<>();
+        LinkedList<Node<T>> queue2 = new LinkedList<>();
+        LinkedList<Node<T>> result = new LinkedList<>();
+        Node<T> rootCopy = root2;
+
+        // copy
+        queue1.add(root1);
+        queue2.add(root1);
+
+        while (!queue1.isEmpty() && !queue2.isEmpty()) {
+            Node<T> current1 = queue1.poll();
+            Node<T> current2 = queue2.poll();
+
+            for (Node<T> child : current.getChildren()) {
+                queue1.add(child);
+            }
+            result.add(current);
+        }
+
+        // create a new tree as copy of the second tree - root2 > implement the
+        // copy operation
+        // create a temp node with the information of the two nodes
+        // do a hashmap between the node source and the node result
+        // add the temp node on the new tree
+
         return result;
     }
 
     /**
-     * This function makes the levelOrderTraversal of a two trees that contains
-     * a generic node
+     * This function creates a copy of a tree
      *
-     * @param root1
-     *            and root2 the first two nodes to be traversed
-     * @param visitor
-     *            a visitor pattern implementation
+     * @param tree
+     *            is the tree to be used
      */
-    public static <T extends IProfileData> boolean levelOrderTraversalComparator(Node<T> root1, Node<T> root2, IProfileVisitor<T> visitor) {
+    public static <T extends IProfileData> Node<T> Copy(Node<T> root1) {
         LinkedList<Node<T>> queue = new LinkedList<>();
-        LinkedList<Node<T>> levelOrderFirst = new LinkedList<>();
-        LinkedList<Node<T>> levelOrderSecond = new LinkedList<>();
-
-        int i = 0;
+        Node<T> result = new Node<>();
+        LinkedList<Node<T>> acc = new LinkedList<>();
+        HashMap<Node<T>, Node<T>> hmap = new HashMap<>(); // node between the
+                                                          // src and the result
+        // copy
         queue.add(root1);
+        result.setParent(root1.getParent());
+        result.setProfileData(root1.getProfileData());
+
         while (!queue.isEmpty()) {
             Node<T> current = queue.poll();
+
             for (Node<T> child : current.getChildren()) {
                 queue.add(child);
             }
-            visitor.visit(current);
-            levelOrderFirst.add(current);
-        }
-        queue.add(root2);
-        while (!queue.isEmpty()) {
-            Node<T> current = queue.poll();
-            for (Node<T> child : current.getChildren()) {
-                queue.add(child);
+            if ((current.getParent() != null)) {
+                hmap.put(current.getParent(), current);
+            } else {
+                hmap.put(new Node(), current);
             }
-            visitor.visit(current);
-            levelOrderSecond.add(current);
+            acc.add(current);
         }
 
-        // Do the level order traversal
-        // Sort
-        // Merge
-        // Compare
-        for (Node<T> node : levelOrderFirst) {
-            if (!node.equals(levelOrderSecond.get(i))) {
-                return false;
+        /* Display content using Iterator */
+        // F, B, G, A, D, I, C, E, H.
+
+        /*
+         * for (int i = 0; i < acc.size(); i++) { Node<T> aux = acc.get(i);
+         * System.out.println("Current: " + aux.fProfileData.getLabel()); }
+         */
+        System.out.println(hmap.size());
+        for (Node<T> key : hmap.keySet()) {
+            if (key != null) {
+                System.out.println("Parent " + key + " value" + hmap.get(key));
             }
         }
-        return true;
+        for (Node<T> key : hmap.keySet()) {
+            if (key != null) {
+                NonNullUtils.checkNotNull(hmap.get(key)).addChild(hmap.get(key));
+            }
+        }
+        // create a new tree as copy of the second tree - root2 > implement the
+        // copy operation
+        // create a temp node with the information of the two nodes
+        // do a hashmap between the node source and the node result
+        // add the temp node on the new tree
+
+        return result;
     }
 
     /**
@@ -158,7 +206,7 @@ public class ProfileTraversal {
      * @param tree
      *            is the tree to be used
      */
-    public static <T extends IProfileData> ArrayList<Node<T>> convertQueue(Queue tree) {
+    public static <T extends IProfileData> ArrayList<Node<T>> convertQueue(Queue<Node<T>> tree) {
 
         ArrayList<Node<T>> Q2 = new ArrayList<>();
 
@@ -202,6 +250,7 @@ public class ProfileTraversal {
 
     /**
      * This function merges nodes with the same label
+     *
      * @param tree
      *            is the tree to be used
      */
@@ -211,8 +260,7 @@ public class ProfileTraversal {
         queue.add(root);
         while (!queue.isEmpty()) {
             Node<T> current = queue.poll();
-            if(current.fProfileData.equals(node.fProfileData))
-            {
+            if (current.fProfileData.equals(node.fProfileData)) {
                 current.fProfileData.merge(node.fProfileData);
             }
             for (Node<T> child : current.getChildren()) {
@@ -241,8 +289,10 @@ public class ProfileTraversal {
     // Do the minus operation and return a new Queue
 
     /**
-     * @param N1 queue of the first tree
-     * @param N2 queue of the second tree
+     * @param N1
+     *            queue of the first tree
+     * @param N2
+     *            queue of the second tree
      * @return
      */
     public static <T extends IProfileData> Queue<Node<T>> doMinus(Queue<Node<T>> N1, Queue<Node<T>> N2) {
@@ -263,11 +313,12 @@ public class ProfileTraversal {
         }
         // System.out.print("while 2");
         Queue<Node<T>> newResult = eliminateNull(result);
-        //Queue<Node<T>> newResult2 = Print(newResult);
+        // Queue<Node<T>> newResult2 = Print(newResult);
 
         // System.out.print("print");
         return newResult;
     }
+
     /**
      * @param node1
      * @param node2
@@ -278,17 +329,19 @@ public class ProfileTraversal {
 
         Node<T> temp = new Node();
 
-/*
-        if (node1.fProfileData.equals(node2.fProfileData)) {
-            temp.fProfileData.setLabel(node1.fProfileData.getLabel());
-                IProfileData data = node1.fProfileData.minus(node2.fProfileData);
-                //System.out.println(a + " " + b + " " + total);
-                temp.setProfileData(data);
-        }
-        */
+        /*
+         * if (node1.fProfileData.equals(node2.fProfileData)) {
+         * temp.fProfileData.setLabel(node1.fProfileData.getLabel());
+         * IProfileData data = node1.fProfileData.minus(node2.fProfileData);
+         * //System.out.println(a + " " + b + " " + total);
+         * temp.setProfileData(data); }
+         */
         return temp;
     }
-    /**This function eliminates the null:
+
+    /**
+     * This function eliminates the null:
+     *
      * @param queue
      * @return
      */
