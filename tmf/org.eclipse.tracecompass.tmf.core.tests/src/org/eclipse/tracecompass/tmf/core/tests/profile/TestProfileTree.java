@@ -41,7 +41,7 @@ public class TestProfileTree {
             fWeight = weight;
             fLabel = label;
         }
-
+        @Override
         public int getWeight() {
             return fWeight;
         }
@@ -141,7 +141,7 @@ public class TestProfileTree {
     }
 
     /**
-     *
+     * This is a Junit test for Printing the tree
      */
     @Test
     public void testPrintTree() {
@@ -149,17 +149,22 @@ public class TestProfileTree {
         Visitor visitor = new Visitor();
         Visitor visitor2 = new Visitor();
         // Create the first tree:
-        ProfileTraversal.levelOrderTraversal(fRoot, visitor);
+        System.out.println(ProfileTraversal.levelOrderTraversal(fRoot));
         // Create the second tree:
         ProfileTraversal.levelOrderTraversal(fRoot2, visitor2);
 
         // Asset for Equals
-        assertEquals(fExpectedLevelorder.length, visitor.result.size());
+        assertEquals(fExpectedLevelorder.length, visitor2.result.size());
         for (int i = 0; i < fExpectedLevelorder.length; i++) {
-            assertEquals(fExpectedLevelorder[i], visitor.result.get(i).getProfileData().getLabel());
+            assertEquals(fExpectedLevelorder[i], visitor2.result.get(i).getProfileData().getLabel());
         }
-    }
 
+        Node<TestData> a = ProfileTraversal.Copy(fRoot);
+        System.out.println(a);
+    }
+    /**
+     * This is a JUnit test for list comparison
+     */
     @Test
     public void testComparisonOfLists() {
 
@@ -173,13 +178,19 @@ public class TestProfileTree {
         ArrayList<Node<TestData>> lst1 = new ArrayList<>();
         ArrayList<Node<TestData>> lst2 = new ArrayList<>();
 
+        //Add note:
+        lst1.add(Node.create(new TestData(10, "C")));
         lst1.add(Node.create(new TestData(10, "B")));
         lst1.add(Node.create(new TestData(10, "A")));
 
         lst2.add(Node.create(new TestData(20, "C")));
         lst2.add(Node.create(new TestData(20, "B")));
         lst2.add(Node.create(new TestData(20, "D")));
+        lst2.add(Node.create(new TestData(20, "E")));
+        lst2.add(Node.create(new TestData(20, "F")));
+        lst2.add(Node.create(new TestData(20, "G")));
 
+        //Sort first:
         lst1.sort(cmp);
         lst2.sort(cmp);
 
@@ -187,6 +198,7 @@ public class TestProfileTree {
 
         ArrayList<Node<TestData>> result = new ArrayList<>();
 
+        //Comparison algorithm:
         while (i1 < lst1.size() || i2 < lst2.size()) {
             System.out.println(i1 + " " + i2);
 
@@ -207,12 +219,14 @@ public class TestProfileTree {
             int res = cmp.compare(node1, node2);
             if (res == 0) {
                 System.out.println("equal nodes: " + node1 + " " + node2);
+
                 IProfileData data = node1.getProfileData().minus(node2.getProfileData());
                 result.add(Node.create((TestData) data));
                 i1++;
                 i2++;
             } else if (res > 0) {
                 System.out.println("node1 greater than node2: " + node1 + " " + node2);
+
                 Node<TestData> defNode = Node.create(new TestData(0, node2.getProfileData().getLabel()));
                 IProfileData data = defNode.getProfileData().minus(node2.getProfileData());
                 result.add(Node.create((TestData) data));
@@ -223,13 +237,12 @@ public class TestProfileTree {
                 Node<TestData> defNode = Node.create(new TestData(0, node1.getProfileData().getLabel()));
                 IProfileData data = node1.getProfileData().minus(defNode.getProfileData());
                 result.add(Node.create((TestData) data));
-
                 i1++;
             }
 
-            System.out.println(result);
-
         }
+        System.out.println("Result");
+        System.out.println(result);
     }
 
 }

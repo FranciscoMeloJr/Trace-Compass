@@ -21,7 +21,12 @@ public class Node<T extends IProfileData> {
         node.setProfileData(data);
         return node;
     }
-
+    public static <T extends IProfileData> Node<T> create(Node<T> node) {
+        Node<T> newNode = new Node<>();
+        newNode.setProfileData(node.fProfileData);
+        newNode.setParent(node.getParent());
+        return newNode;
+    }
     public void addChild(Node<T> node) {
         fChildren.add(node);
         node.setParent(this);
