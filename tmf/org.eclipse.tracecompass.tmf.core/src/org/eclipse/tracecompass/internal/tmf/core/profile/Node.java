@@ -55,7 +55,9 @@ public class Node<T extends IProfileData> {
     public int getNodeId() {
         return fId;
     }
-
+    public String getNodeLabel() {
+        return fProfileData.getLabel();
+    }
     public void mergeNode(Node<T> node) {
         fProfileData.merge(node.fProfileData);
     }
@@ -70,5 +72,11 @@ public class Node<T extends IProfileData> {
             return true;
         }
         return false;
+    }
+    public Node copy() {
+        Node<T> newNode = new Node<>();
+        newNode.setProfileData(fProfileData);
+        newNode.setParent(getParent());
+        return newNode;
     }
 }

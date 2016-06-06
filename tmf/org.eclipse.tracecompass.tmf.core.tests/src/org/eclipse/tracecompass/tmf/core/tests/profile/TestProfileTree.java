@@ -159,8 +159,9 @@ public class TestProfileTree {
             assertEquals(fExpectedLevelorder[i], visitor2.result.get(i).getProfileData().getLabel());
         }
 
-        Node<TestData> a = ProfileTraversal.Copy(fRoot);
+        Node<TestData> a = ProfileTraversal.Copy2(fRoot);
         System.out.println(a);
+        System.out.println(ProfileTraversal.levelOrderTraversal(a));
     }
     /**
      * This is a JUnit test for list comparison
