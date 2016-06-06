@@ -163,11 +163,11 @@ public class ProfileTraversal {
         HashMap<Node<T>, Node<T>> hmap = new HashMap<>(); // (input_node,
                                                           // output_node)
         // copy
-        Node<T> rootCopy = ProfileTraversal.Copy(root2);
+        Node<T> rootCopy = ProfileTraversal.Copy2(root2);
         Node<T> newNode;
 
         queue1.add(root1);
-        queue2.add(root1);
+        queue2.add(rootCopy);
 
         while (!queue1.isEmpty() && !queue2.isEmpty()) {
             Node<T> current1 = queue1.poll();
@@ -175,16 +175,10 @@ public class ProfileTraversal {
 
             if (current1.equals(current2)) {
                 newNode = new Node<>();
-
-                Node parentInTheResultTree = hmap.get(current1.getParent());
-
-                newNode.setParent(parentInTheResultTree);
                 T data = current1.getProfileData();
                 data.minus(current2.getProfileData());
                 newNode.setProfileData(data);
-
-                hmap.put(current1, newNode);
-
+                current2 = newNode;
             }
 
             for (Node<T> child : current1.getChildren()) {
