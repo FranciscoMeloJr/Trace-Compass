@@ -85,13 +85,87 @@ public class ProfileTraversal {
         return result;
     }
 
+    public static <T extends IProfileData> Node<T> Copy2(Node<T> root) {
+        LinkedList<Node<T>> queue = new LinkedList<>();
+        LinkedList<Node<T>> result = new LinkedList<>();
+        Node<T>[] arrNodes = new Node[10];
+        int arrJ = 0;
+
+        queue.add(root);
+        while (!queue.isEmpty()) {
+            Node<T> current = queue.poll();
+            arrNodes[arrJ] = current.copy();
+
+            for (Node<T> child : current.getChildren()) {
+                queue.add(child);
+            }
+            result.add(current);
+            arrJ++;
+        }
+        /* Print array of parent nodes:
+        System.out.println("Printing array parents bf");
+        for (int i = 0; i < arrNodes.length - 1; i++) {
+            if (arrNodes[i].getParent() != null) {
+                System.out.println(arrNodes[i].getParent().getNodeLabel());
+            }
+        }*/
+        // Update the parents
+        for (int i = 0; i < arrNodes.length - 1; i++) {
+            if (arrNodes[i].getParent() != null) {
+                Node<T> aux = findLabel(arrNodes, arrNodes[i].getParent().fProfileData.getLabel());
+                arrNodes[i].setParent(aux);
+            }
+        }
+        /* Print array of parent nodes:
+        System.out.println("Printing array parents af");
+        for (int i = 0; i < arrNodes.length - 1; i++) {
+            if (arrNodes[i].getParent() != null) {
+                System.out.println(arrNodes[i].getParent().getNodeLabel());
+            }
+        }*/
+
+        // Making the new tree:
+        //System.out.println("making the tree");
+        for (int i = 0; i < arrNodes.length -1 ; i++) {
+            for (int j = 1; j < arrNodes.length - 1; j++) {
+                //run through the array:
+                if(arrNodes[i].getNodeLabel() == arrNodes[j].getParent().getNodeLabel())
+                {
+                    arrNodes[i].addChild(arrNodes[j]);
+                }
+            }
+        }
+        return arrNodes[0];
+    }
+
+    /**
+     * This function finds a node with a specific label given
+     *
+     * @param arrNodes
+     *            it is the Array to be used
+     * @param label
+     *            it is the label to be found
+     */
+    public static <T extends IProfileData> Node<T> findLabel(Node<T>[] arrNodes, String label) {
+
+        for (int i = 0; i < arrNodes.length - 1; i++) {
+            if (arrNodes[i].getProfileData().getLabel() == label) {
+                return arrNodes[i];
+            }
+        }
+        return null;
+    }
+
     public static <T extends IProfileData> Queue<Node<T>> levelOrderTraversalComparator(Node<T> root1, Node<T> root2) {
         LinkedList<Node<T>> queue1 = new LinkedList<>();
         LinkedList<Node<T>> queue2 = new LinkedList<>();
         LinkedList<Node<T>> result = new LinkedList<>();
-        Node<T> rootCopy = root2;
-
+        HashMap<Node<T>, Node<T>> hmap = new HashMap<>(); // (input_node,
+                                                          // output_node)
         // copy
+        Node<T> rootCopy = ProfileTraversal.Copy(root2);
+        Node<T> newNode;
+
         queue1.add(root1);
         queue2.add(root1);
 
@@ -99,10 +173,23 @@ public class ProfileTraversal {
             Node<T> current1 = queue1.poll();
             Node<T> current2 = queue2.poll();
 
-            for (Node<T> child : current.getChildren()) {
+            if (current1.equals(current2)) {
+                newNode = new Node<>();
+
+                Node parentInTheResultTree = hmap.get(current1.getParent());
+
+                newNode.setParent(parentInTheResultTree);
+                T data = current1.getProfileData();
+                data.minus(current2.getProfileData());
+                newNode.setProfileData(data);
+
+                hmap.put(current1, newNode);
+
+            }
+
+            for (Node<T> child : current1.getChildren()) {
                 queue1.add(child);
             }
-            result.add(current);
         }
 
         // create a new tree as copy of the second tree - root2 > implement the
