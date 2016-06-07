@@ -81,7 +81,7 @@ public class TestProfileTree {
                 throw new IllegalArgumentException("wrong type for minus operation");
             }
             TestData data = (TestData) other;
-            System.out.print(fWeight - data.getWeight() + " = total ");
+            fWeight = fWeight - data.getWeight();
             return new TestData(fWeight - data.getWeight(), fLabel);
         }
 
@@ -155,7 +155,6 @@ public class TestProfileTree {
     @Test
     public void testPrintTree() {
 
-        Visitor visitor = new Visitor();
         Visitor visitor2 = new Visitor();
         // Create the first tree:
         System.out.println(ProfileTraversal.levelOrderTraversal(fRoot));
