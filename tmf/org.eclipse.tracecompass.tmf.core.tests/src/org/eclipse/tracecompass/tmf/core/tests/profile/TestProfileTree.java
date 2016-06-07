@@ -15,6 +15,10 @@ import org.eclipse.tracecompass.internal.tmf.core.profile.ProfileTraversal;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * @author frank
+ *
+ */
 public class TestProfileTree {
     /**
      * @author frank
@@ -41,6 +45,7 @@ public class TestProfileTree {
             fWeight = weight;
             fLabel = label;
         }
+
         @Override
         public int getWeight() {
             return fWeight;
@@ -76,6 +81,7 @@ public class TestProfileTree {
                 throw new IllegalArgumentException("wrong type for minus operation");
             }
             TestData data = (TestData) other;
+            System.out.print(fWeight - data.getWeight() + " = total ");
             return new TestData(fWeight - data.getWeight(), fLabel);
         }
 
@@ -118,14 +124,17 @@ public class TestProfileTree {
             { "G", "I" },
             { "I", "H" },
     };
+    int[] values = { 12, 13, 15, 16, 17, 29, 16, 17, 29 };
     String[] fExpectedPreorder = { "F", "B", "A", "D", "C", "E", "G", "I", "H" };
     String[] fExpectedLevelorder = { "F", "B", "G", "A", "D", "I", "C", "E", "H" };
 
     private Node<TestData> makeTree(String rootLabel, String[] labels, String[][] defs) {
+        int i = 0;
         Map<String, Node<TestData>> map = new HashMap<>();
         for (String label : labels) {
-            Node<TestData> node = Node.create(new TestData(0, label));
+            Node<TestData> node = Node.create(new TestData(values[i], label));
             map.put(label, node);
+            i++;
         }
         Node<TestData> root = map.get(rootLabel);
         for (String[] item : defs) {
@@ -159,16 +168,30 @@ public class TestProfileTree {
             assertEquals(fExpectedLevelorder[i], visitor2.result.get(i).getProfileData().getLabel());
         }
 
+        // Testing copy
         Node<TestData> a = ProfileTraversal.Copy2(fRoot);
-        System.out.println(a);
         System.out.println(ProfileTraversal.levelOrderTraversal(a));
     }
+
+    /**
+     * This is a Junit test for Comparing trees
+     */
+    @Test
+    public void testComparison() {
+        System.out.println("Comparison test");
+        ProfileTraversal.levelOrderTraversal(fRoot);
+        ProfileTraversal.levelOrderTraversal(fRoot2);
+
+        Node<TestData> b = ProfileTraversal.levelOrderTraversalComparator2(fRoot, fRoot2);
+        ProfileTraversal.levelOrderTraversal(b);
+    }
+
     /**
      * This is a JUnit test for list comparison
      */
     @Test
     public void testComparisonOfLists() {
-
+        System.out.println("Result");
         Comparator<Node<TestData>> cmp = new Comparator<Node<TestData>>() {
             @Override
             public int compare(Node<TestData> arg0, Node<TestData> arg1) {
@@ -179,7 +202,7 @@ public class TestProfileTree {
         ArrayList<Node<TestData>> lst1 = new ArrayList<>();
         ArrayList<Node<TestData>> lst2 = new ArrayList<>();
 
-        //Add note:
+        // Add note:
         lst1.add(Node.create(new TestData(10, "C")));
         lst1.add(Node.create(new TestData(10, "B")));
         lst1.add(Node.create(new TestData(10, "A")));
@@ -191,7 +214,7 @@ public class TestProfileTree {
         lst2.add(Node.create(new TestData(20, "F")));
         lst2.add(Node.create(new TestData(20, "G")));
 
-        //Sort first:
+        // Sort first:
         lst1.sort(cmp);
         lst2.sort(cmp);
 
@@ -199,7 +222,7 @@ public class TestProfileTree {
 
         ArrayList<Node<TestData>> result = new ArrayList<>();
 
-        //Comparison algorithm:
+        // Comparison algorithm:
         while (i1 < lst1.size() || i2 < lst2.size()) {
             System.out.println(i1 + " " + i2);
 
