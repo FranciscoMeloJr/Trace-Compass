@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import org.eclipse.tracecompass.common.core.NonNullUtils;
-import org.eclipse.tracecompass.tmf.core.tests.profile.TestProfileTree.TestData;
 /**
  * @author frank
  *
@@ -214,8 +213,6 @@ public class ProfileTraversal {
         // add the temp node on the new tree
         LinkedList<Node<T>> queue1 = new LinkedList<>();
         LinkedList<Node<T>> queue2 = new LinkedList<>();
-        Node<T>[] arrNodes = new Node[10]; // (input_node, output_node)
-        int arrJ = 0;
 
         // copy
         Node<T> rootCopy = ProfileTraversal.Copy2(root2);
