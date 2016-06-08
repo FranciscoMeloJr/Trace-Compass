@@ -228,10 +228,10 @@ public class ProfileTraversal {
             Node<T> current2 = queue2.poll();
 
             if (current2.getNodeLabel() == current1.getNodeLabel()) {
-                System.out.print(current1.getProfileData().getWeight() + " " + current1.getProfileData().getWeight() +" ");
+                //System.out.print(current1.getProfileData().getWeight() + " " + current1.getProfileData().getWeight() +" ");
                 T data = current2.getProfileData();
                 data.minus(current1.getProfileData());
-                System.out.print("after:" + data+ "\n");
+                //System.out.print("after:" + data+ "\n");
                 current2.setProfileData(data); // put on the tree
 
                 for (Node<T> child : current1.getChildren()) {
