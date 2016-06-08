@@ -128,11 +128,11 @@ public class TestProfileTree {
     String[] fExpectedPreorder = { "F", "B", "A", "D", "C", "E", "G", "I", "H" };
     String[] fExpectedLevelorder = { "F", "B", "G", "A", "D", "I", "C", "E", "H" };
 
-    private Node<TestData> makeTree(String rootLabel, String[] labels, String[][] defs) {
+    private Node<TestData> makeTree(String rootLabel, String[] labels, String[][] defs, int increment) {
         int i = 0;
         Map<String, Node<TestData>> map = new HashMap<>();
         for (String label : labels) {
-            Node<TestData> node = Node.create(new TestData(values[i], label));
+            Node<TestData> node = Node.create(new TestData(values[i]+increment, label));
             map.put(label, node);
             i++;
         }
@@ -145,8 +145,8 @@ public class TestProfileTree {
 
     @Before
     public void setup() {
-        fRoot = makeTree("F", fLabels1, fTreeDef1);
-        fRoot2 = makeTree("F", fLabels2, fTreeDef2);
+        fRoot = makeTree("F", fLabels1, fTreeDef1,10);
+        fRoot2 = makeTree("F", fLabels2, fTreeDef2,1); //the tree used for comparison
     }
 
     /**
@@ -173,7 +173,7 @@ public class TestProfileTree {
     }
 
     /**
-     * This is a Junit test for Comparing trees
+     * This is a Junit test for Comparing equal trees
      */
     @Test
     public void testComparison() {
@@ -184,7 +184,30 @@ public class TestProfileTree {
         Node<TestData> b = ProfileTraversal.levelOrderTraversalComparator2(fRoot, fRoot2);
         ProfileTraversal.levelOrderTraversal(b);
     }
+    /**
+     * This is a Junit test for Comparing trees A > B
+     */
+    @Test
+    public void testComparison2() {
+        System.out.println("Comparison test");
+        ProfileTraversal.levelOrderTraversal(fRoot);
+        ProfileTraversal.levelOrderTraversal(fRoot2);
 
+        Node<TestData> b = ProfileTraversal.levelOrderTraversalComparator2(fRoot, fRoot2);
+        ProfileTraversal.levelOrderTraversal(b);
+    }
+    /**
+     * This is a Junit test for Comparing trees B > A
+     */
+    @Test
+    public void testComparison3() {
+        System.out.println("Comparison test");
+        ProfileTraversal.levelOrderTraversal(fRoot);
+        ProfileTraversal.levelOrderTraversal(fRoot2);
+
+        Node<TestData> b = ProfileTraversal.levelOrderTraversalComparator2(fRoot, fRoot2);
+        ProfileTraversal.levelOrderTraversal(b);
+    }
     /**
      * This is a JUnit test for list comparison
      */
