@@ -2,6 +2,10 @@ package org.eclipse.tracecompass.tmf.core.tests.profile;
 
 import static org.junit.Assert.*;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -20,19 +24,100 @@ import org.junit.Test;
  *
  */
 public class TestProfileTree {
+
     /**
      * @author frank
      *
      */
     public class Visitor implements IProfileVisitor<TestData> {
         /**
-         * result ArrayList of Nodes, which TestData
+         * result ArrayList of Nodes, which are TestData
          */
         public ArrayList<Node<TestData>> result = new ArrayList<>();
 
         @Override
         public void visit(Node<TestData> node) {
             result.add(node);
+        }
+    }
+
+    /**
+     * @author frank
+     *
+     */
+    public class GraphvizVisitor implements IProfileVisitor<TestData> {
+        /**
+         * result ArrayList of Nodes, which are TestData
+         */
+        public ArrayList<Node<TestData>> result = new ArrayList<>();
+
+        @Override
+        public void visit(Node<TestData> node) {
+            result.add(node);
+        }
+
+        /**
+         * This function reset the visit
+         */
+        public void reset() {
+            result = new ArrayList<>();
+        }
+
+        /**
+         * This function print on the console the tree
+         */
+        public void print(String name) {
+            System.out.println("Print tree:");
+            String content = new String("digraph G { \n");
+            // Edges and nodes:
+            for (Node<TestData> n : result) {
+                if (n.getParent() != null) {
+                    System.out.print(n.getNodeLabel() + " -> " + n.getParent().getNodeLabel() + "; \n");
+                    content = content.concat(n.getParent().getNodeLabel() + " -> " + n.getNodeLabel() + "; \n");
+                } else {
+                    if (n.getNodeLabel() != null) {
+                        System.out.print(n.getNodeLabel() + "; \n");
+                        content = content.concat(n.getNodeLabel() + "; \n");
+                    }
+                }
+            }
+            // Content:
+            // B [label = "B [-1]"]; C [label = "C [-1]"]; D [label = "D [-1]"];
+            // I [label = "I [-1]"];
+            for (Node<TestData> n : result) {
+                content = content.concat(n.getNodeLabel() + " " + "[label = \"" + n.getNodeLabel() + "[" + n.getProfileData().getWeight() + "]\" ]; \n");
+
+            }
+            content = content.concat("\n }\n");
+            writeToFile(name, content);
+        }
+
+        /**
+         * This function print on a file the output of the tree:
+         */
+        public void writeToFile(String name, String content) {
+            try {
+
+                // String content = "This is the content to write into file";
+                String fileName = new String("/home/frank/Desktop/outputTree.gv");
+                // fileName.concat(name);
+                File file = new File(fileName); // "/home/frank/Desktop/tree.gv");
+
+                // if file doesnt exists, then create it
+                if (!file.exists()) {
+                    file.createNewFile();
+                }
+
+                try (FileWriter fw = new FileWriter(file.getAbsoluteFile())) {
+                    BufferedWriter bw = new BufferedWriter(fw);
+                    bw.write(content);
+                    bw.close();
+                    System.out.println("Done");
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -132,7 +217,7 @@ public class TestProfileTree {
         int i = 0;
         Map<String, Node<TestData>> map = new HashMap<>();
         for (String label : labels) {
-            Node<TestData> node = Node.create(new TestData(values[i]+increment, label));
+            Node<TestData> node = Node.create(new TestData(values[i] + increment, label));
             map.put(label, node);
             i++;
         }
@@ -145,8 +230,9 @@ public class TestProfileTree {
 
     @Before
     public void setup() {
-        fRoot = makeTree("F", fLabels1, fTreeDef1,10);
-        fRoot2 = makeTree("F", fLabels2, fTreeDef2,1); //the tree used for comparison
+        fRoot = makeTree("F", fLabels1, fTreeDef1, 10);
+        fRoot2 = makeTree("F", fLabels2, fTreeDef2, 1); // the tree used for
+                                                        // comparison
     }
 
     /**
@@ -174,15 +260,55 @@ public class TestProfileTree {
 
     /**
      * This is a Junit test for Comparing equal trees
+     *
+     * @throws Exception
      */
     @Test
-    public void testComparison() {
-        System.out.println("Comparison test");
+    public void testComparison() throws Exception {
+
+        //Question: how to use only one visitor to print?
+
+        GraphvizVisitor visitor = new GraphvizVisitor();
+        System.out.println("Comparison test x");
         ProfileTraversal.levelOrderTraversal(fRoot);
+        // visitor.print(" ");
+        // visitor.reset();
         ProfileTraversal.levelOrderTraversal(fRoot2);
+        //visitor.print("treeInput2.gv");
+        // visitor.reset();
 
         Node<TestData> b = ProfileTraversal.levelOrderTraversalComparator2(fRoot, fRoot2);
-        ProfileTraversal.levelOrderTraversal(b);
+        ProfileTraversal.levelOrderTraversal(b, visitor);
+        visitor.print("treeOutput.gv");
+
+    }
+    /**
+     * This is a Junit test for Comparing equal trees and print the three trees on the file
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testComparisonPrint() throws Exception {
+
+        //Question: how to use only one visitor to print?
+
+        GraphvizVisitor visitorInput1 = new GraphvizVisitor();
+        GraphvizVisitor visitorInput2 = new GraphvizVisitor();
+        GraphvizVisitor visitorOutput = new GraphvizVisitor();
+
+        System.out.println("Comparison test x");
+        ProfileTraversal.levelOrderTraversal(fRoot, visitorInput1);
+        visitorInput1.print(" ");
+        // visitor.reset();
+
+        ProfileTraversal.levelOrderTraversal(fRoot2,visitorInput2);
+        visitorInput2.print("treeInput2.gv");
+        // visitor.reset();
+
+        Node<TestData> b = ProfileTraversal.levelOrderTraversalComparator2(fRoot, fRoot2);
+        ProfileTraversal.levelOrderTraversal(b, visitorOutput);
+        visitorOutput.print("treeOutput.gv");
+
     }
     /**
      * This is a Junit test for Comparing trees A > B
@@ -196,6 +322,7 @@ public class TestProfileTree {
         Node<TestData> b = ProfileTraversal.levelOrderTraversalComparator2(fRoot, fRoot2);
         ProfileTraversal.levelOrderTraversal(b);
     }
+
     /**
      * This is a Junit test for Comparing trees B > A
      */
@@ -208,6 +335,7 @@ public class TestProfileTree {
         Node<TestData> b = ProfileTraversal.levelOrderTraversalComparator2(fRoot, fRoot2);
         ProfileTraversal.levelOrderTraversal(b);
     }
+
     /**
      * This is a JUnit test for list comparison
      */
