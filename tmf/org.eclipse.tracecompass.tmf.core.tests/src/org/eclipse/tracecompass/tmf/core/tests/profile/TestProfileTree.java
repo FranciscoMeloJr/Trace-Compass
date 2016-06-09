@@ -99,8 +99,8 @@ public class TestProfileTree {
             try {
 
                 // String content = "This is the content to write into file";
-                String fileName = new String("/home/frank/Desktop/outputTree.gv");
-                // fileName.concat(name);
+                String fileName = new String("/home/frank/Desktop/");
+                fileName = fileName.concat(name); //
                 File file = new File(fileName); // "/home/frank/Desktop/tree.gv");
 
                 // if file doesnt exists, then create it
@@ -228,6 +228,9 @@ public class TestProfileTree {
         return root;
     }
 
+    /**
+     *  This is the setup for the experiments, which are basically the tree creation
+     */
     @Before
     public void setup() {
         fRoot = makeTree("F", fLabels1, fTreeDef1, 10);
@@ -266,31 +269,28 @@ public class TestProfileTree {
     @Test
     public void testComparison() throws Exception {
 
-        //Question: how to use only one visitor to print?
-
         GraphvizVisitor visitor = new GraphvizVisitor();
         System.out.println("Comparison test x");
         ProfileTraversal.levelOrderTraversal(fRoot);
-        // visitor.print(" ");
-        // visitor.reset();
+
         ProfileTraversal.levelOrderTraversal(fRoot2);
-        //visitor.print("treeInput2.gv");
-        // visitor.reset();
 
         Node<TestData> b = ProfileTraversal.levelOrderTraversalComparator2(fRoot, fRoot2);
         ProfileTraversal.levelOrderTraversal(b, visitor);
         visitor.print("treeOutput.gv");
 
     }
+
     /**
-     * This is a Junit test for Comparing equal trees and print the three trees on the file
+     * This is a Junit test for Comparing equal trees and print the three trees
+     * on the file
      *
      * @throws Exception
      */
     @Test
     public void testComparisonPrint() throws Exception {
 
-        //Question: how to use only one visitor to print?
+        // Question: how to use only one visitor to print?
 
         GraphvizVisitor visitorInput1 = new GraphvizVisitor();
         GraphvizVisitor visitorInput2 = new GraphvizVisitor();
@@ -298,10 +298,10 @@ public class TestProfileTree {
 
         System.out.println("Comparison test x");
         ProfileTraversal.levelOrderTraversal(fRoot, visitorInput1);
-        visitorInput1.print(" ");
+        visitorInput1.print("treeInput1.gv");
         // visitor.reset();
 
-        ProfileTraversal.levelOrderTraversal(fRoot2,visitorInput2);
+        ProfileTraversal.levelOrderTraversal(fRoot2, visitorInput2);
         visitorInput2.print("treeInput2.gv");
         // visitor.reset();
 
@@ -310,6 +310,7 @@ public class TestProfileTree {
         visitorOutput.print("treeOutput.gv");
 
     }
+
     /**
      * This is a Junit test for Comparing trees A > B
      */
