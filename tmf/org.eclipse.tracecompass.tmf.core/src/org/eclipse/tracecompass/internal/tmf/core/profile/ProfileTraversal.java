@@ -101,12 +101,6 @@ public class ProfileTraversal {
             result.add(current);
             arrJ++;
         }
-        /*
-         * Print array of parent nodes: System.out.println(
-         * "Printing array parents bf"); for (int i = 0; i < arrNodes.length -
-         * 1; i++) { if (arrNodes[i].getParent() != null) {
-         * System.out.println(arrNodes[i].getParent().getNodeLabel()); } }
-         */
         // Update the parents
         for (int i = 0; i < arrNodes.length - 1; i++) {
             if (arrNodes[i].getParent() != null) {
@@ -114,12 +108,6 @@ public class ProfileTraversal {
                 arrNodes[i].setParent(aux);
             }
         }
-        /*
-         * Print array of parent nodes: System.out.println(
-         * "Printing array parents af"); for (int i = 0; i < arrNodes.length -
-         * 1; i++) { if (arrNodes[i].getParent() != null) {
-         * System.out.println(arrNodes[i].getParent().getNodeLabel()); } }
-         */
 
         // Making the new tree:
         for (int i = 0; i < arrNodes.length - 1; i++) {
@@ -245,7 +233,34 @@ public class ProfileTraversal {
          */
         return rootCopy;
     }
+    /**
+     * This function finds a node on a tree from a label
+     *
+     * @param node
+     *            it is the tree
+     * @param label
+     *            it is the string
+     */
+    public static <T extends IProfileData> Node<T> findNode(Node<T>root, String label) {
 
+        System.out.println("findNode");
+        LinkedList<Node<T>> queue = new LinkedList<>();
+        Node<T> result = null;
+
+        queue.add(root);
+        while (!queue.isEmpty()) {
+            Node<T> current = queue.poll();
+            if(current.getNodeLabel() == label) {
+                result = current;
+            }
+            for (Node<T> child : current.getChildren()) {
+                queue.add(child);
+            }
+        }
+
+        System.out.println(result);
+        return result;
+    }
     /**
      * This function updates a node in an array list
      *
