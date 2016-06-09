@@ -330,11 +330,28 @@ public class TestProfileTree {
         // Create the events:
         String event1[] = { "10", "F", "B", "A" };
         String event2[] = { "22", "F", "B", "D" };
-        String event3[] = { "10", "F", "B", "D", "E" };
+        String event3[] = { "13", "F", "B", "D", "E" };
         // String event4[] = { "10", "F", "G", "I", "H" };
 
+        //create tree function
+        Node<TestData> root = createTree(event3);
+
+        //merge function:
+        merge(pointer.getParent(), event3);
+        merge(pointer.getParent(), event2);
+
+        ProfileTraversal.levelOrderTraversal(root, visitor);
+        visitor.print("tree1.gv");
+    }
+    /**
+     * This function creates a tree from a String[]
+     */
+    public Node<TestData> createTree(String[] event)
+    {
+        GraphvizVisitor visitor = new GraphvizVisitor();
+
         String creation[] = null;
-        creation = event1;
+        creation = event;
         // Put it on the tree
         int info = Integer.parseInt(creation[0]);
         Node<TestData> pointer = null;
@@ -356,11 +373,15 @@ public class TestProfileTree {
         root.addChild(pointer.getParent());
         pointer.getParent().setParent(root);
 
-        merge(pointer.getParent(), event3);
-        merge(pointer.getParent(), event2);
-
         ProfileTraversal.levelOrderTraversal(root, visitor);
-        visitor.print("tree1.gv");
+        try {
+            visitor.print("tree1.gv");
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return root;
     }
     /**
      * This function merges a tree with a String[]
