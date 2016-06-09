@@ -356,16 +356,31 @@ public class TestProfileTree {
         root.addChild(pointer.getParent());
         pointer.getParent().setParent(root);
 
-        //merge(pointer.getParent(), event2);
-        // First node addition
+        merge(pointer.getParent(), event3);
+        merge(pointer.getParent(), event2);
+
+        ProfileTraversal.levelOrderTraversal(root, visitor);
+        visitor.print("tree1.gv");
+    }
+    /**
+     * This function merges a tree with a String[]
+     */
+    public Node<TestData> merge(Node<TestData> root, String[] event2)
+    {
+        //String [] = {"10","F","B","A"}
+        //First node addition
+        Node<TestData> temp = null;
         Node<TestData> parent = null;
-        parent = pointer.getParent();
+        Node<TestData> pointer = null;
+
+        parent = root;
         boolean created = false;
         String aux[] = null;
         aux = event2;
         String label = aux[1]; // "F"
-        info = Integer.parseInt(aux[0]);
+        int info = Integer.parseInt(aux[0]);
         System.out.println(parent);
+
         if (label.equals(parent.getNodeLabel())) {
             parent.getProfileData().addWeight(info);
             pointer = parent;
@@ -396,11 +411,8 @@ public class TestProfileTree {
                 pointer = temp;
             }
         }
-
-        ProfileTraversal.levelOrderTraversal(root, visitor);
-        visitor.print("tree1.gv");
+        return pointer;
     }
-
     /**
      * This is a Junit test for Comparing trees A > B
      */
