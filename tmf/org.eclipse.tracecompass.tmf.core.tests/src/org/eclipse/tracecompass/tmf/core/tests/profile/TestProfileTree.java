@@ -16,7 +16,6 @@ import org.eclipse.tracecompass.internal.tmf.core.profile.IProfileData;
 import org.eclipse.tracecompass.internal.tmf.core.profile.IProfileVisitor;
 import org.eclipse.tracecompass.internal.tmf.core.profile.Node;
 import org.eclipse.tracecompass.internal.tmf.core.profile.ProfileTraversal;
-import org.eclipse.tracecompass.tmf.core.tests.profile.TestProfileTree.TestData;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -66,8 +65,10 @@ public class TestProfileTree {
 
         /**
          * This function print on the console the tree
+         *
+         * @throws Exception
          */
-        public void print(String name) {
+        public void print(String name) throws Exception {
             System.out.println("Print tree:");
             String content = new String("digraph G { \n");
             // Edges and nodes:
@@ -94,7 +95,7 @@ public class TestProfileTree {
         /**
          * This function print on a file the output of the tree:
          */
-        public void writeToFile(String name, String content) {
+        public void writeToFile(String name, String content) throws Exception {
             try {
 
                 // String content = "This is the content to write into file";
@@ -328,46 +329,76 @@ public class TestProfileTree {
 
         // Create the events:
         String event1[] = { "10", "F", "B", "A" };
-        String event2[] = { "23", "F", "B", "D", "C" };
+        String event2[] = { "22", "F", "B", "D" };
         String event3[] = { "10", "F", "B", "D", "E" };
-        String event4[] = { "10", "F", "G", "I", "H" };
+        // String event4[] = { "10", "F", "G", "I", "H" };
 
+        String creation[] = null;
+        creation = event1;
         // Put it on the tree
-        int info = Integer.parseInt(event2[0]);
+        int info = Integer.parseInt(creation[0]);
         Node<TestData> pointer = null;
         Node<TestData> temp = null;
-        Node<TestData> n = Node.create(new TestData(info, event2[event2.length - 1])); // create_the_last_one
-
+        Node<TestData> n = Node.create(new TestData(info, creation[creation.length - 1])); // create_the_last_one
         // Create the tree backwards
         temp = n;
-        for (int i = 2; i <= event2.length - 1; i++) {
+        pointer = n;
+
+        for (int i = 2; i <= creation.length - 1; i++) {
             pointer = temp;
-            temp = Node.create(new TestData(info, event2[event2.length - i])); // createEachNode
+            temp = Node.create(new TestData(info, creation[creation.length - i])); // createEachNode
             pointer.setParent(temp);
             temp.addChild(pointer);
         }
 
-        /* Read each node, if it is on the hash map, add the content, if not,add
-        // another
-        if (map.containsKey(event1[2])) {
-            info = Integer.parseInt(event1[0]);
-            pointer = map.get(event1[1]);// remember pointer
-            if (pointer != null) {
-                pointer.getProfileData().addWeight(info);// add value
-            }
-        } else { // so the tree does not have this label
-            temp = Node.create(new TestData(info, event2[event2.length - 1]));//createnode
-            //put on the parent
-            map.put(event1[2], temp);//put on the hashmap
-        }
-        */
-        //Put the root:
+        // Put the root:
         Node<TestData> root = Node.create(new TestData(0, "root"));
         root.addChild(pointer.getParent());
         pointer.getParent().setParent(root);
 
+        //merge(pointer.getParent(), event2);
+        // First node addition
+        Node<TestData> parent = null;
+        parent = pointer.getParent();
+        boolean created = false;
+        String aux[] = null;
+        aux = event2;
+        String label = aux[1]; // "F"
+        info = Integer.parseInt(aux[0]);
+        System.out.println(parent);
+        if (label.equals(parent.getNodeLabel())) {
+            parent.getProfileData().addWeight(info);
+            pointer = parent;
+        } else {
+            temp = Node.create(new TestData(info, label));
+            temp.setParent(parent.getParent());
+            parent.getParent().addChild(temp);
+            pointer = temp;
+        }
+
+        // n node:
+        info = Integer.parseInt(aux[0]);
+        for (int i = 2; i < aux.length; i++) {
+            label = aux[i]; // "A"
+            created = false;
+            for (Node<TestData> node : pointer.getChildren()) {
+                System.out.println(node);
+                if (label.equals(node.getNodeLabel())) {
+                    node.getProfileData().addWeight(info);
+                    created = true;
+                    pointer = node;
+                }
+            }
+            if (!created) {
+                temp = Node.create(new TestData(info, label));
+                temp.setParent(pointer);
+                pointer.addChild(temp);
+                pointer = temp;
+            }
+        }
+
         ProfileTraversal.levelOrderTraversal(root, visitor);
-        visitor.print("tree.gv");
+        visitor.print("tree1.gv");
     }
 
     /**
