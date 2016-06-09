@@ -182,6 +182,11 @@ public class TestProfileTree {
             TestData data = (TestData) other;
             return fLabel.equals(data.getLabel());
         }
+
+        public void addWeight(int value) {
+            fWeight = fWeight + value;
+        }
+
     }
 
     private Node<TestData> fRoot, fRoot2;
@@ -327,44 +332,42 @@ public class TestProfileTree {
         String event3[] = { "10", "F", "B", "D", "E" };
         String event4[] = { "10", "F", "G", "I", "H" };
 
-        // Use an arraylist
-        ArrayList<Node<TestData>> list = new ArrayList<>();
-
         // Put it on the tree
         int info = Integer.parseInt(event2[0]);
         Node<TestData> pointer = null;
         Node<TestData> temp = null;
-        Node<TestData> n = Node.create(new TestData(info, event2[event2.length - 1])); // create
-                                                                                       // the
-                                                                                       // last
-                                                                                       // one
-        list.add(n);
+        Node<TestData> n = Node.create(new TestData(info, event2[event2.length - 1])); // create_the_last_one
 
         // Create the tree backwards
         temp = n;
         for (int i = 2; i <= event2.length - 1; i++) {
             pointer = temp;
             temp = Node.create(new TestData(info, event2[event2.length - i])); // createEachNode
-            list.add(temp); // put in an array to make it easy
             pointer.setParent(temp);
             temp.addChild(pointer);
         }
 
-        ProfileTraversal.levelOrderTraversal(pointer, visitor);
-        visitor.print("tree.gv");
-
-        // Do this to find label by label:
-        ProfileTraversal.findNode(pointer, event3[1]);
-
-        // use the arraylist to mark the nodes: [node1, node2, node3, node4]
-        String aux = event3[1];
-        for(Node<TestData> node : list)
-        {
-            if(n.getNodeLabel() == aux) {
-                temp = node;
+        /* Read each node, if it is on the hash map, add the content, if not,add
+        // another
+        if (map.containsKey(event1[2])) {
+            info = Integer.parseInt(event1[0]);
+            pointer = map.get(event1[1]);// remember pointer
+            if (pointer != null) {
+                pointer.getProfileData().addWeight(info);// add value
             }
+        } else { // so the tree does not have this label
+            temp = Node.create(new TestData(info, event2[event2.length - 1]));//createnode
+            //put on the parent
+            map.put(event1[2], temp);//put on the hashmap
         }
+        */
+        //Put the root:
+        Node<TestData> root = Node.create(new TestData(0, "root"));
+        root.addChild(pointer.getParent());
+        pointer.getParent().setParent(root);
 
+        ProfileTraversal.levelOrderTraversal(root, visitor);
+        visitor.print("tree.gv");
     }
 
     /**
