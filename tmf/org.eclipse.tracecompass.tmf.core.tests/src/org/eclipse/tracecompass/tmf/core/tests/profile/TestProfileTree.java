@@ -16,6 +16,7 @@ import org.eclipse.tracecompass.internal.tmf.core.profile.IProfileData;
 import org.eclipse.tracecompass.internal.tmf.core.profile.IProfileVisitor;
 import org.eclipse.tracecompass.internal.tmf.core.profile.Node;
 import org.eclipse.tracecompass.internal.tmf.core.profile.ProfileTraversal;
+import org.eclipse.tracecompass.tmf.core.tests.profile.TestProfileTree.TestData;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -75,10 +76,8 @@ public class TestProfileTree {
                     System.out.print(n.getNodeLabel() + " -> " + n.getParent().getNodeLabel() + "; \n");
                     content = content.concat(n.getParent().getNodeLabel() + " -> " + n.getNodeLabel() + "; \n");
                 } else {
-                    if (n.getNodeLabel() != null) {
-                        System.out.print(n.getNodeLabel() + "; \n");
-                        content = content.concat(n.getNodeLabel() + "; \n");
-                    }
+                    System.out.print(n.getNodeLabel() + "; \n");
+                    content = content.concat(n.getNodeLabel() + "; \n");
                 }
             }
             // Content:
@@ -229,7 +228,8 @@ public class TestProfileTree {
     }
 
     /**
-     *  This is the setup for the experiments, which are basically the tree creation
+     * This is the setup for the experiments, which are basically the tree
+     * creation
      */
     @Before
     public void setup() {
@@ -282,8 +282,8 @@ public class TestProfileTree {
     }
 
     /**
-     * This is a Junit test for Comparing equal trees and print the three trees
-     * on the file
+     * This is a Junit test for Comparing equal and print the three trees on the
+     * file
      *
      * @throws Exception
      */
@@ -308,6 +308,62 @@ public class TestProfileTree {
         Node<TestData> b = ProfileTraversal.levelOrderTraversalComparator2(fRoot, fRoot2);
         ProfileTraversal.levelOrderTraversal(b, visitorOutput);
         visitorOutput.print("treeOutput.gv");
+
+    }
+
+    /**
+     * This is a Junit test is the algorithm to create trees
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testCreateTree() throws Exception {
+
+        GraphvizVisitor visitor = new GraphvizVisitor();
+
+        // Create the events:
+        String event1[] = { "10", "F", "B", "A" };
+        String event2[] = { "23", "F", "B", "D", "C" };
+        String event3[] = { "10", "F", "B", "D", "E" };
+        String event4[] = { "10", "F", "G", "I", "H" };
+
+        // Use an arraylist
+        ArrayList<Node<TestData>> list = new ArrayList<>();
+
+        // Put it on the tree
+        int info = Integer.parseInt(event2[0]);
+        Node<TestData> pointer = null;
+        Node<TestData> temp = null;
+        Node<TestData> n = Node.create(new TestData(info, event2[event2.length - 1])); // create
+                                                                                       // the
+                                                                                       // last
+                                                                                       // one
+        list.add(n);
+
+        // Create the tree backwards
+        temp = n;
+        for (int i = 2; i <= event2.length - 1; i++) {
+            pointer = temp;
+            temp = Node.create(new TestData(info, event2[event2.length - i])); // createEachNode
+            list.add(temp); // put in an array to make it easy
+            pointer.setParent(temp);
+            temp.addChild(pointer);
+        }
+
+        ProfileTraversal.levelOrderTraversal(pointer, visitor);
+        visitor.print("tree.gv");
+
+        // Do this to find label by label:
+        ProfileTraversal.findNode(pointer, event3[1]);
+
+        // use the arraylist to mark the nodes: [node1, node2, node3, node4]
+        String aux = event3[1];
+        for(Node<TestData> node : list)
+        {
+            if(n.getNodeLabel() == aux) {
+                temp = node;
+            }
+        }
 
     }
 
