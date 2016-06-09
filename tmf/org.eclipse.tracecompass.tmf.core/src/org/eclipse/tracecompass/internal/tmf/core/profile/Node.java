@@ -36,6 +36,9 @@ public class Node<T extends IProfileData> {
         return fChildren;
     }
 
+    public ArrayList<Node> getAllChildren() {
+        return fChildren;
+    }
     public Node getParent() {
         return fParent;
     }
