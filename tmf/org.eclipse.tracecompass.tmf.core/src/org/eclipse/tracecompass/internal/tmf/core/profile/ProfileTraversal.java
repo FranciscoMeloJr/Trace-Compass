@@ -3,6 +3,7 @@ package org.eclipse.tracecompass.internal.tmf.core.profile;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 
 import org.eclipse.tracecompass.common.core.NonNullUtils;
@@ -88,7 +89,6 @@ public class ProfileTraversal {
 
     // This function makes a copy of a node
     public static <T extends IProfileData> Node<T> Copy2(Node<T> root) {
-        System.out.println("Copy2 1");
         LinkedList<Node<T>> queue = new LinkedList<>();
         LinkedList<Node<T>> result = new LinkedList<>();
         Node<T>[] arrNodes = new Node[100];
@@ -99,18 +99,15 @@ public class ProfileTraversal {
         while (!queue.isEmpty()) {
             Node<T> current = queue.poll();
             arrNodes[arrJ] = current.copy();
-            System.out.print("Adding node: " + arrNodes[arrJ]);
             for (Node<T> child : current.getChildren()) {
                 queue.add(child);
             }
             result.add(current);
             arrJ++;
         }
-        System.out.println("Copy: size" + arrNodes.length);
         // Update the parents
         for (int i = 0; i < arrJ; i++) {
             if (arrNodes[i].getParent() != null) {
-                System.out.print("Node: " + arrNodes[i] + " " + arrNodes[i].getParent());
                 Node<T> aux = findLabel(arrNodes, arrNodes[i].getParent().fProfileData.getLabel());
                 arrNodes[i].setParent(aux);
             }
@@ -267,32 +264,147 @@ public class ProfileTraversal {
         Node<T> current1 = null;
         Node<T> current2 = null;
         boolean sameFather = false;
-        while (!queue1.isEmpty() ) {
+        while (!queue1.isEmpty()) {
             current1 = queue1.poll();
-            if(sameFather == false) {
+            if (sameFather == false) {
                 current2 = queue2.poll();
             }
             System.out.println("Comparando: " + current1 + " " + current2);
-            if (current1.getNodeLabel() == current2.getNodeLabel()) {
-                sameFather = true;
-                T data = current2.getProfileData();
-                data.minus(current1.getProfileData());
-                System.out.print("after:" + data + "\n");
-                current2.setProfileData(data); // put on the tree
+            if (current2 != null) {
+                if (current1.getNodeLabel() == current2.getNodeLabel()) {
+                    sameFather = true;
+                    T data = current2.getProfileData();
+                    data.minus(current1.getProfileData());
+                    System.out.print("after:" + data + "\n");
+                    current2.setProfileData(data); // put on the tree
 
-                for (Node<T> child : current1.getChildren()) {
-                    System.out.print("fila 1");
-                    queue1.add(child);
+                    // If parents are the same accumulate
+                    for (Node<T> child : current1.getChildren()) {
+                        System.out.print("fila 1");
+                        queue1.add(child);
+                    }
+                    // If parents are the same accumulate
+                    for (Node<T> child : current2.getChildren()) {
+                        System.out.print("fila 2");
+                        queue2.add(child);
+                    }
+
+                    // How to synchronize the input?
+                    current2 = queue2.poll();
+                    System.out.println("novo current2: " + current2);
                 }
-                for (Node<T> child : current2.getChildren()) {
-                    System.out.print("fila 2");
-                    queue2.add(child);
-                }
-                current2 = queue2.poll();
-                System.out.println("novo current2: " + current2 );
             }
         }
         return rootCopy;
+    }
+
+    /**
+     * This function does a hash map for the comparison
+     *
+     * @param root1
+     *            it is the first tree
+     * @param root2
+     *            it is the second tree
+     */
+    public static <T extends IProfileData> Node<T> levelOrderTraversalComparatorHash(Node<T> root1, Node<T> root2) {
+        System.out.println("Level Order comparator using hash x" + "\n");
+        LinkedList<Node<T>> queue1 = new LinkedList<>();
+        LinkedList<Node<T>> queue2 = new LinkedList<>();
+        Map<KeyTree, Node<T>> hmap1 = new HashMap<>();
+        Map<KeyTree, Node<T>> hmap2 = new HashMap<>();
+        System.out.print("rootCopy:");
+        // copy
+        Node<T> rootCopy = ProfileTraversal.Copy2(root2);
+
+        // Tree 1:
+        int level = 0;
+        queue1.add(root1);
+        Node<T> pointerParent =  root1.getParent();
+        while (!queue1.isEmpty()) {
+            Node<T> current = queue1.poll();
+            if (current.getParent() != pointerParent) {
+                pointerParent = current.getParent();
+                level++;
+            }
+            String label = current.getNodeLabel();
+            KeyTree aux = new KeyTree(label, level);
+            hmap1.put(aux, current);
+            for (Node<T> child : current.getChildren()) {
+                queue1.add(child);
+            }
+        }
+        System.out.println("Hash Map 1 ");
+        for (KeyTree key : hmap1.keySet()) {
+            System.out.println(key.getLabel() + " " + key.getLevel() + " " + hmap1.get(key));
+            System.out.println(key.hashCode());
+        }
+        // Tree 1:
+        level = 0;
+        queue2.add(root2);
+        pointerParent =  root2.getParent();
+        while (!queue2.isEmpty()) {
+            Node<T> current = queue2.poll();
+            if (current.getParent() != pointerParent) {
+                pointerParent = current.getParent();
+                level++;
+            }
+            String label = current.getNodeLabel();
+            KeyTree aux = new KeyTree(label, level);
+            hmap2.put(aux, current);
+            for (Node<T> child : current.getChildren()) {
+                queue2.add(child);
+            }
+        }
+        System.out.println("Hash Map 2 ");
+        for (KeyTree key : hmap2.keySet()) {
+            System.out.println(key.getLabel() + " " + key.getLevel() + " " + hmap2.get(key));
+            System.out.println(key.hashCode());
+        }
+        // Combining
+        System.out.println("Combining");
+        for (KeyTree key : hmap1.keySet()) {
+            // Tem o mesmo key, ou seja, o mesmo label e level:
+            System.out.println(hmap2.get(key));
+
+        }
+        return rootCopy;
+    }
+
+    // Class used for hashMap
+    public static class KeyTree {
+        String label;
+        int level;
+
+        public KeyTree(String label, int level) {
+            this.label = label;
+            this.level = level;
+        }
+
+        public String getLabel() {
+            return this.label;
+        }
+
+        public int getLevel() {
+            return this.level;
+        }
+
+        @Override
+        public int hashCode() {
+            int A = label.hashCode();
+            int B = level;
+            return (A * B) * 255;
+        }
+
+        public boolean equals(KeyTree k) {
+            if (this.getLevel() == k.getLevel()) {
+                if (this.getLabel() == k.getLabel()) {
+                    return true;
+                }
+
+            }
+            return false;
+        }
+
     }
 
     /**

@@ -344,7 +344,7 @@ public class TestProfileTree {
         ProfileTraversal.levelOrderTraversal(root2, visitor2);
         visitor2.print("treeInput2.gv");
 
-        Node<TestData> b = ProfileTraversal.levelOrderTraversalComparator3(root2, root1);
+        Node<TestData> b = ProfileTraversal.levelOrderTraversalComparatorHash(root2, root1);
         ProfileTraversal.levelOrderTraversal(b, visitor3);
         visitor3.print("treeOutput.gv");
     }
