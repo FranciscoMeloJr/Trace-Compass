@@ -109,10 +109,11 @@ public class TestProfileTree {
                 }
 
                 try (FileWriter fw = new FileWriter(file.getAbsoluteFile())) {
-                    BufferedWriter bw = new BufferedWriter(fw);
-                    bw.write(content);
-                    bw.close();
-                    System.out.println("Done");
+                    try (BufferedWriter bw = new BufferedWriter(fw)) {
+                        bw.write(content);
+                        bw.close();
+                        System.out.println("Done");
+                    }
                 }
 
             } catch (IOException e) {
@@ -325,13 +326,37 @@ public class TestProfileTree {
     @Test
     public void testCreateTree() throws Exception {
 
-        GraphvizVisitor visitor = new GraphvizVisitor();
+        GraphvizVisitor visitor1 = new GraphvizVisitor();
+        GraphvizVisitor visitor2 = new GraphvizVisitor();
+        GraphvizVisitor visitor3 = new GraphvizVisitor();
 
         // Create the events:
-        String event1[] = { "10", "F", "B", "A" };
-        String event2[] = { "22", "F", "B", "D", "C" };
-        String event3[] = { "10", "F", "B", "D", "E" };
-        String event4[] = { "10", "F", "G", "I", "H" };
+        String event1[] = { "20", "A", "B","D" };
+        String event2[] = { "10", "C" };
+        String event3[] = { "10", "A", "B", "D" };
+        Node<TestData> root1 = createTree(event1, event2);
+        Node<TestData> root2 = createTree(event3, null);
+        // merge(pointer.getParent(), event4);
+
+        ProfileTraversal.levelOrderTraversal(root1, visitor1);
+        visitor1.print("treeInput1.gv");
+
+        ProfileTraversal.levelOrderTraversal(root2, visitor2);
+        visitor2.print("treeInput2.gv");
+
+        Node<TestData> b = ProfileTraversal.levelOrderTraversalComparator3(root2, root1);
+        ProfileTraversal.levelOrderTraversal(b, visitor3);
+        visitor3.print("treeOutput.gv");
+    }
+
+    // This function creates a tree from a basic and then add samples
+    public Node<TestData> createTree(String[] stringCreating, String[] event2) throws Exception {
+
+        // Create the events:
+        String event1[] = stringCreating;
+        // String event2[] = { "10", "baz" };
+        // String event3[] = { "10", "F", "B", "D", "E" };
+        // String event4[] = { "10", "F", "G", "I", "H" };
 
         String creation[] = null;
         creation = event1;
@@ -356,20 +381,21 @@ public class TestProfileTree {
         root.addChild(pointer.getParent());
         pointer.getParent().setParent(root);
 
-        merge(pointer.getParent(), event3);
-        merge(pointer.getParent(), event2);
-        merge(pointer.getParent(), event4);
+        if (event2 != null) {
+            addSample(pointer.getParent(), event2);
+            // merge(pointer.getParent(), event2);
+            // merge(pointer.getParent(), event4);
+        }
 
-        ProfileTraversal.levelOrderTraversal(root, visitor);
-        visitor.print("tree1.gv");
+        return root;
     }
+
     /**
-     * This function merges a tree with a String[]
+     * This function merges a tree with a String["10", "A","B","C"]
      */
-    public Node<TestData> merge(Node<TestData> root, String[] event2)
-    {
-        //String [] = {"10","F","B","A"}
-        //First node addition
+    public Node<TestData> addSample(Node<TestData> root, String[] event2) {
+        // String [] = {"10","F","B","A"}
+        // First node addition
         Node<TestData> temp = null;
         Node<TestData> parent = null;
         Node<TestData> pointer = null;
@@ -414,6 +440,7 @@ public class TestProfileTree {
         }
         return pointer;
     }
+
     /**
      * This is a Junit test for Comparing trees A > B
      */

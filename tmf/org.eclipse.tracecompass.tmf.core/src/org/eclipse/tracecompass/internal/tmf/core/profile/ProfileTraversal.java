@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import org.eclipse.tracecompass.common.core.NonNullUtils;
+
 /**
  * @author frank
  *
@@ -24,7 +25,7 @@ public class ProfileTraversal {
         while (!queue.isEmpty()) {
             temp.clear();
             Node<T> current = queue.poll();
-            // reverse order
+
             for (Node<T> child : current.getChildren()) {
                 temp.addFirst(child);
             }
@@ -67,57 +68,65 @@ public class ProfileTraversal {
      *            a tree first node to be traversed
      */
     public static <T extends IProfileData> Queue<Node<T>> levelOrderTraversal(Node<T> root) {
-        System.out.println("levelOrderTraversal");
+        System.out.print("levelOrderTraversal ");
         LinkedList<Node<T>> queue = new LinkedList<>();
         LinkedList<Node<T>> result = new LinkedList<>();
 
         queue.add(root);
         while (!queue.isEmpty()) {
             Node<T> current = queue.poll();
+            System.out.print(current);
             for (Node<T> child : current.getChildren()) {
                 queue.add(child);
             }
             result.add(current);
         }
 
-        System.out.println(result);
+        System.out.println("\n");
         return result;
     }
 
+    // This function makes a copy of a node
     public static <T extends IProfileData> Node<T> Copy2(Node<T> root) {
+        System.out.println("Copy2 1");
         LinkedList<Node<T>> queue = new LinkedList<>();
         LinkedList<Node<T>> result = new LinkedList<>();
-        Node<T>[] arrNodes = new Node[10];
+        Node<T>[] arrNodes = new Node[100];
         int arrJ = 0;
 
+        // Add the root to the queue
         queue.add(root);
         while (!queue.isEmpty()) {
             Node<T> current = queue.poll();
             arrNodes[arrJ] = current.copy();
-
+            System.out.print("Adding node: " + arrNodes[arrJ]);
             for (Node<T> child : current.getChildren()) {
                 queue.add(child);
             }
             result.add(current);
             arrJ++;
         }
+        System.out.println("Copy: size" + arrNodes.length);
         // Update the parents
-        for (int i = 0; i < arrNodes.length - 1; i++) {
+        for (int i = 0; i < arrJ; i++) {
             if (arrNodes[i].getParent() != null) {
+                System.out.print("Node: " + arrNodes[i] + " " + arrNodes[i].getParent());
                 Node<T> aux = findLabel(arrNodes, arrNodes[i].getParent().fProfileData.getLabel());
                 arrNodes[i].setParent(aux);
             }
         }
 
+        System.out.println("Copy2 2.5");
         // Making the new tree:
-        for (int i = 0; i < arrNodes.length - 1; i++) {
-            for (int j = 1; j < arrNodes.length - 1; j++) {
+        for (int i = 0; i < arrJ; i++) {
+            for (int j = 1; j < arrJ; j++) {
                 // run through the array:
                 if (arrNodes[i].getNodeLabel() == arrNodes[j].getParent().getNodeLabel()) {
                     arrNodes[i].addChild(arrNodes[j]);
                 }
             }
         }
+        System.out.println("Copy2 3");
         return arrNodes[0];
     }
 
@@ -194,29 +203,28 @@ public class ProfileTraversal {
 
     public static <T extends IProfileData> Node<T> levelOrderTraversalComparator2(Node<T> root1, Node<T> root2) {
         System.out.println("Level Order comparator " + "\n");
-        // create a new tree as copy of the second tree - root2 > implement the
-        // copy operation
-        // create a temp node with the information of the two nodes
-        // do a hashmap between the node source and the node result
-        // add the temp node on the new tree
         LinkedList<Node<T>> queue1 = new LinkedList<>();
         LinkedList<Node<T>> queue2 = new LinkedList<>();
-
+        System.out.print("rootCopy:");
         // copy
         Node<T> rootCopy = ProfileTraversal.Copy2(root2);
-
+        System.out.print("queue");
         queue1.add(root1);
         queue2.add(rootCopy);
+        ProfileTraversal.levelOrderTraversal(root1);
+        ProfileTraversal.levelOrderTraversal(root2);
+        System.out.print("rootCopy:");
         while (!queue1.isEmpty() && !queue2.isEmpty()) {
 
             Node<T> current1 = queue1.poll();
             Node<T> current2 = queue2.poll();
-
+            System.out.print("Arvore 1" + current1);
+            System.out.print("Arvore 2" + current2);
             if (current2.getNodeLabel() == current1.getNodeLabel()) {
-                //System.out.print(current1.getProfileData().getWeight() + " " + current1.getProfileData().getWeight() +" ");
+                System.out.print(current1.getProfileData().getWeight() + " " + current1.getProfileData().getWeight() + " ");
                 T data = current2.getProfileData();
                 data.minus(current1.getProfileData());
-                //System.out.print("after:" + data+ "\n");
+                System.out.print("after:" + data + "\n");
                 current2.setProfileData(data); // put on the tree
 
                 for (Node<T> child : current1.getChildren()) {
@@ -233,6 +241,60 @@ public class ProfileTraversal {
          */
         return rootCopy;
     }
+
+    /**
+     * This function does the traversal Level Order Comparator
+     *
+     * @param node
+     *            it is the tree
+     * @param label
+     *            it is the string
+     */
+    public static <T extends IProfileData> Node<T> levelOrderTraversalComparator3(Node<T> root1, Node<T> root2) {
+        System.out.println("Level Order comparator " + "\n");
+        LinkedList<Node<T>> queue1 = new LinkedList<>();
+        LinkedList<Node<T>> queue2 = new LinkedList<>();
+        System.out.print("rootCopy:");
+        // copy
+        Node<T> rootCopy = ProfileTraversal.Copy2(root2);
+        System.out.print("Arvore 1 e 2c:");
+        queue1.add(root1);
+        queue2.add(rootCopy);
+        ProfileTraversal.levelOrderTraversal(root1);
+        ProfileTraversal.levelOrderTraversal(root2);
+        System.out.print("comparation:");
+
+        Node<T> current1 = null;
+        Node<T> current2 = null;
+        boolean sameFather = false;
+        while (!queue1.isEmpty() ) {
+            current1 = queue1.poll();
+            if(sameFather == false) {
+                current2 = queue2.poll();
+            }
+            System.out.println("Comparando: " + current1 + " " + current2);
+            if (current1.getNodeLabel() == current2.getNodeLabel()) {
+                sameFather = true;
+                T data = current2.getProfileData();
+                data.minus(current1.getProfileData());
+                System.out.print("after:" + data + "\n");
+                current2.setProfileData(data); // put on the tree
+
+                for (Node<T> child : current1.getChildren()) {
+                    System.out.print("fila 1");
+                    queue1.add(child);
+                }
+                for (Node<T> child : current2.getChildren()) {
+                    System.out.print("fila 2");
+                    queue2.add(child);
+                }
+                current2 = queue2.poll();
+                System.out.println("novo current2: " + current2 );
+            }
+        }
+        return rootCopy;
+    }
+
     /**
      * This function finds a node on a tree from a label
      *
@@ -241,7 +303,7 @@ public class ProfileTraversal {
      * @param label
      *            it is the string
      */
-    public static <T extends IProfileData> Node<T> findNode(Node<T>root, String label) {
+    public static <T extends IProfileData> Node<T> findNode(Node<T> root, String label) {
 
         System.out.println("findNode");
         LinkedList<Node<T>> queue = new LinkedList<>();
@@ -250,7 +312,7 @@ public class ProfileTraversal {
         queue.add(root);
         while (!queue.isEmpty()) {
             Node<T> current = queue.poll();
-            if(current.getNodeLabel() == label) {
+            if (current.getNodeLabel() == label) {
                 result = current;
             }
             for (Node<T> child : current.getChildren()) {
@@ -261,6 +323,7 @@ public class ProfileTraversal {
         System.out.println(result);
         return result;
     }
+
     /**
      * This function updates a node in an array list
      *
