@@ -338,11 +338,10 @@ public class ProfileTraversal {
             }
         }
         /*
-        System.out.println("hmap 1 ");
-        for (KeyTree key : hmap1.keySet()) {
-            System.out.println(key.getLabel() + " " + key.getLevel() + " " + hmap1.get(key));
-        }
-        */
+         * System.out.println("hmap 1 "); for (KeyTree key : hmap1.keySet()) {
+         * System.out.println(key.getLabel() + " " + key.getLevel() + " " +
+         * hmap1.get(key)); }
+         */
         queue2.add(root2);
         pointerParent = root2.getParent();
         current = null;
@@ -365,10 +364,11 @@ public class ProfileTraversal {
             }
         }
 
-        /*System.out.println("hmap 2 ");
-        for (KeyTree key : hmap2.keySet()) {
-            System.out.println(key.getLabel() + " " + key.getLevel() + " " + hmap2.get(key));
-        }*/
+        /*
+         * System.out.println("hmap 2 "); for (KeyTree key : hmap2.keySet()) {
+         * System.out.println(key.getLabel() + " " + key.getLevel() + " " +
+         * hmap2.get(key)); }
+         */
         // Combining:
 
         Node<T> current1, current2;
@@ -383,6 +383,11 @@ public class ProfileTraversal {
                     data.minus(current1.getProfileData());
                     current2.setProfileData(data); // put on the tree
                     System.out.println(current2);
+                    if (data.getWeight() < current2.getProfileData().getWeight()) {
+                        System.out.println("Green");
+                    } else {
+                        System.out.println("Red");
+                    }
                     hmap2.put(key, current2);
                 }
             }

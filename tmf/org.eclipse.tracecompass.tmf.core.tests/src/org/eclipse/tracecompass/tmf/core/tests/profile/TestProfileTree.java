@@ -93,6 +93,35 @@ public class TestProfileTree {
         }
 
         /**
+         * This function print on the console the tree
+         *
+         * @throws Exception
+         */
+        public void printColor(String name) throws Exception {
+            System.out.println("Print tree:");
+            String content = new String("digraph G { \n");
+            // Edges and nodes:
+            for (Node<TestData> n : result) {
+                if (n.getParent() != null) {
+                    System.out.print(n.getNodeLabel() + " -> " + n.getParent().getNodeLabel() + "; \n");
+                    content = content.concat(n.getParent().getNodeLabel() + " -> " + n.getNodeLabel() + "; \n");
+                } else {
+                    System.out.print(n.getNodeLabel() + "; \n");
+                    content = content.concat(n.getNodeLabel() + "; \n");
+                }
+            }
+            // Content:
+            // B [label = "B [-1]"]; C [label = "C [-1]"]; D [label = "D [-1]"];
+            // I [label = "I [-1]"];
+            for (Node<TestData> n : result) {
+                content = content.concat(n.getNodeLabel() + " " + "[label = \"" + n.getNodeLabel() + "[" + n.getProfileData().getColor() + "]\" ]; \n");
+
+            }
+            content = content.concat("\n }\n");
+            writeToFile(name, content);
+        }
+
+        /**
          * This function print on a file the output of the tree:
          */
         public void writeToFile(String name, String content) throws Exception {
@@ -126,10 +155,12 @@ public class TestProfileTree {
 
         private int fWeight;
         private String fLabel;
+        private String fColor;
 
         public TestData(int weight, String label) {
             fWeight = weight;
             fLabel = label;
+            fColor = "gray";
         }
 
         @Override
@@ -142,12 +173,20 @@ public class TestProfileTree {
             return fLabel;
         }
 
+        public String getColor() {
+            return fColor;
+        }
+
         public void setWeight(int newfWeight) {
             fWeight = newfWeight;
         }
 
         public void setLabel(String newfLabel) {
             fLabel = newfLabel;
+        }
+
+        public void setColor(String newfColor) {
+            fColor = newfColor;
         }
 
         @Override
@@ -167,6 +206,11 @@ public class TestProfileTree {
                 throw new IllegalArgumentException("wrong type for minus operation");
             }
             TestData data = (TestData) other;
+            if (data.getWeight() > fWeight) {
+                fColor = "Green";
+            } else {
+                fColor = "Red";
+            }
             fWeight = fWeight - data.getWeight();
             return new TestData(fWeight - data.getWeight(), fLabel);
         }
@@ -361,6 +405,7 @@ public class TestProfileTree {
 
         dot.print("samples1.dot");
     }
+
     /**
      * This is a Junit test is the algorithm to compare trees
      *
@@ -375,26 +420,23 @@ public class TestProfileTree {
 
         // Create the events:
         String trace1[][] = {
-                { "F", "B", "A" },
-                { "F", "B", "D", "C" },
-                { "F", "B", "D", "E" },
-                { "F", "G", "I", "H" },
+                { "xis", "foo" },
+                { "xis"},
+                { "xis"},
+                { "baz"},
         };
 
         for (String[] event : trace1) {
-            addSample(root, event, 3);
+            addSample(root, event, 10);
         }
 
-     // Create the events:
+        // Create the events:
         String trace2[][] = {
-                { "F", "B", "A" },
-                { "F", "B", "D", "C" },
-                { "F", "B", "D", "E" },
-                { "F", "B", "D", "Z" },
+                { "xis", "foo"},
         };
 
         for (String[] event : trace2) {
-            addSample(root2, event,1);
+            addSample(root2, event, 5);
         }
 
         ProfileTraversal.levelOrderTraversal(root, dot);
@@ -405,8 +447,9 @@ public class TestProfileTree {
         dot.reset();
         ProfileTraversal.levelOrderTraversalComparatorHash(root2, root);
         ProfileTraversal.levelOrderTraversal(root, dot);
-        dot.print("samples1.dot");
+        dot.printColor("samples1.dot");
     }
+
     /**
      * This function add a sample in the tree
      */
@@ -414,9 +457,9 @@ public class TestProfileTree {
         // for each stack level
 
         Node<TestData> current = root;
-        for (String label: event) {
+        for (String label : event) {
 
-            // search for a matching node in the current level
+            System.out.println(label + " " + value);
             Node<TestData> match = null;
             for (Node<TestData> child : current.getChildren()) {
                 if (label.equals(child.getNodeLabel())) {
