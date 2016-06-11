@@ -114,7 +114,6 @@ public class ProfileTraversal {
             }
         }
 
-        System.out.println("Copy2 2.5");
         // Making the new tree:
         for (int i = 0; i < arrJ; i++) {
             for (int j = 1; j < arrJ; j++) {
@@ -124,7 +123,6 @@ public class ProfileTraversal {
                 }
             }
         }
-        System.out.println("Copy2 3");
         return arrNodes[0];
     }
 
@@ -318,14 +316,19 @@ public class ProfileTraversal {
         Node<T> rootCopy = ProfileTraversal.Copy2(root2);
 
         // Tree 1:
-        int level = 0;
         queue1.add(root1);
         Node<T> pointerParent = root1.getParent();
+        Node<T> current = null;
+        int level;
         while (!queue1.isEmpty()) {
-            Node<T> current = queue1.poll();
-            if (current.getParent() != pointerParent) {
-                pointerParent = current.getParent();
-                level++;
+            current = queue1.poll();
+            level = 0;
+            pointerParent = current.getParent();
+            if (pointerParent != null) {
+                while (pointerParent != null) {
+                    pointerParent = pointerParent.getParent();
+                    level++;
+                }
             }
             String label = current.getNodeLabel();
             KeyTree aux = new KeyTree(label, level);
@@ -334,20 +337,25 @@ public class ProfileTraversal {
                 queue1.add(child);
             }
         }
-        System.out.println("Hash Map 1 ");
+        /*
+        System.out.println("hmap 1 ");
         for (KeyTree key : hmap1.keySet()) {
             System.out.println(key.getLabel() + " " + key.getLevel() + " " + hmap1.get(key));
-            System.out.println(key.hashCode());
         }
-        // Tree 1:
-        level = 0;
+        */
         queue2.add(root2);
         pointerParent = root2.getParent();
+        current = null;
+        level = 0;
         while (!queue2.isEmpty()) {
-            Node<T> current = queue2.poll();
-            if (current.getParent() != pointerParent) {
-                pointerParent = current.getParent();
-                level++;
+            current = queue2.poll();
+            level = 0;
+            pointerParent = current.getParent();
+            if (pointerParent != null) {
+                while (pointerParent != null) {
+                    pointerParent = pointerParent.getParent();
+                    level++;
+                }
             }
             String label = current.getNodeLabel();
             KeyTree aux = new KeyTree(label, level);
@@ -356,31 +364,41 @@ public class ProfileTraversal {
                 queue2.add(child);
             }
         }
-        System.out.println("Hash Map 2 ");
+
+        /*System.out.println("hmap 2 ");
+        for (KeyTree key : hmap2.keySet()) {
+            System.out.println(key.getLabel() + " " + key.getLevel() + " " + hmap2.get(key));
+        }*/
+        // Combining:
+
+        Node<T> current1, current2;
+        System.out.println("Combining");
+        for (KeyTree key : hmap1.keySet()) {
+            if (hmap1.get(key) != null) {
+                current1 = hmap1.get(key);
+                current2 = hmap2.get(key);
+                hmap2.remove(key);
+                if ((current2 != null) && (current1 != null)) {
+                    T data = current2.getProfileData();
+                    data.minus(current1.getProfileData());
+                    current2.setProfileData(data); // put on the tree
+                    System.out.println(current2);
+                    hmap2.put(key, current2);
+                }
+            }
+        }
+        System.out.println("Final ");
         for (KeyTree key : hmap2.keySet()) {
             System.out.println(key.getLabel() + " " + key.getLevel() + " " + hmap2.get(key));
             System.out.println(key.hashCode());
-        }
-        // Combining
-        System.out.println("Combining");
-        for (KeyTree key : hmap1.keySet()) {
-            // Tem o mesmo key, ou seja, o mesmo label e level:
-            System.out.println(key.label + " " + key.level + " " + key.hashCode() + " " + hmap2.get(key));
-
-        }
-        System.out.println("Combining");
-        for (KeyTree key : hmap2.keySet()) {
-            // Tem o mesmo key, ou seja, o mesmo label e level:
-            System.out.println(key.label + " " + key.level + " " + key.hashCode() + " " + hmap1.get(key));
-
         }
         return rootCopy;
     }
 
     // Class used for hashMap
     public static class KeyTree {
-        String label;
-        int level;
+        final String label;
+        final int level;
 
         public KeyTree(String label, int level) {
             this.label = label;
@@ -397,15 +415,25 @@ public class ProfileTraversal {
 
         @Override
         public int hashCode() {
-            // int A = label.hashCode(); int B = level;return (A * B) * 255;
-            return Objects.hash(label, level);
+            return Objects.hash(level, label);
         }
 
-        public boolean equals(KeyTree k) {
-            if ((this.getLevel() == k.getLevel()) && (this.getLabel() == k.getLabel())) {
-                return true;
+        @Override
+        public boolean equals(Object k) {
+            if (k == null) {
+                return false;
+            }
+            if (k instanceof KeyTree) {
+                KeyTree other = (KeyTree) k;
+                return this.getLevel() == other.getLevel() &&
+                        this.getLabel().equals(other.getLabel());
             }
             return false;
+        }
+
+        @Override
+        public String toString() {
+            return (this.label + " " + this.level);
         }
 
     }
