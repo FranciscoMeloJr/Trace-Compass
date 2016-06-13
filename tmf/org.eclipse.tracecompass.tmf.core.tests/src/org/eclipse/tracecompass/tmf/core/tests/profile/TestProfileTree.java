@@ -68,54 +68,52 @@ public class TestProfileTree {
          *
          * @throws Exception
          */
-        public void print(String name) throws Exception {
+        public void print(String name, Mode mode) throws Exception {
             System.out.println("Print tree:");
             String content = new String("digraph G { \n");
-            // Edges and nodes:
-            for (Node<TestData> n : result) {
-                if (n.getParent() != null) {
-                    System.out.print(n.getNodeLabel() + " -> " + n.getParent().getNodeLabel() + "; \n");
-                    content = content.concat(n.getParent().getNodeLabel() + " -> " + n.getNodeLabel() + "; \n");
+            if (mode != Mode.COLOR) {
+                if (mode != Mode.ID) {
+                    // Edges and nodes:
+                    for (Node<TestData> n : result) {
+                        if (n.getParent() != null) {
+                            System.out.print(n.getNodeLabel() + " -> " + n.getParent().getNodeLabel() + "; \n");
+                            content = content.concat(n.getParent().getNodeLabel() + " -> " + n.getNodeLabel() + "; \n");
+                        } else {
+                            System.out.print(n.getNodeLabel() + "; \n");
+                            content = content.concat(n.getNodeLabel() + "; \n");
+                        }
+                    }
+                    for (Node<TestData> n : result) {
+                        content = content.concat(n.getNodeLabel() + " " + "[label = \"" + n.getNodeLabel() + "[" + n.getProfileData().getWeight() + "]\" ]; \n");
+                    }
                 } else {
-                    System.out.print(n.getNodeLabel() + "; \n");
-                    content = content.concat(n.getNodeLabel() + "; \n");
+                    // Edges and nodes:
+                    for (Node<TestData> n : result) {
+                        if (n.getParent() != null) {
+                            System.out.print(n.getNodeId() + " -> " + n.getParent().getNodeId() + "; \n");
+                            content = content.concat(n.getParent().getNodeId() + " -> " + n.getNodeId() + "; \n");
+                        } else {
+                            System.out.print(n.getNodeId() + "; \n");
+                            content = content.concat(n.getNodeId() + "; \n");
+                        }
+                    }
+                    for (Node<TestData> n : result) {
+                        content = content.concat(n.getNodeId() + " " + "[label = \"" + n.getNodeId() + "[" + n.getProfileData().getWeight() + "]\" ]; \n");
+                    }
                 }
-            }
-            // Content:
-            // B [label = "B [-1]"]; C [label = "C [-1]"]; D [label = "D [-1]"];
-            // I [label = "I [-1]"];
-            for (Node<TestData> n : result) {
-                content = content.concat(n.getNodeLabel() + " " + "[label = \"" + n.getNodeLabel() + "[" + n.getProfileData().getWeight() + "]\" ]; \n");
-
-            }
-            content = content.concat("\n }\n");
-            writeToFile(name, content);
-        }
-
-        /**
-         * This function print on the console the tree
-         *
-         * @throws Exception
-         */
-        public void printColor(String name) throws Exception {
-            System.out.println("Print tree:");
-            String content = new String("digraph G { \n");
-            // Edges and nodes:
-            for (Node<TestData> n : result) {
-                if (n.getParent() != null) {
-                    System.out.print(n.getNodeLabel() + " -> " + n.getParent().getNodeLabel() + "; \n");
-                    content = content.concat(n.getParent().getNodeLabel() + " -> " + n.getNodeLabel() + "; \n");
-                } else {
-                    System.out.print(n.getNodeLabel() + "; \n");
-                    content = content.concat(n.getNodeLabel() + "; \n");
+            } else {
+                for (Node<TestData> n : result) {
+                    if (n.getParent() != null) {
+                        System.out.print(n.getNodeLabel() + " -> " + n.getParent().getNodeLabel() + "; \n");
+                        content = content.concat(n.getParent().getNodeLabel() + " -> " + n.getNodeLabel() + "; \n");
+                    } else {
+                        System.out.print(n.getNodeLabel() + "; \n");
+                        content = content.concat(n.getNodeLabel() + "; \n");
+                    }
                 }
-            }
-            // Content:
-            // B [label = "B [-1]"]; C [label = "C [-1]"]; D [label = "D [-1]"];
-            // I [label = "I [-1]"];
-            for (Node<TestData> n : result) {
-                content = content.concat(n.getNodeLabel() + " " + "[label = \"" + n.getNodeLabel() + "[" + n.getProfileData().getColor() + "]\" ]; \n");
-
+                for (Node<TestData> n : result) {
+                    content = content.concat(n.getNodeLabel() + " " + "[label = \"" + n.getNodeLabel() + "[" + n.getProfileData().getColor() + "]\" ]; \n");
+                }
             }
             content = content.concat("\n }\n");
             writeToFile(name, content);
@@ -151,8 +149,14 @@ public class TestProfileTree {
         }
     }
 
+    // Color for the graph plot
     public enum Color {
         Grey, Green, Red;
+    }
+
+    // Mode for print
+    public enum Mode {
+        ID, LABEL, COLOR;
     }
 
     public class TestData implements IProfileData {
@@ -325,6 +329,7 @@ public class TestProfileTree {
     public void testComparison() throws Exception {
 
         GraphvizVisitor visitor = new GraphvizVisitor();
+        Mode mode = Mode.ID;
         System.out.println("Comparison test x");
         ProfileTraversal.levelOrderTraversal(fRoot);
 
@@ -332,7 +337,7 @@ public class TestProfileTree {
 
         Node<TestData> b = ProfileTraversal.levelOrderTraversalComparator2(fRoot, fRoot2);
         ProfileTraversal.levelOrderTraversal(b, visitor);
-        visitor.print("treeOutput.gv");
+        visitor.print("treeOutput.gv", mode);
 
     }
 
@@ -351,18 +356,19 @@ public class TestProfileTree {
         GraphvizVisitor visitorInput2 = new GraphvizVisitor();
         GraphvizVisitor visitorOutput = new GraphvizVisitor();
 
+        Mode mode = Mode.LABEL;
         System.out.println("Comparison test x");
         ProfileTraversal.levelOrderTraversal(fRoot, visitorInput1);
-        visitorInput1.print("treeInput1.gv");
+        visitorInput1.print("treeInput1.gv", mode);
         // visitor.reset();
 
         ProfileTraversal.levelOrderTraversal(fRoot2, visitorInput2);
-        visitorInput2.print("treeInput2.gv");
+        visitorInput2.print("treeInput2.gv", mode);
         // visitor.reset();
 
         Node<TestData> b = ProfileTraversal.levelOrderTraversalComparator2(fRoot, fRoot2);
         ProfileTraversal.levelOrderTraversal(b, visitorOutput);
-        visitorOutput.print("treeOutput.gv");
+        visitorOutput.print("treeOutput.gv", mode);
 
     }
 
@@ -378,7 +384,7 @@ public class TestProfileTree {
     public void testCreateTree() throws Exception {
         GraphvizVisitor dot = new GraphvizVisitor();
         Node<TestData> root = Node.create(new TestData(0, "root"));
-
+        Mode mode = Mode.LABEL;
         // Create the events:
         String trace[][] = {
                 { "F", "B", "A" },
@@ -407,7 +413,7 @@ public class TestProfileTree {
         String exp[] = { "root", "F", "B", "G", "A", "D", "I", "C", "E", "H" };
         assertArrayEquals(exp, fAct.toArray());
 
-        dot.print("samples1.dot");
+        dot.print("samples1.dot", mode);
     }
 
     /**
@@ -421,6 +427,7 @@ public class TestProfileTree {
         GraphvizVisitor dot = new GraphvizVisitor();
         Node<TestData> root = Node.create(new TestData(0, "root"));
         Node<TestData> root2 = Node.create(new TestData(0, "root"));
+        Mode mode = Mode.LABEL;
 
         // Create the events:
         String trace1[][] = {
@@ -444,14 +451,44 @@ public class TestProfileTree {
         }
 
         ProfileTraversal.levelOrderTraversal(root, dot);
-        dot.print("input1.dot");
+        dot.print("input1.dot", mode);
         dot.reset();
         ProfileTraversal.levelOrderTraversal(root2, dot);
-        dot.print("input2.dot");
+        dot.print("input2.dot", mode);
         dot.reset();
         ProfileTraversal.levelOrderTraversalComparatorHash(root2, root);
         ProfileTraversal.levelOrderTraversal(root, dot);
-        dot.printColor("samples1.dot");
+        mode = Mode.COLOR;
+
+        dot.print("samples1.dot", mode);
+    }
+
+    /**
+     * This is a Junit test is to generate a call graph
+     *
+     * @throws Exception
+     */
+
+    @Test
+    public void testCallGraph() throws Exception {
+        GraphvizVisitor dot = new GraphvizVisitor();
+        Node<TestData> root = Node.create(new TestData(0, "root"));
+        Mode mode = Mode.ID;
+        // Create the events:
+        String trace1[][] = {
+                { "xis", "foo" },
+                { "xis" },
+                { "xis" },
+                { "baz" },
+        };
+
+        for (String[] event : trace1) {
+            addSampleC(root, event, 10);
+        }
+
+        ProfileTraversal.levelOrderTraversal(root, dot);
+        dot.print("input1.dot", mode);
+        dot.reset();
     }
 
     /**
@@ -479,6 +516,30 @@ public class TestProfileTree {
                 match = Node.create(new TestData(value, label));
                 current.addChild(match);
             }
+
+            // increase the weight
+            match.getProfileData().addWeight(value);
+
+            // update current node
+            current = match;
+        }
+    }
+
+    /**
+     * This function add a sample in the a call graph
+     */
+    public void addSampleC(Node<TestData> root, String[] event, int value) {
+        // for each stack level
+
+        Node<TestData> current = root;
+        for (String label : event) {
+
+            System.out.println(label + " " + value);
+            Node<TestData> match = null;
+
+            // if the node does not exist, create it and set its parent
+            match = Node.create(new TestData(value, label));
+            current.addChild(match);
 
             // increase the weight
             match.getProfileData().addWeight(value);
