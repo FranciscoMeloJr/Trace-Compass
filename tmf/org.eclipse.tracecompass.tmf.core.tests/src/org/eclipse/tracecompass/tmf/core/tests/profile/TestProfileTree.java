@@ -151,16 +151,20 @@ public class TestProfileTree {
         }
     }
 
+    public enum Color {
+        Grey, Green, Red;
+    }
+
     public class TestData implements IProfileData {
 
         private int fWeight;
         private String fLabel;
-        private String fColor;
+        private Color fColor;
 
         public TestData(int weight, String label) {
             fWeight = weight;
             fLabel = label;
-            fColor = "gray";
+            fColor = Color.Grey;
         }
 
         @Override
@@ -174,7 +178,7 @@ public class TestProfileTree {
         }
 
         public String getColor() {
-            return fColor;
+            return fColor.toString();
         }
 
         public void setWeight(int newfWeight) {
@@ -185,7 +189,7 @@ public class TestProfileTree {
             fLabel = newfLabel;
         }
 
-        public void setColor(String newfColor) {
+        public void setColor(Color newfColor) {
             fColor = newfColor;
         }
 
@@ -207,9 +211,9 @@ public class TestProfileTree {
             }
             TestData data = (TestData) other;
             if (data.getWeight() > fWeight) {
-                fColor = "Green";
+                fColor = Color.Green;
             } else {
-                fColor = "Red";
+                fColor = Color.Red;
             }
             fWeight = fWeight - data.getWeight();
             return new TestData(fWeight - data.getWeight(), fLabel);
@@ -421,9 +425,9 @@ public class TestProfileTree {
         // Create the events:
         String trace1[][] = {
                 { "xis", "foo" },
-                { "xis"},
-                { "xis"},
-                { "baz"},
+                { "xis" },
+                { "xis" },
+                { "baz" },
         };
 
         for (String[] event : trace1) {
@@ -432,7 +436,7 @@ public class TestProfileTree {
 
         // Create the events:
         String trace2[][] = {
-                { "xis", "foo"},
+                { "xis", "foo" },
         };
 
         for (String[] event : trace2) {
@@ -451,7 +455,7 @@ public class TestProfileTree {
     }
 
     /**
-     * This function add a sample in the tree
+     * This function add a sample in the calling context tree
      */
     public void addSample(Node<TestData> root, String[] event, int value) {
         // for each stack level
@@ -462,6 +466,8 @@ public class TestProfileTree {
             System.out.println(label + " " + value);
             Node<TestData> match = null;
             for (Node<TestData> child : current.getChildren()) {
+                // Since it is a calling context tree, the same labels get
+                // merged, otherwise it would be a call tree:
                 if (label.equals(child.getNodeLabel())) {
                     match = child;
                     break;
