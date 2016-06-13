@@ -159,6 +159,12 @@ public class TestProfileTree {
         ID, LABEL, COLOR;
     }
 
+    // Which tree:
+    public enum Tree {
+        ECCT, DCT, CG;
+        // Calling context tree, dynamic call tree, call graph
+    }
+
     public class TestData implements IProfileData {
 
         private int fWeight;
@@ -380,11 +386,15 @@ public class TestProfileTree {
     Integer fCount = 0;
     ArrayList<String> fAct = new ArrayList<>();
 
+    /**
+     * @throws Exception
+     */
     @Test
     public void testCreateTree() throws Exception {
         GraphvizVisitor dot = new GraphvizVisitor();
         Node<TestData> root = Node.create(new TestData(0, "root"));
         Mode mode = Mode.LABEL;
+        Tree typeTree = Tree.ECCT;
         // Create the events:
         String trace[][] = {
                 { "F", "B", "A" },
@@ -394,7 +404,7 @@ public class TestProfileTree {
         };
 
         for (String[] event : trace) {
-            addSample(root, event, 1);
+            addSample(root, event, 1, typeTree);
         }
 
         ProfileTraversal.levelOrderTraversal(root, dot);
@@ -427,18 +437,19 @@ public class TestProfileTree {
         GraphvizVisitor dot = new GraphvizVisitor();
         Node<TestData> root = Node.create(new TestData(0, "root"));
         Node<TestData> root2 = Node.create(new TestData(0, "root"));
-        Mode mode = Mode.LABEL;
+        Mode mode = Mode.ID;
+        Tree tree = Tree.ECCT;
 
         // Create the events:
         String trace1[][] = {
-                { "xis", "foo" },
+                { "xis", "foo", "xis" },
                 { "xis" },
                 { "xis" },
                 { "baz" },
         };
 
         for (String[] event : trace1) {
-            addSample(root, event, 10);
+            addSample(root, event, 10, tree);
         }
 
         // Create the events:
@@ -447,7 +458,7 @@ public class TestProfileTree {
         };
 
         for (String[] event : trace2) {
-            addSample(root2, event, 5);
+            addSample(root2, event, 5, tree);
         }
 
         ProfileTraversal.levelOrderTraversal(root, dot);
@@ -458,8 +469,8 @@ public class TestProfileTree {
         dot.reset();
         ProfileTraversal.levelOrderTraversalComparatorHash(root2, root);
         ProfileTraversal.levelOrderTraversal(root, dot);
+        // Change the print mode
         mode = Mode.COLOR;
-
         dot.print("samples1.dot", mode);
     }
 
@@ -474,16 +485,18 @@ public class TestProfileTree {
         GraphvizVisitor dot = new GraphvizVisitor();
         Node<TestData> root = Node.create(new TestData(0, "root"));
         Mode mode = Mode.ID;
+        Tree tree = Tree.DCT;
         // Create the events:
         String trace1[][] = {
-                { "xis", "foo" },
+                { "xis", "foo", "xis" },
                 { "xis" },
                 { "xis" },
                 { "baz" },
         };
 
         for (String[] event : trace1) {
-            addSampleC(root, event, 10);
+            // Creating a DCT:
+            addSample(root, event, 10, tree);
         }
 
         ProfileTraversal.levelOrderTraversal(root, dot);
@@ -494,7 +507,7 @@ public class TestProfileTree {
     /**
      * This function add a sample in the calling context tree
      */
-    public void addSample(Node<TestData> root, String[] event, int value) {
+    public void addSample(Node<TestData> root, String[] event, int value, Tree t) {
         // for each stack level
 
         Node<TestData> current = root;
@@ -502,44 +515,21 @@ public class TestProfileTree {
 
             System.out.println(label + " " + value);
             Node<TestData> match = null;
-            for (Node<TestData> child : current.getChildren()) {
-                // Since it is a calling context tree, the same labels get
-                // merged, otherwise it would be a call tree:
-                if (label.equals(child.getNodeLabel())) {
-                    match = child;
-                    break;
+            if (t.equals(Tree.ECCT)) {
+                for (Node<TestData> child : current.getChildren()) {
+                    // Since it is a calling context tree, the same labels get
+                    // merged, otherwise it would be a call tree:
+                    if (label.equals(child.getNodeLabel())) {
+                        match = child;
+                        break;
+                    }
                 }
             }
-
             // if the node does not exist, create it and set its parent
             if (match == null) {
                 match = Node.create(new TestData(value, label));
                 current.addChild(match);
             }
-
-            // increase the weight
-            match.getProfileData().addWeight(value);
-
-            // update current node
-            current = match;
-        }
-    }
-
-    /**
-     * This function add a sample in the a call graph
-     */
-    public void addSampleC(Node<TestData> root, String[] event, int value) {
-        // for each stack level
-
-        Node<TestData> current = root;
-        for (String label : event) {
-
-            System.out.println(label + " " + value);
-            Node<TestData> match = null;
-
-            // if the node does not exist, create it and set its parent
-            match = Node.create(new TestData(value, label));
-            current.addChild(match);
 
             // increase the weight
             match.getProfileData().addWeight(value);
