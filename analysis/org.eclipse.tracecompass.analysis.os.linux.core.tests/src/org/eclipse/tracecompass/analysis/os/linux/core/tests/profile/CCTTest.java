@@ -1,4 +1,4 @@
-package org.eclipse.tracecompass.tmf.core.tests.profile;
+package org.eclipse.tracecompass.analysis.os.linux.core.tests.profile;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -10,14 +10,14 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.tracecompass.analysis.os.linux.core.tests.Activator;
 import org.eclipse.tracecompass.analysis.os.linux.core.tests.stubs.trace.TmfXmlKernelTraceStub;
-import org.eclipse.tracecompass.internal.tmf.core.profile.Node;
+import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.CCTAnalysisModule;
+import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.Node;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
-import org.eclipse.tracecompass.tmf.core.tests.profile.TestProfileTree.TestData;
 import org.eclipse.tracecompass.tmf.core.tests.shared.TmfTestHelper;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -34,7 +34,7 @@ import org.junit.Test;
  *
  */
 public class CCTTest {
-    private static final String KERNEL_FILE_TEST = "testfiles/KernelCCTAnalysis_testTrace.xml";
+    private static final String KERNEL_FILE_TEST = "testfiles/KernelCCTTest_testTrace.xml";
     private ITmfTrace fTrace;
     private CCTAnalysisModule fModule = null;
 
@@ -55,6 +55,7 @@ public class CCTTest {
         ITmfTrace trace = new TmfXmlKernelTraceStub();
         IPath filePath = Activator.getAbsoluteFilePath(KERNEL_FILE_TEST);
         IStatus status = trace.validate(null, filePath.toOSString());
+
         if (!status.isOK()) {
             fail(status.getException().getMessage());
         }
@@ -69,6 +70,12 @@ public class CCTTest {
         fModule = TmfTraceUtils.getAnalysisModuleOfClass(trace, CCTAnalysisModule.class, CCTAnalysisModule.ID);
         assertNotNull(fModule);
         fTrace = trace;
+    }
+
+    @Test
+    public void testNewInstance() throws InstantiationException, IllegalAccessException {
+        CCTAnalysisModule obj = CCTAnalysisModule.class.newInstance();
+        assertNotNull(obj);
     }
 
     /**
@@ -109,10 +116,6 @@ public class CCTTest {
 
     /**
      * Test execute Analysis by francis
-     */
-
-    /**
-     * Abstract event request to fill a tree
      */
     @Ignore
     private static class requestTest extends TmfEventRequest { //

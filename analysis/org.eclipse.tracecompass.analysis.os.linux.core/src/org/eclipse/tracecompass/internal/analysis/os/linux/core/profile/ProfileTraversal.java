@@ -1,4 +1,4 @@
-package org.eclipse.tracecompass.internal.tmf.core.profile;
+package org.eclipse.tracecompass.internal.analysis.os.linux.core.profile;
 
 import java.util.ArrayList;
 import java.util.HashMap;
