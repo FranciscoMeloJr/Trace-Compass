@@ -23,8 +23,10 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -64,8 +66,7 @@ public class CCTTest {
         deleteSuppFiles(trace);
         ((TmfTrace) trace).traceOpened(new TmfTraceOpenedSignal(this, trace, null));
         // original source:
-        // fModule = TmfTraceUtils.getAnalysisModuleOfClass(trace,
-        // CCTAnalysisModule.class, CCTAnalysisModule.ID);
+        fModule = TmfTraceUtils.getAnalysisModuleOfClass(trace, CCTAnalysisModule.class, CCTAnalysisModule.ID);
         assertNotNull(fModule);
         fTrace = trace;
     }
@@ -105,22 +106,15 @@ public class CCTTest {
          */
 
     }
+
     /**
      * Test execute Analysis by francis
      */
 
-    @Test
-    public void executeAnalysis() {
-
-        request = new TmfEventRequest(...);
-
-        getTrace().sendRequest(request);
-        request.waitForCompletion();
-    }
-
     /**
      * Abstract event request to fill a tree
      */
+    @Ignore
     private static class requestTest extends TmfEventRequest { //
 
         private final Node<TestData> fNode;
@@ -140,5 +134,9 @@ public class CCTTest {
             fNode.addChild(aux);
         }
 
+        @Ignore
+        public void avoidAnnoyingErrorMessageWhenRunningTestsInAnt() {
+            assertTrue(true); // do nothing;
+        }
     }
 }

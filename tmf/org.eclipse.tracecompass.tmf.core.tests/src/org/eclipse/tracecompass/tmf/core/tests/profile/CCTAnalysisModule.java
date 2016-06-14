@@ -40,7 +40,7 @@ public abstract class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     protected boolean executeAnalysis(IProgressMonitor monitor) throws TmfAnalysisException {
         ITmfTrace trace = checkNotNull(getTrace());
 
-        requestTest request = new requestTest(trace); // with the active
+        //requestTest request = new requestTest(trace); // with the active
                                                               // trace
         getTrace().sendRequest(request); // the method handleData is called for
                                          // each event
