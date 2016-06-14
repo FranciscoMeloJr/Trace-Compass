@@ -1,42 +1,40 @@
 package org.eclipse.tracecompass.tmf.core.tests.profile;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.tracecompass.analysis.os.linux.core.tests.Activator;
 import org.eclipse.tracecompass.analysis.os.linux.core.tests.stubs.trace.TmfXmlKernelTraceStub;
-import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
-import org.eclipse.tracecompass.statesystem.core.exceptions.AttributeNotFoundException;
-import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
-import org.eclipse.tracecompass.statesystem.core.interval.ITmfStateInterval;
+import org.eclipse.tracecompass.internal.tmf.core.profile.Node;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.TmfEvent;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfTraceException;
+import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
+import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.signal.TmfTraceOpenedSignal;
+import org.eclipse.tracecompass.tmf.core.tests.profile.TestProfileTree.TestData;
 import org.eclipse.tracecompass.tmf.core.tests.shared.TmfTestHelper;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * @author francisco from Geneviève Bastien code
+ *
+ */
 public class CCTTest {
-    private static final String KERNEL_MEMORY_USAGE_FILE = "testfiles/KernelMemoryAnalysis_testTrace.xml";
-    private static final long PAGE_SIZE = 4096;
+    private static final String KERNEL_FILE_TEST = "testfiles/KernelCCTAnalysis_testTrace.xml";
     private ITmfTrace fTrace;
     private CCTAnalysisModule fModule = null;
-    private SortedMap<Long, Long> threadEvent = new TreeMap<>();
 
     private static void deleteSuppFiles(ITmfTrace trace) {
         /* Remove supplementary files */
@@ -50,9 +48,10 @@ public class CCTTest {
      * Setup the trace for the tests
      */
     @Before
-    public void setUp() {
+    public void settings() {
+        // take the trace:
         ITmfTrace trace = new TmfXmlKernelTraceStub();
-        IPath filePath = Activator.getAbsoluteFilePath(KERNEL_MEMORY_USAGE_FILE);
+        IPath filePath = Activator.getAbsoluteFilePath(KERNEL_FILE_TEST);
         IStatus status = trace.validate(null, filePath.toOSString());
         if (!status.isOK()) {
             fail(status.getException().getMessage());
@@ -64,7 +63,9 @@ public class CCTTest {
         }
         deleteSuppFiles(trace);
         ((TmfTrace) trace).traceOpened(new TmfTraceOpenedSignal(this, trace, null));
-        fModule = TmfTraceUtils.getAnalysisModuleOfClass(trace, CCTAnalysisModule.class, CCTAnalysisModule.ID);
+        // original source:
+        // fModule = TmfTraceUtils.getAnalysisModuleOfClass(trace,
+        // CCTAnalysisModule.class, CCTAnalysisModule.ID);
         assertNotNull(fModule);
         fTrace = trace;
     }
@@ -79,15 +80,65 @@ public class CCTTest {
     }
 
     /**
-     * Test that the analysis executes without problems
+     * Test analysis from test
      */
     @Test
     public void testAnalysisExecution() {
         /* Make sure the analysis hasn't run yet */
-        assertNull(fModule.getStateSystem());
+        // assertNull(fModule.getStateSystem());
 
         /* Execute the analysis */
+        // assertTrue(TmfTestHelper.executeAnalysis(fModule));
+        // assertNotNull(fModule.getStateSystem());
         assertTrue(TmfTestHelper.executeAnalysis(fModule));
-        assertNotNull(fModule.getStateSystem());
+
+        /*
+         * If we want to call it: if (module instance of
+         * TmfAbstractAnalysisModule) { try { Class<?>[] argTypes = new Class[]
+         * { IProgressMonitor.class }; Method method =
+         * TmfAbstractAnalysisModule.class.getDeclaredMethod("executeAnalysis",
+         * argTypes); method.setAccessible(true); Object obj =
+         * method.invoke(module, new NullProgressMonitor()); return (Boolean)
+         * obj; } catch (IllegalAccessException | IllegalArgumentException |
+         * InvocationTargetException | NoSuchMethodException | SecurityException
+         * e) { fail(e.toString()); }
+         */
+
+    }
+    /**
+     * Test execute Analysis by francis
+     */
+
+    @Test
+    public void executeAnalysis() {
+
+        request = new TmfEventRequest(...);
+
+        getTrace().sendRequest(request);
+        request.waitForCompletion();
+    }
+
+    /**
+     * Abstract event request to fill a tree
+     */
+    private static class requestTest extends TmfEventRequest { //
+
+        private final Node<TestData> fNode;
+
+        public <T> requestTest(Node<TestData> node) {
+            super(ITmfEvent.class, TmfTimeRange.ETERNITY, 0, ITmfEventRequest.ALL_DATA, ExecutionType.BACKGROUND);
+
+            fNode = node;
+        }
+
+        @Override
+        public void handleData(final ITmfEvent event) {
+            // Just for test, print on the console and add the children
+            System.out.println(event.getName());
+            Node<TestData> aux = Node.create(new TestData(0, event.getName()));
+
+            fNode.addChild(aux);
+        }
+
     }
 }

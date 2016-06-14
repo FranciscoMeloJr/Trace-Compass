@@ -165,7 +165,7 @@ public class TestProfileTree {
         // Calling context tree, dynamic call tree, call graph
     }
 
-    public class TestData implements IProfileData {
+    public static class TestData implements IProfileData {
 
         private int fWeight;
         private String fLabel;
