@@ -33,11 +33,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     protected boolean executeAnalysis(IProgressMonitor monitor) throws TmfAnalysisException {
         ITmfTrace trace = checkNotNull(getTrace());
 
-        //Node<TestData> root = Node.create(new TestData(0, "root"));
+        // Node<TestData> root = Node.create(new TestData(0, "root"));
         RequestTest request = new RequestTest(); // with the active
-                                                      // trace
+                                                 // trace
         trace.sendRequest(request); // the method handleData is called for
-                                         // each event
+                                    // each event
         try {
             request.waitForCompletion();
         } catch (InterruptedException e) {
@@ -53,35 +53,41 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     private static class RequestTest extends TmfEventRequest {
 
+        Node<TestData> fNode;
+
         public RequestTest() {
             super(ITmfEvent.class, TmfTimeRange.ETERNITY, 0, ITmfEventRequest.ALL_DATA, ExecutionType.BACKGROUND);
-        }
-
-        @Override
-        public void handleData(final ITmfEvent event) {
-            // Just for test, print on the console and add the children
-            System.out.println(event.toString());
         }
 
         /*
          * @Override public void handleData(final ITmfEvent event) { // Just for
          * test, print on the console and add the children
-         * System.out.println(event.getName()); Node<TestData> aux =
-         * Node.create(new TestData(0, event.getName()));
-         *
-         * fNode.addChild(aux);
-         *
-         * final String eventName = event.getType().getName(); if
-         * (eventName.startsWith(layout.eventSyscallEntryPrefix()) ||
-         * eventName.startsWith(layout.eventCompatSyscallEntryPrefix())) {
-         *
-         * }else if (eventName.startsWith(layout.eventSyscallExitPrefix())) {
-         *
-         * long endTime = event.getTimestamp().getValue(); } }
-         *  >>write (f, g, h)
-         *
-         *
+         * System.out.println(event.toString()); }
          */
+
+        @Override
+        public void handleData(final ITmfEvent event) {
+            // Just for
+            // * test, print on the console and add the children
+            System.out.println(event.getName());
+
+            final String eventName = event.getType().getName();
+            long endTime;
+
+            Node<TestData> aux;
+
+            if (eventName.contains("irq_handler_entry") || eventName.contains("hrtimer_expire_entry") || eventName.contains("softirq_entry")) {
+                aux = Node.create(new TestData(0, event.getName()));
+                fNode.addChild(aux);
+
+            } else {
+                if (eventName.contains("irq_handler_exit") || eventName.contains("irq_handler_exit") || eventName.contains("softirq_exit")) {
+                    endTime = event.getTimestamp().getValue();
+                    aux = Node.create(new TestData(endTime, event.getName()));
+                    fNode.addChild(aux);
+                }
+            }
+        }
     }
 
     @Override
@@ -92,5 +98,64 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     @Override
     protected void canceling() {
+    }
+
+    /**
+     * @author frank
+     *
+     */
+    protected class TestData implements IProfileData {
+
+        private String fLabel;
+        private int fWeight;
+
+        // Constructor:
+        public TestData(int weight, String label) {
+            fWeight = weight;
+            fLabel = label;
+        }
+
+        // Constructor:
+        public TestData(long weight, String label) {
+            fWeight = (int) weight;
+            fLabel = label;
+        }
+
+        @Override
+        public IProfileData minus(IProfileData other) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public void merge(IProfileData other) {
+            // TODO Auto-generated method stub
+
+        }
+
+        @Override
+        public boolean equals(IProfileData other) {
+            if (!(other instanceof TestData)) {
+                throw new IllegalArgumentException("wrong type for minus operation");
+            }
+            TestData data = (TestData) other;
+            if (fLabel.equals(data.getLabel())) {
+                if (fWeight == data.getWeight()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public String getLabel() {
+            return fLabel;
+        }
+
+        @Override
+        public int getWeight() {
+            return fWeight;
+        }
+
     }
 }
