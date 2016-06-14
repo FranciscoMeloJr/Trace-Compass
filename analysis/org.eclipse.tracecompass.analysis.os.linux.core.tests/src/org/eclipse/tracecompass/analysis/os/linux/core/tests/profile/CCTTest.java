@@ -92,25 +92,8 @@ public class CCTTest {
      */
     @Test
     public void testAnalysisExecution() {
-        /* Make sure the analysis hasn't run yet */
-        // assertNull(fModule.getStateSystem());
-
-        /* Execute the analysis */
-        // assertTrue(TmfTestHelper.executeAnalysis(fModule));
-        // assertNotNull(fModule.getStateSystem());
+        System.out.println("testAnalysisExecution");
         assertTrue(TmfTestHelper.executeAnalysis(fModule));
-
-        /*
-         * If we want to call it: if (module instance of
-         * TmfAbstractAnalysisModule) { try { Class<?>[] argTypes = new Class[]
-         * { IProgressMonitor.class }; Method method =
-         * TmfAbstractAnalysisModule.class.getDeclaredMethod("executeAnalysis",
-         * argTypes); method.setAccessible(true); Object obj =
-         * method.invoke(module, new NullProgressMonitor()); return (Boolean)
-         * obj; } catch (IllegalAccessException | IllegalArgumentException |
-         * InvocationTargetException | NoSuchMethodException | SecurityException
-         * e) { fail(e.toString()); }
-         */
 
     }
 
