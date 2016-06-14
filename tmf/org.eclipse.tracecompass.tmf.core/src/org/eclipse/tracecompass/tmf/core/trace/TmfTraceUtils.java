@@ -90,6 +90,9 @@ public final class TmfTraceUtils {
         Iterable<IAnalysisModule> analysisModules = trace.getAnalysisModules();
         List<@NonNull T> modules = new ArrayList<>();
         for (IAnalysisModule module : analysisModules) {
+
+            System.out.println(module.getClass().getSimpleName());
+
             if (moduleClass.isAssignableFrom(module.getClass())) {
                 modules.add(checkNotNull(moduleClass.cast(module)));
             }
