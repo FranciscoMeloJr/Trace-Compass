@@ -1,0 +1,40 @@
+<!-- **************************************************************************************
+* Simple  Entry and Exit test
+**************************************************************************************** -->
+<trace>
+	<set_aspects>
+	<field name="cpu" value="1" type="int" />
+	</set_aspects>
+	<event timestamp="1" name="func_entry">
+		<field name="name" value="foo" type="string" />
+	</event>
+	<event timestamp="2" name="func_entry">
+		<field name="name" value="bar" type="string" />
+	</event>
+	<event timestamp="3" name="func_entry">
+		<field name="name" value="baz" type="string" />
+	</event>
+	<event timestamp="4" name="func_exit">
+	</event>
+	<event timestamp="5" name="func_exit">
+	</event>
+	<event timestamp="6" name="func_exit">
+	</event>
+	
+	<event timestamp="7" name="func_entry">
+		<field name="name" value="foo" type="string" />
+	</event>
+	<event timestamp="8" name="func_entry">
+		<field name="name" value="bar" type="string" />
+	</event>
+	<event timestamp="9" name="func_entry">
+		<field name="name" value="baz" type="string" />
+	</event>
+	<event timestamp="10" name="func_exit">
+	</event>
+	<event timestamp="11" name="func_exit">
+	</event>
+	<event timestamp="12" name="func_exit">
+	</event>
+
+</trace>
