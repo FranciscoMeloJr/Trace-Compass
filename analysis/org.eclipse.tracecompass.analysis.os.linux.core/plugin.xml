@@ -77,5 +77,16 @@
                class="org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace">
          </tracetype>
       </module>
+      <module
+            analysis_module="org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.CCTAnalysisModule"
+            applies_experiment="true"
+            automatic="false"
+            id="org.eclipse.tracecompass.analysis.os.linux.core.profile.cctanalysis.module"
+            name="CCT">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.analysis.os.linux.core.trace.IKernelTrace">
+         </tracetype>
+      </module>
    </extension>
 </plugin>
