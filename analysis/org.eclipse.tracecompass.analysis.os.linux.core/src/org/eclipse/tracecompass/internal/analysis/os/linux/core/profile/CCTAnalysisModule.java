@@ -2,6 +2,13 @@ package org.eclipse.tracecompass.internal.analysis.os.linux.core.profile;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Stack;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
@@ -51,15 +58,24 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
      * Abstract event request to fill a tree
      */
 
-    private static class RequestTest extends TmfEventRequest {
+    private class RequestTest extends TmfEventRequest {
 
-        Node<TestData> fNode;
+        Node<TestData> fNode, fCurrent;
+        Stack<Node<TestData>> tmp;
+        GraphvizVisitor dot;
 
         public RequestTest() {
             super(ITmfEvent.class, TmfTimeRange.ETERNITY, 0, ITmfEventRequest.ALL_DATA, ExecutionType.BACKGROUND);
+
+            tmp = new Stack<>();
+            fNode = Node.create(new TestData(0, "root"));
+            fCurrent = fNode;
+            dot = new GraphvizVisitor();
         }
 
         /*
+         * // the First handleData()
+         *
          * @Override public void handleData(final ITmfEvent event) { // Just for
          * test, print on the console and add the children
          * System.out.println(event.toString()); }
@@ -68,25 +84,49 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         @Override
         public void handleData(final ITmfEvent event) {
             // Just for
-            // * test, print on the console and add the children
+            // * test, print on the console and add to the stack:
             System.out.println(event.getName());
 
             final String eventName = event.getType().getName();
             long endTime;
 
             Node<TestData> aux;
+            TestData data;
 
             if (eventName.contains("irq_handler_entry") || eventName.contains("hrtimer_expire_entry") || eventName.contains("softirq_entry")) {
                 aux = Node.create(new TestData(0, event.getName()));
-                fNode.addChild(aux);
+                System.out.println("Pushing");
+                tmp.push(aux);
 
             } else {
                 if (eventName.contains("irq_handler_exit") || eventName.contains("irq_handler_exit") || eventName.contains("softirq_exit")) {
+                    System.out.println("Creating");
                     endTime = event.getTimestamp().getValue();
-                    aux = Node.create(new TestData(endTime, event.getName()));
-                    fNode.addChild(aux);
+                    if (!tmp.isEmpty()) {
+                        aux = tmp.pop();
+
+                        // Timestamp:
+                        data = aux.fProfileData;
+                        data.fWeight += endTime;
+
+                        // Add to the tree:
+                        fCurrent.addChild(aux);
+                        fCurrent = aux;
+                    } else {
+                        System.out.println("Empty Stack");
+                    }
                 }
             }
+            // GraphvizVisitor dot = new GraphvizVisitor();
+            System.out.println("Printing");
+            // ProfileTraversal.levelOrderTraversal(fNode, dot);
+            System.out.println(fCurrent.toString());
+        }
+
+        @Override
+        public void handleCompleted() {
+            System.out.println("Sucess");
+            ProfileTraversal.levelOrderTraversal(fNode, dot);
         }
     }
 
@@ -101,6 +141,52 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     /**
+     * This function add a sample in the calling context tree
+     */
+    public void addSample(Node<TestData> root, String[] event, int value, Tree t) {
+        // for each stack level
+
+        Node<TestData> current = root;
+        for (String label : event) {
+
+            System.out.println(label + " " + value);
+            Node<TestData> match = null;
+            if (t.equals(Tree.ECCT)) {
+                for (Node<TestData> child : current.getChildren()) {
+                    // Since it is a calling context tree, the same labels get
+                    // merged, otherwise it would be a call tree:
+                    if (label.equals(child.getNodeLabel())) {
+                        match = child;
+                        break;
+                    }
+                }
+            }
+            // if the node does not exist, create it and set its parent
+            if (match == null) {
+                match = Node.create(new TestData(value, label));
+                current.addChild(match);
+            }
+
+            // increase the weight
+            match.getProfileData().addWeight(value);
+
+            // update current node
+            current = match;
+        }
+    }
+
+    // Which kind of tree:
+    public enum Tree {
+        ECCT, DCT, CG;
+        // Calling context tree, dynamic call tree, call graph
+    }
+
+    // Mode for print
+    public enum Mode {
+        ID_, LABEL_, COLOR_;
+    }
+
+    /**
      * @author frank
      *
      */
@@ -111,7 +197,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         // Constructor:
         public TestData(int weight, String label) {
-            fWeight = weight;
+            if (weight == 0) {
+                fWeight = 0;
+            } else {
+                fWeight = weight;
+            }
             fLabel = label;
         }
 
@@ -121,16 +211,21 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             fLabel = label;
         }
 
-        @Override
-        public IProfileData minus(IProfileData other) {
-            // TODO Auto-generated method stub
-            return null;
+        // Add to the weight:
+        public void addWeight(int value) {
+            fWeight += value;
         }
 
         @Override
         public void merge(IProfileData other) {
             // TODO Auto-generated method stub
 
+        }
+
+        @Override
+        public IProfileData minus(IProfileData other) {
+            // TODO Auto-generated method stub
+            return null;
         }
 
         @Override
@@ -157,5 +252,116 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             return fWeight;
         }
 
+        @Override
+        public String toString() {
+            return new String(fWeight + " " + fLabel);
+        }
     }
+
+    public class GraphvizVisitor implements IProfileVisitor<TestData> {
+        /**
+         * result ArrayList of Nodes, which are TestData
+         */
+        public ArrayList<Node<TestData>> result = new ArrayList<>();
+
+        @Override
+        public void visit(Node<TestData> node) {
+            result.add(node);
+        }
+
+        /**
+         * This function reset the visit
+         */
+        public void reset() {
+            result = new ArrayList<>();
+        }
+
+        /**
+         * This function print on the console the tree
+         *
+         * @throws Exception
+         */
+        public void print(String name, Mode mode) throws Exception {
+            System.out.println("Print tree:");
+            String content = new String("digraph G { \n");
+            if (mode != Mode.COLOR_) {
+                if (mode != Mode.ID_) {
+                    // Edges and nodes:
+                    for (Node<TestData> n : result) {
+                        if (n.getParent() != null) {
+                            System.out.print(n.getNodeLabel() + " -> " + n.getParent().getNodeLabel() + "; \n");
+                            content = content.concat(n.getParent().getNodeLabel() + " -> " + n.getNodeLabel() + "; \n");
+                        } else {
+                            System.out.print(n.getNodeLabel() + "; \n");
+                            content = content.concat(n.getNodeLabel() + "; \n");
+                        }
+                    }
+                    for (Node<TestData> n : result) {
+                        content = content.concat(n.getNodeLabel() + " " + "[label = \"" + n.getNodeLabel() + "[" + n.getProfileData().getWeight() + "]\" ]; \n");
+                    }
+                } else {
+                    // Edges and nodes:
+                    for (Node<TestData> n : result) {
+                        if (n.getParent() != null) {
+                            System.out.print(n.getNodeId() + " -> " + n.getParent().getNodeId() + "; \n");
+                            content = content.concat(n.getParent().getNodeId() + " -> " + n.getNodeId() + "; \n");
+                        } else {
+                            System.out.print(n.getNodeId() + "; \n");
+                            content = content.concat(n.getNodeId() + "; \n");
+                        }
+                    }
+                    for (Node<TestData> n : result) {
+                        content = content.concat(n.getNodeId() + " " + "[label = \"" + n.getNodeId() + "[" + n.getProfileData().getWeight() + "]\" ]; \n");
+                    }
+                }
+            } else {
+                for (Node<TestData> n : result) {
+                    if (n.getParent() != null) {
+                        System.out.print(n.getNodeLabel() + " -> " + n.getParent().getNodeLabel() + "; \n");
+                        content = content.concat(n.getParent().getNodeLabel() + " -> " + n.getNodeLabel() + "; \n");
+                    } else {
+                        System.out.print(n.getNodeLabel() + "; \n");
+                        content = content.concat(n.getNodeLabel() + "; \n");
+                    }
+                }
+                for (Node<TestData> n : result) {
+                    content = content.concat(n.getNodeLabel() + " " + "[label = \"" + n.getNodeLabel() + "[" + n.getProfileData() + "]\" ]; \n"); // tirei
+                                                                                                                                                  // o
+                                                                                                                                                  // color
+                }
+            }
+            content = content.concat("\n }\n");
+            writeToFile(name, content);
+        }
+
+        /**
+         * This function print on a file the output of the tree:
+         */
+        public void writeToFile(String name, String content) throws Exception {
+            try {
+
+                // String content = "This is the content to write into file";
+                String fileName = new String("/tmp/");
+                fileName = fileName.concat(name); //
+                File file = new File(fileName); // "/home/frank/Desktop/tree.gv");
+
+                // if file doesnt exists, then create it
+                if (!file.exists()) {
+                    file.createNewFile();
+                }
+
+                try (FileWriter fw = new FileWriter(file.getAbsoluteFile())) {
+                    try (BufferedWriter bw = new BufferedWriter(fw)) {
+                        bw.write(content);
+                        bw.close();
+                        System.out.println("Done printing");
+                    }
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }
