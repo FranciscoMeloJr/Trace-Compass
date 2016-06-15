@@ -96,7 +96,14 @@ public class CCTTest {
         assertTrue(TmfTestHelper.executeAnalysis(fModule));
 
     }
+    /**
+     * Test analysis from test
+     */
+    @Ignore
+    public void testStack() {
+        System.out.println("testStack");
 
+    }
     /**
      * Test execute Analysis by francis
      */

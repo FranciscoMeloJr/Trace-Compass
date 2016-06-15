@@ -7,4 +7,6 @@ public interface IProfileData {
     public boolean equals(IProfileData other);
     public String getLabel();
     public int getWeight();
+    @Override
+    public String toString();
 }
