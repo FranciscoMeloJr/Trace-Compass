@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Stack;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -62,40 +63,49 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         Node<TestData> fNode, fCurrent;
         Stack<Node<TestData>> tmp;
+        Stack<Node<TestData>> temp;
         GraphvizVisitor dot;
+
+        HashMap<String, Node<TestData>> hashMap;
 
         public RequestTest() {
             super(ITmfEvent.class, TmfTimeRange.ETERNITY, 0, ITmfEventRequest.ALL_DATA, ExecutionType.BACKGROUND);
 
             tmp = new Stack<>();
+            temp = new Stack<>();
             fNode = Node.create(new TestData(0, "root"));
             fCurrent = fNode;
             dot = new GraphvizVisitor();
+
+            // HashMap
+            hashMap = new HashMap();
         }
 
         /*
-         * // the First handleData()
+         * the First handleData()
          *
          * @Override public void handleData(final ITmfEvent event) { // Just for
-         * test, print on the console and add the children
-         * System.out.println(event.toString()); }
+         * test, print on the console and add the children System.out.println(
+         * "Name: " + event.getName()); System.out.println("Content: " +
+         * event.getContent()); //it is empty when is exit }
+         *
          */
-
         @Override
         public void handleData(final ITmfEvent event) {
-            // Just for
-            // * test, print on the console and add to the stack:
+            // Just for test, print on the console and add to the stack:
             System.out.println(event.getName());
 
             final String eventName = event.getType().getName();
             long endTime;
 
             Node<TestData> aux;
+            Node<TestData> nodeHash;
             TestData data;
 
             if (eventName.contains("irq_handler_entry") || eventName.contains("hrtimer_expire_entry") || eventName.contains("softirq_entry")) {
-                aux = Node.create(new TestData(0, event.getName()));
-                System.out.println("Pushing");
+                String content = event.getContent().toString();
+                aux = Node.create(new TestData(0, content));
+                System.out.println("Pushing" + aux);
                 tmp.push(aux);
 
             } else {
@@ -109,24 +119,46 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         data = aux.fProfileData;
                         data.fWeight += endTime;
 
-                        // Add to the tree:
-                        fCurrent.addChild(aux);
-                        fCurrent = aux;
+                        aux.fProfileData = data;
+                        temp.push(aux);
+                        // HashMap addition:
+                        if (!hashMap.containsKey(aux.getNodeLabel())) {
+                            hashMap.put(aux.getNodeLabel(), aux);
+                        } else {
+                            nodeHash = hashMap.get(aux.getNodeLabel());
+                            if (nodeHash != null) {
+                                data = nodeHash.fProfileData;
+                                data.fWeight += endTime;
+                                nodeHash.fProfileData = data;
+                                hashMap.replace(aux.getNodeLabel(), nodeHash);
+                            }
+                        }
                     } else {
                         System.out.println("Empty Stack");
                     }
                 }
             }
-            // GraphvizVisitor dot = new GraphvizVisitor();
-            System.out.println("Printing");
-            // ProfileTraversal.levelOrderTraversal(fNode, dot);
-            System.out.println(fCurrent.toString());
+            System.out.println("Current " + fCurrent.toString());
         }
 
         @Override
         public void handleCompleted() {
+            Node<TestData> aux;
+            // Add to the tree:
+            while (!temp.isEmpty()) {
+                aux = temp.pop();
+                fCurrent.addChild(aux);
+                fCurrent = aux;
+            }
+
             System.out.println("Sucess");
             ProfileTraversal.levelOrderTraversal(fNode, dot);
+            try {
+                dot.print("XMLTest.dot", Mode.LABEL_);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            System.out.println("end");
         }
     }
 

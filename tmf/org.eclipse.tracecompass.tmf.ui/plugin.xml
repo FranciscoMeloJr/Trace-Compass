@@ -98,6 +98,17 @@
             name="%synchronization.view.name"
             restorable="true">
       </view>
+      <category
+            id="org.eclipse.tracecompass.tmf.ui"
+            name="Sample Category">
+      </category>
+      <view
+            category="org.eclipse.tracecompass.tmf.ui"
+            class="org.eclipse.tracecompass.tmf.ui.views.SampleView"
+            icon="icons/sample.gif"
+            id="org.eclipse.tracecompass.tmf.ui.views.SampleView"
+            name="Sample View">
+      </view>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
@@ -1975,5 +1986,23 @@
             id="org.eclipse.tracecompass.tmf.ui.providerFactory1"
             priority="0">
       </providerFactory>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               id="org.eclipse.tracecompass.tmf.ui.views.SampleView"
+               ratio="0.5"
+               relationship="right"
+               relative="org.eclipse.ui.views.ProblemView">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="contexts.xml">
+      </contexts>
    </extension>
 </plugin>

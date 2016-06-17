@@ -58,6 +58,7 @@ public class ProfileTraversal {
                 queue.add(child);
             }
             visitor.visit(current);
+            System.out.println(current);
         }
 
     }
