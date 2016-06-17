@@ -353,7 +353,7 @@ public class TestProfileTree {
         GraphvizVisitor dot = new GraphvizVisitor();
         Node<TestData> root = Node.create(new TestData(0, "root"));
         Node<TestData> root2 = Node.create(new TestData(0, "root"));
-        Mode mode = Mode.ID;
+        Mode mode = Mode.LABEL;
         Tree tree = Tree.ECCT;
 
         // Create the events:
@@ -383,8 +383,8 @@ public class TestProfileTree {
         ProfileTraversal.levelOrderTraversal(root2, dot);
         dot.print("input2.dot", mode);
         dot.reset();
-        ProfileTraversal.levelOrderTraversalComparatorHash(root2, root);
-        ProfileTraversal.levelOrderTraversal(root, dot);
+        ProfileTraversal.levelOrderTraversalComparatorHash(root, root2);
+        ProfileTraversal.levelOrderTraversal(root2, dot);
         // Change the print mode
         mode = Mode.COLOR;
         dot.print("samples1.dot", mode);

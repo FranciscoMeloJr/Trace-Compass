@@ -102,7 +102,6 @@ public class CCTTest {
     @Ignore
     public void testStack() {
         System.out.println("testStack");
-
     }
     /**
      * Test execute Analysis by francis
@@ -114,7 +113,6 @@ public class CCTTest {
 
         public <T> requestTest(Node<TestData> node) {
             super(ITmfEvent.class, TmfTimeRange.ETERNITY, 0, ITmfEventRequest.ALL_DATA, ExecutionType.BACKGROUND);
-
             fNode = node;
         }
 
