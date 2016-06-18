@@ -72,7 +72,7 @@ public class CCTTest {
         fTrace = trace;
     }
 
-    @Test
+    @Ignore
     public void testNewInstance() throws InstantiationException, IllegalAccessException {
         CCTAnalysisModule obj = CCTAnalysisModule.class.newInstance();
         assertNotNull(obj);
