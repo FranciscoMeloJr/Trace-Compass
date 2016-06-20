@@ -3,16 +3,23 @@ package org.eclipse.tracecompass.tmf.ui.views;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.graphics.Image;
+
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jface.action.*;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.*;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.tracecompass.internal.tmf.ui.Messages;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
-import org.eclipse.tracecompass.tmf.ui.views.callstack.AbstractCallStackAnalysis;
+import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackEntry;
 import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackView;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.ITimeGraphTimeListener;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphTimeEvent;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.swt.SWT;
 
 /**
@@ -44,6 +51,13 @@ public class SampleView extends CallStackView {
     private Action action2;
     private Action doubleClickAction;
 
+    private static final String[] COLUMN_NAMES = new String[] {
+            Messages.CallStackView_FunctionColumn,
+            Messages.CallStackView_DepthColumn,
+            Messages.CallStackView_EntryTimeColumn,
+            Messages.CallStackView_ExitTimeColumn,
+            Messages.CallStackView_DurationColumn
+    };
     /*
      * The content provider class is responsible for providing objects to the
      * view. It can wrap existing objects in adapters or simply return objects
@@ -97,35 +111,59 @@ public class SampleView extends CallStackView {
      * This is a callback that will allow us to create the viewer and initialize
      * it.
      */
+
     @Override
     protected void buildEntryList(final ITmfTrace trace, final ITmfTrace parentTrace, final IProgressMonitor monitor) {
         // Load the module:
         AbstractCallStackAnalysis module = TmfTraceUtils.getAnalysisModulesOfClass(trace, AnalysisModule.class);
 
         if (module == null) {
-            //addUnavailableEntry(trace, parentTrace);
+            // addUnavailableEntry(trace, parentTrace);
             return;
         }
         // Read the StateHistory, but I will not use it
         ITmfStateSystem ss = module.getStateSystem();
 
         if (ss == null) {
-            //addUnavailableEntry(trace, parentTrace);
+            // addUnavailableEntry(trace, parentTrace);
             return;
         }
 
         long start = 1000;
 
+    }
 
+    @Override
+    private void buildStatusEvents(ITmfTrace trace, CallStackEntry entry, @NonNull IProgressMonitor monitor, long start, long end) {
+        ITmfStateSystem ss = entry.getStateSystem();
+        long resolution = Math.max(1, (end - ss.getStartTime()) / getDisplayWidth());
+        List<ITimeEvent> eventList = getEventList(entry, start, end + 1, resolution, monitor);
+        if (eventList != null) {
+            entry.setEventList(eventList);
+            System.out.println(entry);
+        }
+        if (trace == getTrace()) {
+            redraw();
+        }
     }
 
     @Override
     public void createPartControl(Composite parent) {
+
+        setTreeColumns(COLUMN_NAMES);
+
         viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
         viewer.setContentProvider(new ViewContentProvider());
         viewer.setLabelProvider(new ViewLabelProvider());
         viewer.setSorter(new NameSorter());
         viewer.setInput(getViewSite());
+
+        getTimeGraphViewer().addTimeListener(new ITimeGraphTimeListener() {
+            @Override
+            public void timeSelected(TimeGraphTimeEvent event) {
+                synchingToTime(event.getBeginTime());
+            }
+        });
 
         // Create the help context id for the viewer's control
         PlatformUI.getWorkbench().getHelpSystem().setHelp(viewer.getControl(), "org.eclipse.tracecompass.tmf.ui.viewer");
