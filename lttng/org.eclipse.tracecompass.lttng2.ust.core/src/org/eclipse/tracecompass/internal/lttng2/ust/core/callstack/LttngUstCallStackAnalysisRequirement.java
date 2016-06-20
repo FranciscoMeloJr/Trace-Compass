@@ -73,6 +73,7 @@ public class LttngUstCallStackAnalysisRequirement extends TmfCompositeAnalysisRe
                 PriorityLevel.MANDATORY);
         TmfAbstractAnalysisRequirement cygProfileFast = new TmfCompositeAnalysisRequirement(ImmutableSet.of(entryReq, exitReq), PriorityLevel.MANDATORY);
 
+        System.out.println("cygProfileFast" + cygProfileFast);
         return ImmutableSet.of(cygProfile, cygProfileFast);
     }
 

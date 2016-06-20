@@ -635,7 +635,7 @@ public class CallStackView extends AbstractTimeGraphView {
                         int callStackQuark = ss.getQuarkRelative(threadQuark, callStackPath);
                         String threadName = ss.getAttributeName(threadQuark);
 
-                        System.out.println(threadName);
+                        System.out.println(endStates);
 
                         long threadEnd = end + 1;
                         ITmfStateInterval endInterval = endStates.get(callStackQuark);
@@ -737,6 +737,7 @@ public class CallStackView extends AbstractTimeGraphView {
         List<ITimeEvent> eventList = getEventList(entry, start, end + 1, resolution, monitor);
         if (eventList != null) {
             entry.setEventList(eventList);
+            System.out.println(entry);
         }
         if (trace == getTrace()) {
             redraw();
@@ -819,7 +820,9 @@ public class CallStackView extends AbstractTimeGraphView {
             public void accept(TimeGraphEntry entry) {
                 if (entry instanceof CallStackEntry) {
                     CallStackEntry callStackEntry = (CallStackEntry) entry;
+
                     ITmfStateSystem ss = callStackEntry.getStateSystem();
+                    System.out.println(callStackEntry.getStateSystem());
                     if (time < ss.getStartTime() || time > ss.getCurrentEndTime()) {
                         return;
                     }
@@ -830,6 +833,7 @@ public class CallStackView extends AbstractTimeGraphView {
                         ITmfStateValue nameValue = stackLevelInterval.getStateValue();
 
                         String name = getFunctionName(trace, callStackEntry.getProcessId(), time, nameValue);
+                        System.out.println(name);
                         callStackEntry.setFunctionName(name);
                         if (!name.isEmpty()) {
                             callStackEntry.setFunctionEntryTime(stackLevelInterval.getStartTime());
