@@ -621,7 +621,7 @@ public class CallStackView extends AbstractTimeGraphView {
 
                     /* Create the threads under the process */
                     List<Integer> threadQuarks = ss.getQuarks(processQuark, module.getThreadsPattern());
-
+                    System.out.println(threadQuarks.size());
                     /*
                      * Only query startStates if necessary (threadEntry == null)
                      */
@@ -634,6 +634,9 @@ public class CallStackView extends AbstractTimeGraphView {
                         String[] callStackPath = module.getCallStackPath();
                         int callStackQuark = ss.getQuarkRelative(threadQuark, callStackPath);
                         String threadName = ss.getAttributeName(threadQuark);
+
+                        System.out.println(threadName);
+
                         long threadEnd = end + 1;
                         ITmfStateInterval endInterval = endStates.get(callStackQuark);
                         if (endInterval.getStateValue().isNull() && endInterval.getStartTime() != ss.getStartTime()) {
@@ -679,6 +682,7 @@ public class CallStackView extends AbstractTimeGraphView {
                             if (level > callStackParent.getChildren().size()) {
                                 CallStackEntry callStackEntry = new CallStackEntry(threadName, stackLevelQuark, level, processId, trace, ss);
                                 callStackParent.addChild(callStackEntry);
+                                System.out.println(callStackEntry.getName());
                             }
                             level++;
                         }
