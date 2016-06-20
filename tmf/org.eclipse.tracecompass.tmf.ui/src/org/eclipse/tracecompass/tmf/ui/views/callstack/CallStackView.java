@@ -599,6 +599,7 @@ public class CallStackView extends AbstractTimeGraphView {
                         ProcessEntry processEntry = processEntryMap.get(processQuark);
                         if (processEntry == null) {
                             String processName = ss.getAttributeName(processQuark);
+                            System.out.println(processName);
                             ITmfStateValue processStateValue = endStates.get(processQuark).getStateValue();
                             if (processStateValue.getType() == Type.INTEGER) {
                                 processId = processStateValue.unboxInt();

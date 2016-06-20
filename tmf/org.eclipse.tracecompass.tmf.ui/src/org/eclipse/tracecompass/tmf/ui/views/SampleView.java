@@ -3,203 +3,229 @@ package org.eclipse.tracecompass.tmf.ui.views;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.jface.viewers.*;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.*;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ui.*;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
+import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
+import org.eclipse.tracecompass.tmf.ui.views.callstack.AbstractCallStackAnalysis;
 import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackView;
 import org.eclipse.swt.SWT;
 
-
 /**
- * This sample class demonstrates how to plug-in a new
- * workbench view. The view shows data obtained from the
- * model. The sample creates a dummy model on the fly,
- * but a real implementation would connect to the model
- * available either in this or another plug-in (e.g. the workspace).
- * The view is connected to the model using a content provider.
+ * This sample class demonstrates how to plug-in a new workbench view. The view
+ * shows data obtained from the model. The sample creates a dummy model on the
+ * fly, but a real implementation would connect to the model available either in
+ * this or another plug-in (e.g. the workspace). The view is connected to the
+ * model using a content provider.
  * <p>
- * The view uses a label provider to define how model
- * objects should be presented in the view. Each
- * view can present the same model objects using
- * different labels and icons, if needed. Alternatively,
- * a single label provider can be shared between views
- * in order to ensure that objects of the same type are
- * presented in the same way everywhere.
+ * The view uses a label provider to define how model objects should be
+ * presented in the view. Each view can present the same model objects using
+ * different labels and icons, if needed. Alternatively, a single label provider
+ * can be shared between views in order to ensure that objects of the same type
+ * are presented in the same way everywhere.
  * <p>
+ *
  * @since 2.0
  */
 
 public class SampleView extends CallStackView {
 
-	/**
-	 * The ID of the view as specified by the extension.
-	 */
-	public static final String ID1 = "org.eclipse.tracecompass.tmf.ui.views.SampleView";
+    /**
+     * The ID of the view as specified by the extension.
+     */
+    public static final String ID1 = "org.eclipse.tracecompass.tmf.ui.views.SampleView";
 
-	private TableViewer viewer;
-	private Action action1;
-	private Action action2;
-	private Action doubleClickAction;
+    private TableViewer viewer;
+    private Action action1;
+    private Action action2;
+    private Action doubleClickAction;
 
-	/*
-	 * The content provider class is responsible for
-	 * providing objects to the view. It can wrap
-	 * existing objects in adapters or simply return
-	 * objects as-is. These objects may be sensitive
-	 * to the current input of the view, or ignore
-	 * it and always show the same content
-	 * (like Task List, for example).
-	 */
+    /*
+     * The content provider class is responsible for providing objects to the
+     * view. It can wrap existing objects in adapters or simply return objects
+     * as-is. These objects may be sensitive to the current input of the view,
+     * or ignore it and always show the same content (like Task List, for
+     * example).
+     */
 
-	class ViewContentProvider implements IStructuredContentProvider {
-		@Override
+    class ViewContentProvider implements IStructuredContentProvider {
+        @Override
         public void inputChanged(Viewer v, Object oldInput, Object newInput) {
-		}
-		@Override
+        }
+
+        @Override
         public void dispose() {
-		}
-		@Override
+        }
+
+        @Override
         public Object[] getElements(Object parent) {
-			return new String[] { "X", "Two", "Three" };
-		}
-	}
-	class ViewLabelProvider extends LabelProvider implements ITableLabelProvider {
-		@Override
+            return new String[] { "X", "Two", "Three" };
+        }
+    }
+
+    class ViewLabelProvider extends LabelProvider implements ITableLabelProvider {
+        @Override
         public String getColumnText(Object obj, int index) {
-			return getText(obj);
-		}
-		@Override
+            return getText(obj);
+        }
+
+        @Override
         public Image getColumnImage(Object obj, int index) {
-			return getImage(obj);
-		}
-		@Override
+            return getImage(obj);
+        }
+
+        @Override
         public Image getImage(Object obj) {
-			return PlatformUI.getWorkbench().
-					getSharedImages().getImage(ISharedImages.IMG_OBJ_ELEMENT);
-		}
-	}
-	class NameSorter extends ViewerSorter {
-	}
+            return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ELEMENT);
+        }
+    }
 
-	/**
-	 * The constructor.
-	 */
-	public SampleView() {
-	}
+    class NameSorter extends ViewerSorter {
+    }
 
-	/**
-	 * This is a callback that will allow us
-	 * to create the viewer and initialize it.
-	 */
-	@Override
+    /**
+     * The constructor.
+     */
+    public SampleView() {
+    }
+
+    /**
+     * This is a callback that will allow us to create the viewer and initialize
+     * it.
+     */
+    @Override
+    protected void buildEntryList(final ITmfTrace trace, final ITmfTrace parentTrace, final IProgressMonitor monitor) {
+        // Load the module:
+        AbstractCallStackAnalysis module = TmfTraceUtils.getAnalysisModulesOfClass(trace, AnalysisModule.class);
+
+        if (module == null) {
+            //addUnavailableEntry(trace, parentTrace);
+            return;
+        }
+        // Read the StateHistory, but I will not use it
+        ITmfStateSystem ss = module.getStateSystem();
+
+        if (ss == null) {
+            //addUnavailableEntry(trace, parentTrace);
+            return;
+        }
+
+        long start = 1000;
+
+
+    }
+
+    @Override
     public void createPartControl(Composite parent) {
-		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		viewer.setContentProvider(new ViewContentProvider());
-		viewer.setLabelProvider(new ViewLabelProvider());
-		viewer.setSorter(new NameSorter());
-		viewer.setInput(getViewSite());
+        viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+        viewer.setContentProvider(new ViewContentProvider());
+        viewer.setLabelProvider(new ViewLabelProvider());
+        viewer.setSorter(new NameSorter());
+        viewer.setInput(getViewSite());
 
-		// Create the help context id for the viewer's control
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(viewer.getControl(), "org.eclipse.tracecompass.tmf.ui.viewer");
-		getSite().setSelectionProvider(viewer);
-		makeActions();
-		hookContextMenu();
-		hookDoubleClickAction();
-		contributeToActionBars();
-	}
+        // Create the help context id for the viewer's control
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(viewer.getControl(), "org.eclipse.tracecompass.tmf.ui.viewer");
+        getSite().setSelectionProvider(viewer);
+        makeActions();
+        hookContextMenu();
+        hookDoubleClickAction();
+        contributeToActionBars();
+    }
 
-	private void hookContextMenu() {
-		MenuManager menuMgr = new MenuManager("#PopupMenu");
-		menuMgr.setRemoveAllWhenShown(true);
-		menuMgr.addMenuListener(new IMenuListener() {
-			@Override
+    private void hookContextMenu() {
+        MenuManager menuMgr = new MenuManager("#PopupMenu");
+        menuMgr.setRemoveAllWhenShown(true);
+        menuMgr.addMenuListener(new IMenuListener() {
+            @Override
             public void menuAboutToShow(IMenuManager manager) {
-				SampleView.this.fillContextMenu(manager);
-			}
-		});
-		Menu menu = menuMgr.createContextMenu(viewer.getControl());
-		viewer.getControl().setMenu(menu);
-		getSite().registerContextMenu(menuMgr, viewer);
-	}
+                SampleView.this.fillContextMenu(manager);
+            }
+        });
+        Menu menu = menuMgr.createContextMenu(viewer.getControl());
+        viewer.getControl().setMenu(menu);
+        getSite().registerContextMenu(menuMgr, viewer);
+    }
 
-	private void contributeToActionBars() {
-		IActionBars bars = getViewSite().getActionBars();
-		fillLocalPullDown(bars.getMenuManager());
-		fillLocalToolBar(bars.getToolBarManager());
-	}
+    private void contributeToActionBars() {
+        IActionBars bars = getViewSite().getActionBars();
+        fillLocalPullDown(bars.getMenuManager());
+        fillLocalToolBar(bars.getToolBarManager());
+    }
 
-	private void fillLocalPullDown(IMenuManager manager) {
-		manager.add(action1);
-		manager.add(new Separator());
-		manager.add(action2);
-	}
+    private void fillLocalPullDown(IMenuManager manager) {
+        manager.add(action1);
+        manager.add(new Separator());
+        manager.add(action2);
+    }
 
-	private void fillContextMenu(IMenuManager manager) {
-		manager.add(action1);
-		manager.add(action2);
-		// Other plug-ins can contribute there actions here
-		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-	}
+    private void fillContextMenu(IMenuManager manager) {
+        manager.add(action1);
+        manager.add(action2);
+        // Other plug-ins can contribute there actions here
+        manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+    }
 
-	@Override
+    @Override
     protected void fillLocalToolBar(IToolBarManager manager) {
-		manager.add(action1);
-		manager.add(action2);
-	}
+        manager.add(action1);
+        manager.add(action2);
+    }
 
-	private void makeActions() {
-		action1 = new Action() {
-			@Override
+    private void makeActions() {
+        action1 = new Action() {
+            @Override
             public void run() {
-				showMessage("Action 1 executed");
-			}
-		};
-		action1.setText("Action 1");
-		action1.setToolTipText("Action 1 tooltip");
-		action1.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
-			getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
+                showMessage("Action 1 executed");
+            }
+        };
+        action1.setText("Action 1");
+        action1.setToolTipText("Action 1 tooltip");
+        action1.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
 
-		action2 = new Action() {
-			@Override
+        action2 = new Action() {
+            @Override
             public void run() {
-				showMessage("Action 2 executed");
-			}
-		};
-		action2.setText("Action 2");
-		action2.setToolTipText("Action 2 tooltip");
-		action2.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
-				getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-		doubleClickAction = new Action() {
-			@Override
+                showMessage("Action 2 executed");
+            }
+        };
+        action2.setText("Action 2");
+        action2.setToolTipText("Action 2 tooltip");
+        action2.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
+        doubleClickAction = new Action() {
+            @Override
             public void run() {
-				ISelection selection = viewer.getSelection();
-				Object obj = ((IStructuredSelection)selection).getFirstElement();
-				showMessage("Double-click detected on "+obj.toString());
-			}
-		};
-	}
+                ISelection selection = viewer.getSelection();
+                Object obj = ((IStructuredSelection) selection).getFirstElement();
+                showMessage("Double-click detected on " + obj.toString());
+            }
+        };
+    }
 
-	private void hookDoubleClickAction() {
-		viewer.addDoubleClickListener(new IDoubleClickListener() {
-			@Override
+    private void hookDoubleClickAction() {
+        viewer.addDoubleClickListener(new IDoubleClickListener() {
+            @Override
             public void doubleClick(DoubleClickEvent event) {
-				doubleClickAction.run();
-			}
-		});
-	}
-	private void showMessage(String message) {
-		MessageDialog.openInformation(
-			viewer.getControl().getShell(),
-			"Sample View",
-			message);
-	}
+                doubleClickAction.run();
+            }
+        });
+    }
 
-	/**
-	 * Passing the focus request to the viewer's control.
-	 */
-	@Override
+    private void showMessage(String message) {
+        MessageDialog.openInformation(
+                viewer.getControl().getShell(),
+                "Sample View",
+                message);
+    }
+
+    /**
+     * Passing the focus request to the viewer's control.
+     */
+    @Override
     public void setFocus() {
-		viewer.getControl().setFocus();
-	}
+        viewer.getControl().setFocus();
+    }
 }
