@@ -1,26 +1,20 @@
 package org.eclipse.tracecompass.tmf.ui.views;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.jface.viewers.*;
-import org.eclipse.swt.graphics.Image;
-
-import java.util.List;
-
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jface.action.*;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.ui.*;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.tracecompass.internal.tmf.ui.Messages;
-import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.CCTAnalysisModule;
+import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackEntry;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackView;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.ITimeGraphTimeListener;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphTimeEvent;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
-import org.eclipse.swt.SWT;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * This sample class demonstrates how to plug-in a new workbench view. The view
@@ -46,11 +40,7 @@ public class SampleView extends CallStackView {
      */
     public static final String ID1 = "org.eclipse.tracecompass.tmf.ui.views.SampleView";
 
-    private TableViewer viewer;
-    private Action action1;
-    private Action action2;
-    private Action doubleClickAction;
-
+    /*
     private static final String[] COLUMN_NAMES = new String[] {
             Messages.CallStackView_FunctionColumn,
             Messages.CallStackView_DepthColumn,
@@ -58,6 +48,7 @@ public class SampleView extends CallStackView {
             Messages.CallStackView_ExitTimeColumn,
             Messages.CallStackView_DurationColumn
     };
+    */
     /*
      * The content provider class is responsible for providing objects to the
      * view. It can wrap existing objects in adapters or simply return objects
@@ -112,31 +103,40 @@ public class SampleView extends CallStackView {
      * it.
      */
 
+    //Override this method:
     @Override
     protected void buildEntryList(final ITmfTrace trace, final ITmfTrace parentTrace, final IProgressMonitor monitor) {
         // Load the module:
-        AbstractCallStackAnalysis module = TmfTraceUtils.getAnalysisModulesOfClass(trace, AnalysisModule.class);
-
+        System.out.println("buildEntryList " + trace.getName());
+        Iterable<CCTAnalysisModule> iter = TmfTraceUtils.getAnalysisModulesOfClass(trace, CCTAnalysisModule.class);
+        CCTAnalysisModule module = null;
+        for (IAnalysisModule mod: iter) {
+            if (mod instanceof CCTAnalysisModule) {
+                module = (CCTAnalysisModule) mod;
+                break;
+            }
+        }
+        System.out.println(module);
         if (module == null) {
-            // addUnavailableEntry(trace, parentTrace);
-            return;
-        }
-        // Read the StateHistory, but I will not use it
-        ITmfStateSystem ss = module.getStateSystem();
-
-        if (ss == null) {
-            // addUnavailableEntry(trace, parentTrace);
             return;
         }
 
-        long start = 1000;
+
+
+        // Read the StateHistory, but we will not use it
+        //Node<TestData> node = module.getTree();
+
+        /*
+         TimeGraphEntry can have children: then they appear as child in the tree viewer on the left
+         ITimeEvent are the intervals that gets drawn in the time graph view on the right side
+         */
 
     }
 
-    @Override
-    private void buildStatusEvents(ITmfTrace trace, CallStackEntry entry, @NonNull IProgressMonitor monitor, long start, long end) {
-        ITmfStateSystem ss = entry.getStateSystem();
-        long resolution = Math.max(1, (end - ss.getStartTime()) / getDisplayWidth());
+    //Override this method:
+    /*
+    private void buildStatusEvents(ITmfTrace trace, Node<T> entry, @NonNull IProgressMonitor monitor, long start, long end) {
+        long resolution = Math.max(1, (end - node.getStartTime()) / getDisplayWidth());
         List<ITimeEvent> eventList = getEventList(entry, start, end + 1, resolution, monitor);
         if (eventList != null) {
             entry.setEventList(eventList);
@@ -146,124 +146,11 @@ public class SampleView extends CallStackView {
             redraw();
         }
     }
+    */
 
     @Override
     public void createPartControl(Composite parent) {
-
-        setTreeColumns(COLUMN_NAMES);
-
-        viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-        viewer.setContentProvider(new ViewContentProvider());
-        viewer.setLabelProvider(new ViewLabelProvider());
-        viewer.setSorter(new NameSorter());
-        viewer.setInput(getViewSite());
-
-        getTimeGraphViewer().addTimeListener(new ITimeGraphTimeListener() {
-            @Override
-            public void timeSelected(TimeGraphTimeEvent event) {
-                synchingToTime(event.getBeginTime());
-            }
-        });
-
-        // Create the help context id for the viewer's control
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(viewer.getControl(), "org.eclipse.tracecompass.tmf.ui.viewer");
-        getSite().setSelectionProvider(viewer);
-        makeActions();
-        hookContextMenu();
-        hookDoubleClickAction();
-        contributeToActionBars();
+        super.createPartControl(parent);
     }
 
-    private void hookContextMenu() {
-        MenuManager menuMgr = new MenuManager("#PopupMenu");
-        menuMgr.setRemoveAllWhenShown(true);
-        menuMgr.addMenuListener(new IMenuListener() {
-            @Override
-            public void menuAboutToShow(IMenuManager manager) {
-                SampleView.this.fillContextMenu(manager);
-            }
-        });
-        Menu menu = menuMgr.createContextMenu(viewer.getControl());
-        viewer.getControl().setMenu(menu);
-        getSite().registerContextMenu(menuMgr, viewer);
-    }
-
-    private void contributeToActionBars() {
-        IActionBars bars = getViewSite().getActionBars();
-        fillLocalPullDown(bars.getMenuManager());
-        fillLocalToolBar(bars.getToolBarManager());
-    }
-
-    private void fillLocalPullDown(IMenuManager manager) {
-        manager.add(action1);
-        manager.add(new Separator());
-        manager.add(action2);
-    }
-
-    private void fillContextMenu(IMenuManager manager) {
-        manager.add(action1);
-        manager.add(action2);
-        // Other plug-ins can contribute there actions here
-        manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-    }
-
-    @Override
-    protected void fillLocalToolBar(IToolBarManager manager) {
-        manager.add(action1);
-        manager.add(action2);
-    }
-
-    private void makeActions() {
-        action1 = new Action() {
-            @Override
-            public void run() {
-                showMessage("Action 1 executed");
-            }
-        };
-        action1.setText("Action 1");
-        action1.setToolTipText("Action 1 tooltip");
-        action1.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-
-        action2 = new Action() {
-            @Override
-            public void run() {
-                showMessage("Action 2 executed");
-            }
-        };
-        action2.setText("Action 2");
-        action2.setToolTipText("Action 2 tooltip");
-        action2.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
-        doubleClickAction = new Action() {
-            @Override
-            public void run() {
-                ISelection selection = viewer.getSelection();
-                Object obj = ((IStructuredSelection) selection).getFirstElement();
-                showMessage("Double-click detected on " + obj.toString());
-            }
-        };
-    }
-
-    private void hookDoubleClickAction() {
-        viewer.addDoubleClickListener(new IDoubleClickListener() {
-            @Override
-            public void doubleClick(DoubleClickEvent event) {
-                doubleClickAction.run();
-            }
-        });
-    }
-
-    private void showMessage(String message) {
-        MessageDialog.openInformation(
-                viewer.getControl().getShell(),
-                "Sample View",
-                message);
-    }
-
-    /**
-     * Passing the focus request to the viewer's control.
-     */
-    @Override
-    public void setFocus() {
-        viewer.getControl().setFocus();
-    }
 }
