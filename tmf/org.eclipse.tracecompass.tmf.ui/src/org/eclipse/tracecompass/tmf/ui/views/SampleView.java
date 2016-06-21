@@ -1,7 +1,10 @@
 package org.eclipse.tracecompass.tmf.ui.views;
 
-import java.awt.List;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Composite;
@@ -10,14 +13,12 @@ import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfile
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfileVisitor;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.Node;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileData;
-import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
+import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileTraversal.KeyTree;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackEntry;
-import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackEvent;
 import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackView;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 
 /**
@@ -63,6 +64,18 @@ public class SampleView extends CallStackView {
         System.out.println("buildEntryList " + trace.getName());
         Iterable<CCTAnalysisModule> iter = TmfTraceUtils.getAnalysisModulesOfClass(trace, CCTAnalysisModule.class);
         CCTAnalysisModule module = null;
+
+        // Map of the nodes:
+        Map<KeyTree, Node<ProfileData>> map;
+
+        // Maps for the Entries
+        Map<ITmfTrace, TraceEntry> traceEntryMap = new HashMap<>();
+        Map<ITmfTrace, LevelEntry> levelEntryMap = new HashMap<>();
+        Map<LevelEntry, EventEntry> eventEntryMap = new HashMap<>();
+
+        // Queue for the traversal:
+        LinkedList<Node<ProfileData>> queue = new LinkedList<>();
+
         // Selects only the CCTAnalysis module
         for (IAnalysisModule mod : iter) {
             if (mod instanceof CCTAnalysisModule) {
@@ -82,11 +95,17 @@ public class SampleView extends CallStackView {
         // Read the tree but we will not use it
         Node<ProfileData> root = module.getTree(); // how to solve this problem?
                                                    // ProfileData class?
+        long startTime = 0;
+        long endTime = 100;
 
-        long start = 0;
-
-        TimeGraphEntry threadParent;
-        ITimeEvent x; // ITimeEvent
+        TraceEntry traceEntry = traceEntryMap.get(trace);
+        if (traceEntry == null) {
+            traceEntry = new TraceEntry(trace.getName(), startTime, endTime); // end
+                                                                              // +
+                                                                              // 1
+            traceEntryMap.put(trace, traceEntry);
+            addToEntryList(parentTrace, Collections.singletonList(traceEntry));
+        }
 
         /*
          * TimeGraphEntry can have children: then they appear as child in the
@@ -94,63 +113,39 @@ public class SampleView extends CallStackView {
          * in the time graph view on the right side
          */
 
-        LinkedList<Node<ProfileData>> queue = new LinkedList<>();
+        // Creating the LevelEntry:
+        System.out.println("Tree");
+        map = createHash(root);
 
-        // Tree traversal:
-
-        queue.add(root);
-        while (!queue.isEmpty()) {
-            Node<ProfileData> current = queue.poll();
-            for (Node<ProfileData> child : current.getChildren()) {
-                queue.add(child);
+        for (KeyTree key : map.keySet()) {
+            System.out.println(key);
+            // Add to the HashMap
+            if (!levelEntryMap.containsKey(key)) {
+                LevelEntry aux = new LevelEntry(Integer.toString(key.getLevel()), key.getLevel(), startTime, endTime);
+                levelEntryMap.put(trace, aux);
             }
-
-            // Creating the callStackEntry
-            CallStackEntry callStackEntry = new CallStackEntry(threadName, stackLevelQuark, level, processId, trace, ss);
-            callStackParent.addChild(callStackEntry); // Create the Entry on the
-                                                      // entry list
-
-            System.out.println(current);
         }
+
+        // Creating the Events:
+        for (KeyTree key : map.keySet()) {
+            Node<ProfileData> node = map.get(key);
+            EventEntry aux = new EventEntry(node.getNodeLabel(), node.getProfileData().get); //(String name, int nodeId, long startTime, long endTime);
+        }
+
+        startTime = endTime;
 
     }
 
-    // Override this method, now to build the status of the events on the list
-    @Override
-    private void buildStatusEvents(ITmfTrace trace, Node<TestData> entry, IProgressMonitor monitor, long start, long end) {
+    /**
+     * This method creates the status of the Events
+     */
 
-        long resolution = Math.max(1, (end));
-        List<ITimeEvent> eventList = getEventList(entry, start, end + 1, resolution, monitor);
-        if (eventList != null) {
-            entry.setEventList(eventList);
-            System.out.println(entry);
-        }
-        if (trace == getTrace()) {
-            redraw();
-        }
-    }
+    private void buildEventList(ITmfTrace trace, , IProgressMonitor monitor, long start, long end) {
 
-    // List of events:
-    protected List<ITimeEvent> getEventList(TimeGraphEntry tgentry, long startTime, long endTime, long resolution, IProgressMonitor monitor) {
-
-        CallStackEntry entry = (CallStackEntry) tgentry;
-        ITmfStateSystem ss = entry.getStateSystem();
-
-        List<ITimeEvent> eventList;
-
-        long start = Math.max(0, 10); // long start = Math.max(startTime,
-                                      // ss.getStartTime());
-        long end = Math.min(10, 10); // long end = Math.min(endTime,
-                                     // ss.getCurrentEndTime() + 1);
-
-        // the same validation:
-        if (end <= start) {
-            return null;
-        }
-
-        eventList.add(new CallStackEvent(entry, time, duration, value));
 
     }
+
+
 
     /**
      * This function makes the levelOrderTraversal of a tree, which contains a
@@ -182,4 +177,81 @@ public class SampleView extends CallStackView {
         super.createPartControl(parent);
     }
 
+    // TraceEntry is a trace
+    private static class TraceEntry extends TimeGraphEntry {
+        public TraceEntry(String name, long startTime, long endTime) {
+            super(name, startTime, endTime);
+        }
+
+        @Override
+        public boolean hasTimeEvents() {
+            return false;
+        }
+    }
+
+    // LevelEntry is an Level on the tree
+    private static class LevelEntry extends TimeGraphEntry {
+
+        private final int fLevelId;
+
+        public LevelEntry(String name, int levelId, long startTime, long endTime) {
+            super(name, startTime, endTime);
+            fLevelId = levelId;
+        }
+
+        @Override
+        public boolean hasTimeEvents() {
+            return false;
+        }
+    }
+
+    // EventEntry is an Node on the tree
+    private static class EventEntry extends TimeGraphEntry {
+
+        private final int fNodeId;
+
+        public EventEntry(String name, int nodeId, long startTime, long endTime) {
+            super(name, startTime, endTime);
+            fNodeId = nodeId;
+        }
+
+        @Override
+        public boolean hasTimeEvents() {
+            return false;
+        }
+    }
+
+    // This function creates a HashMap of level(label) x Node
+    private static Map<KeyTree, Node<ProfileData>> createHash(Node<ProfileData> root) {
+
+        Map<KeyTree, Node<ProfileData>> hmap = new HashMap<>();
+        Node<ProfileData> current = null;
+        Node<ProfileData> pointerParent = null;
+
+        LinkedList<Node<ProfileData>> queue = new LinkedList<>();
+
+        int level = 0;
+
+        queue.add(root);
+        while (!queue.isEmpty()) {
+            current = queue.poll();
+            level = 0;
+            pointerParent = current.getParent();
+            if (pointerParent != null) {
+                while (pointerParent != null) {
+                    pointerParent = pointerParent.getParent();
+                    level++;
+                }
+            }
+            String label = current.getNodeLabel();
+            KeyTree aux = new KeyTree(label, level);
+
+            hmap.put(aux, current);
+            for (Node<ProfileData> child : current.getChildren()) {
+                queue.add(child);
+            }
+        }
+
+        return hmap;
+    }
 }
