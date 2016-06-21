@@ -374,6 +374,7 @@ public class CallStackView extends AbstractTimeGraphView {
     // ViewPart
     // ------------------------------------------------------------------------
 
+    //This function creates the widgets on the screen
     @Override
     public void createPartControl(Composite parent) {
         super.createPartControl(parent);

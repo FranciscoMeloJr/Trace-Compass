@@ -21,7 +21,7 @@ import org.junit.Test;
 
 /**
  * @author frank
- *
+ * This a Class of Tests using Junit and GraphvizVisitor
  */
 public class TestProfileTree {
 
