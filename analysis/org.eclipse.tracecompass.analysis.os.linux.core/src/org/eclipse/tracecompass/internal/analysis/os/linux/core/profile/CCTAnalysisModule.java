@@ -41,6 +41,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     @Override
     protected boolean executeAnalysis(IProgressMonitor monitor) throws TmfAnalysisException {
+        System.out.println("Execute");
         ITmfTrace trace = checkNotNull(getTrace());
 
         // Node<TestData> root = Node.create(new TestData(0, "root"));
@@ -109,14 +110,14 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             Node<TestData> nodeHash;
             TestData data;
 
-            if (eventName.contains("irq_handler_entry") || eventName.contains("hrtimer_expire_entry") || eventName.contains("softirq_entry")) {
+            if (eventName.contains("irq_handler_entry") || eventName.contains("lttng_ust_cyg_profile:func_entry") || eventName.contains("softirq_entry")) {
                 String content = event.getContent().toString();
                 aux = Node.create(new TestData(0, content));
                 System.out.println("Pushing" + aux);
                 tmp.push(aux);
 
             } else {
-                if (eventName.contains("irq_handler_exit") || eventName.contains("irq_handler_exit") || eventName.contains("softirq_exit")) {
+                if (eventName.contains("irq_handler_exit") || eventName.contains("lttng_ust_cyg_profile:func_exit") || eventName.contains("softirq_exit")) {
                     System.out.println("Creating");
                     endTime = event.getTimestamp().getValue();
                     if (!tmp.isEmpty()) {
@@ -227,6 +228,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     // Mode for print
     public enum Mode {
         ID_, LABEL_, COLOR_;
+    }
+
+    @Override
+    public String toString() {
+        return "CCT Analysis Module";
     }
 
     /**
