@@ -1,28 +1,24 @@
 package org.eclipse.tracecompass.tmf.ui.views;
 
-import java.util.List;
+import java.awt.List;
+import java.util.LinkedList;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.CCTAnalysisModule;
+import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfileData;
+import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfileVisitor;
+import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.Node;
+import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileData;
 import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackEntry;
 import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackEvent;
-import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
 /**
  * This sample class demonstrates how to plug-in a new workbench view. The view
@@ -56,44 +52,70 @@ public class SampleView extends CallStackView {
     }
 
     /**
-     * This is a callback that will allow us to create the viewer and initialize
-     * it.
+     * This method will create the Entry List from the node:
      */
 
-    //Override this method:
+    @SuppressWarnings("restriction")
+    // Override this method:
     @Override
     protected void buildEntryList(final ITmfTrace trace, final ITmfTrace parentTrace, final IProgressMonitor monitor) {
         // Load the module:
         System.out.println("buildEntryList " + trace.getName());
         Iterable<CCTAnalysisModule> iter = TmfTraceUtils.getAnalysisModulesOfClass(trace, CCTAnalysisModule.class);
         CCTAnalysisModule module = null;
-        for (IAnalysisModule mod: iter) {
+        // Selects only the CCTAnalysis module
+        for (IAnalysisModule mod : iter) {
             if (mod instanceof CCTAnalysisModule) {
                 module = (CCTAnalysisModule) mod;
+                System.out.println("Module" + module);
                 break;
             }
         }
-        System.out.println(module);
+
         if (module == null) {
             return;
         }
+        // Modules:
         module.schedule();
         module.waitForCompletion();
 
-        //TimeGraphEntry threadParent;
-        //ITimeEvent x; //ITimeEvent
+        // Read the tree but we will not use it
+        Node<ProfileData> root = module.getTree(); // how to solve this problem?
+                                                   // ProfileData class?
 
-        // Read the StateHistory, but we will not use it
-        //Node<TestData> node = module.getTree();
+        long start = 0;
+
+        TimeGraphEntry threadParent;
+        ITimeEvent x; // ITimeEvent
 
         /*
-         TimeGraphEntry can have children: then they appear as child in the tree viewer on the left
-         ITimeEvent are the intervals that gets drawn in the time graph view on the right side
+         * TimeGraphEntry can have children: then they appear as child in the
+         * tree viewer on the left ITimeEvent are the intervals that gets drawn
+         * in the time graph view on the right side
          */
+
+        LinkedList<Node<ProfileData>> queue = new LinkedList<>();
+
+        // Tree traversal:
+
+        queue.add(root);
+        while (!queue.isEmpty()) {
+            Node<ProfileData> current = queue.poll();
+            for (Node<ProfileData> child : current.getChildren()) {
+                queue.add(child);
+            }
+
+            // Creating the callStackEntry
+            CallStackEntry callStackEntry = new CallStackEntry(threadName, stackLevelQuark, level, processId, trace, ss);
+            callStackParent.addChild(callStackEntry); // Create the Entry on the
+                                                      // entry list
+
+            System.out.println(current);
+        }
 
     }
 
-    //Override this method:
+    // Override this method, now to build the status of the events on the list
     @Override
     private void buildStatusEvents(ITmfTrace trace, Node<TestData> entry, IProgressMonitor monitor, long start, long end) {
 
@@ -108,7 +130,7 @@ public class SampleView extends CallStackView {
         }
     }
 
-
+    // List of events:
     protected List<ITimeEvent> getEventList(TimeGraphEntry tgentry, long startTime, long endTime, long resolution, IProgressMonitor monitor) {
 
         CallStackEntry entry = (CallStackEntry) tgentry;
@@ -116,18 +138,45 @@ public class SampleView extends CallStackView {
 
         List<ITimeEvent> eventList;
 
-        long start = Math.max(0, 10); //long start = Math.max(startTime, ss.getStartTime());
-        long end = Math.min(10, 10); //long end = Math.min(endTime, ss.getCurrentEndTime() + 1);
+        long start = Math.max(0, 10); // long start = Math.max(startTime,
+                                      // ss.getStartTime());
+        long end = Math.min(10, 10); // long end = Math.min(endTime,
+                                     // ss.getCurrentEndTime() + 1);
 
-        //the same validation:
+        // the same validation:
         if (end <= start) {
             return null;
         }
 
         eventList.add(new CallStackEvent(entry, time, duration, value));
 
+    }
+
+    /**
+     * This function makes the levelOrderTraversal of a tree, which contains a
+     * generic node
+     *
+     * @param root
+     *            a tree first node to be traversed
+     * @param visitor
+     *            a visitor pattern implementation
+     * @return the queue with the level order traversal
+     */
+    public static <T extends IProfileData> void levelOrderTraversal(Node<T> root, IProfileVisitor<T> visitor) {
+        LinkedList<Node<T>> queue = new LinkedList<>();
+
+        queue.add(root);
+        while (!queue.isEmpty()) {
+            Node<T> current = queue.poll();
+            for (Node<T> child : current.getChildren()) {
+                queue.add(child);
+            }
+            visitor.visit(current);
+            System.out.println(current);
+        }
 
     }
+
     @Override
     public void createPartControl(Composite parent) {
         super.createPartControl(parent);
