@@ -30,6 +30,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
      */
     public static final @NonNull String ID = "org.eclipse.tracecompass.analysis.os.linux.core.profile.cctanalysis.module"; //$NON-NLS-1$
 
+    private volatile Node<TestData> fRoot;
+
     /**
      * Default constructor
      */
@@ -48,11 +50,16 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                                     // each event
         try {
             request.waitForCompletion();
+            fRoot = request.getTree();
         } catch (InterruptedException e) {
             e.printStackTrace();
             return false;
         }
         return true;
+    }
+
+    public Node<TestData> getTree() {
+        return fRoot;
     }
 
     /**
@@ -159,6 +166,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 e.printStackTrace();
             }
             System.out.println("end");
+        }
+
+        public  Node<TestData> getTree() {
+            return fNode;
         }
     }
 
