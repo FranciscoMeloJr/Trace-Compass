@@ -100,14 +100,14 @@
       </view>
       <category
             id="org.eclipse.tracecompass.tmf.ui"
-            name="Sample Category">
+            name="New Category">
       </category>
       <view
             category="org.eclipse.tracecompass.tmf.ui"
             class="org.eclipse.tracecompass.tmf.ui.views.SampleView"
             icon="icons/sample.gif"
             id="org.eclipse.tracecompass.tmf.ui.views.SampleView"
-            name="Sample View">
+            name="CCT View">
       </view>
    </extension>
    <extension
