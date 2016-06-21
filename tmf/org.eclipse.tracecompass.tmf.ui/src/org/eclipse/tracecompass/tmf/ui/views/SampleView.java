@@ -1,5 +1,7 @@
 package org.eclipse.tracecompass.tmf.ui.views;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -9,10 +11,16 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.CCTAnalysisModule;
+import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
+import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackEntry;
+import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackEvent;
+import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackView;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
@@ -40,62 +48,11 @@ public class SampleView extends CallStackView {
      */
     public static final String ID1 = "org.eclipse.tracecompass.tmf.ui.views.SampleView";
 
-    /*
-    private static final String[] COLUMN_NAMES = new String[] {
-            Messages.CallStackView_FunctionColumn,
-            Messages.CallStackView_DepthColumn,
-            Messages.CallStackView_EntryTimeColumn,
-            Messages.CallStackView_ExitTimeColumn,
-            Messages.CallStackView_DurationColumn
-    };
-    */
-    /*
-     * The content provider class is responsible for providing objects to the
-     * view. It can wrap existing objects in adapters or simply return objects
-     * as-is. These objects may be sensitive to the current input of the view,
-     * or ignore it and always show the same content (like Task List, for
-     * example).
-     */
-
-    class ViewContentProvider implements IStructuredContentProvider {
-        @Override
-        public void inputChanged(Viewer v, Object oldInput, Object newInput) {
-        }
-
-        @Override
-        public void dispose() {
-        }
-
-        @Override
-        public Object[] getElements(Object parent) {
-            return new String[] { "X", "Two", "Three" };
-        }
-    }
-
-    class ViewLabelProvider extends LabelProvider implements ITableLabelProvider {
-        @Override
-        public String getColumnText(Object obj, int index) {
-            return getText(obj);
-        }
-
-        @Override
-        public Image getColumnImage(Object obj, int index) {
-            return getImage(obj);
-        }
-
-        @Override
-        public Image getImage(Object obj) {
-            return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_ELEMENT);
-        }
-    }
-
-    class NameSorter extends ViewerSorter {
-    }
-
     /**
      * The constructor.
      */
     public SampleView() {
+        super();
     }
 
     /**
@@ -120,8 +77,11 @@ public class SampleView extends CallStackView {
         if (module == null) {
             return;
         }
+        module.schedule();
+        module.waitForCompletion();
 
-
+        //TimeGraphEntry threadParent;
+        //ITimeEvent x; //ITimeEvent
 
         // Read the StateHistory, but we will not use it
         //Node<TestData> node = module.getTree();
@@ -134,9 +94,10 @@ public class SampleView extends CallStackView {
     }
 
     //Override this method:
-    /*
-    private void buildStatusEvents(ITmfTrace trace, Node<T> entry, @NonNull IProgressMonitor monitor, long start, long end) {
-        long resolution = Math.max(1, (end - node.getStartTime()) / getDisplayWidth());
+    @Override
+    private void buildStatusEvents(ITmfTrace trace, Node<TestData> entry, IProgressMonitor monitor, long start, long end) {
+
+        long resolution = Math.max(1, (end));
         List<ITimeEvent> eventList = getEventList(entry, start, end + 1, resolution, monitor);
         if (eventList != null) {
             entry.setEventList(eventList);
@@ -146,8 +107,27 @@ public class SampleView extends CallStackView {
             redraw();
         }
     }
-    */
 
+
+    protected List<ITimeEvent> getEventList(TimeGraphEntry tgentry, long startTime, long endTime, long resolution, IProgressMonitor monitor) {
+
+        CallStackEntry entry = (CallStackEntry) tgentry;
+        ITmfStateSystem ss = entry.getStateSystem();
+
+        List<ITimeEvent> eventList;
+
+        long start = Math.max(0, 10); //long start = Math.max(startTime, ss.getStartTime());
+        long end = Math.min(10, 10); //long end = Math.min(endTime, ss.getCurrentEndTime() + 1);
+
+        //the same validation:
+        if (end <= start) {
+            return null;
+        }
+
+        eventList.add(new CallStackEvent(entry, time, duration, value));
+
+
+    }
     @Override
     public void createPartControl(Composite parent) {
         super.createPartControl(parent);
