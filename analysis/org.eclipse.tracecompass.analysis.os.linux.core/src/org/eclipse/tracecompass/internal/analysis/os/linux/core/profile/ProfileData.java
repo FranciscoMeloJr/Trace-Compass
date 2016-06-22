@@ -11,6 +11,8 @@ public class ProfileData implements IProfileData {
 
     private String fLabel;
     int fWeight;
+    long startTime;
+    long endTime;
 
     // Constructor:
     public ProfileData(int weight, String label) {
@@ -57,6 +59,22 @@ public class ProfileData implements IProfileData {
             }
         }
         return false;
+    }
+
+    //Change for StackCall
+    public void setStartTime(long start) {
+        startTime = start;
+    }
+
+    public void setEndTime(long end) {
+        endTime = end;
+    }
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public long getEndTime() {
+        return endTime;
     }
 
     @Override
