@@ -124,19 +124,20 @@ public class SampleView extends CallStackView {
         EventEntry eventEntryAux = null;
 
         // Creating the LevelEntry (key is the level)
-        levelEntryAux = new LevelEntry("foo", 0, fRoot.getProfileData().getStartTime() , fRoot.getProfileData().getEndTime() + 1 );
+        levelEntryAux = new LevelEntry("foo", 0, fRoot.getProfileData().getStartTime(), fRoot.getProfileData().getEndTime() + 1);
         traceEntry.addChild(levelEntryAux);
         levelEntryMap.put(trace, levelEntryAux);
 
         // Creating a eventEntry
-        eventEntryAux = new EventEntry("main", 37, fRoot.getProfileData().getStartTime() +1 , fRoot.getProfileData().getEndTime() );
+        eventEntryAux = new EventEntry("main", 37, fRoot.getProfileData().getStartTime() + 1, fRoot.getProfileData().getEndTime());
 
         // Put as child
         List<ITimeEvent> eventList = new ArrayList<>(4);
-        ITimeEvent event = new EventNode("main", 37, fRoot.getProfileData().getStartTime() +1 , fRoot.getProfileData().getEndTime() + 1 );
+        ITimeEvent event = new EventNode("main", 37, fRoot.getProfileData().getStartTime() + 1, fRoot.getProfileData().getEndTime() + 1);
         eventEntryMap.put(levelEntryAux, eventEntryAux);
 
         eventList.add(event);
+        eventEntryAux.addEvent(event);
 
         levelEntryAux.addChild(eventEntryAux);
 
