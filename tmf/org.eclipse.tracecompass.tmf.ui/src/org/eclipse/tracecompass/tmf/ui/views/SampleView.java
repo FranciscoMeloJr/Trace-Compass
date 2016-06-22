@@ -43,11 +43,10 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
  */
 
 /*
-/* Instructions:
-* TimeGraphEntry can have children: then they appear as child in
-* the tree viewer on the left ITimeEvent are the intervals that
-* gets drawn in the time graph view on the right side
-*/
+ * TimeGraphEntry can have children: then they appear as child in the tree
+ * viewer on the left ITimeEvent are the intervals that gets drawn in the time
+ * graph view on the right side
+ */
 
 public class SampleView extends CallStackView {
 
@@ -68,22 +67,12 @@ public class SampleView extends CallStackView {
      * This method will create the Entry List from the node:
      */
 
-    @SuppressWarnings("restriction")
     // Override this method:
     @Override
     protected void buildEntryList(final ITmfTrace trace, final ITmfTrace parentTrace, final IProgressMonitor monitor) {
-        // Load the module:
         System.out.println("buildEntryList " + trace.getName());
         Iterable<CCTAnalysisModule> iter = TmfTraceUtils.getAnalysisModulesOfClass(trace, CCTAnalysisModule.class);
         CCTAnalysisModule module = null;
-
-        // Map of the nodes:
-        Map<KeyTree, Node<ProfileData>> map;
-
-        // Maps for the Entries
-        Map<ITmfTrace, TraceEntry> traceEntryMap = new HashMap<>();
-        Map<ITmfTrace, LevelEntry> levelEntryMap = new HashMap<>();
-        Map<LevelEntry, EventEntry> eventEntryMap = new HashMap<>();
 
         // Selects only the CCTAnalysis module
         for (IAnalysisModule mod : iter) {
@@ -105,86 +94,53 @@ public class SampleView extends CallStackView {
         Node<ProfileData> root = module.getTree();
         fRoot = root;
 
+        // For the View:
+        TraceEntry traceEntry = null;
+        Map<ITmfTrace, LevelEntry> levelEntryMap = new HashMap<>();
+        Map<LevelEntry, EventEntry> eventEntryMap = new HashMap<>();
+
+        // Map of the nodes:
+        Map<KeyTree, Node<ProfileData>> map;
+
         long startTime = fRoot.getProfileData().getStartTime();
         long start = startTime;
         setStartTime(Math.min(getStartTime(), startTime));
 
-        boolean complete = false;
-        while (!complete) {
-            if (monitor.isCanceled()) {
-                return;
-            }
-
-            long end = fRoot.getProfileData().getEndTime();
-            long endTime = end + 1;// 1466105154172095511;
-
-            setEndTime(Math.max(getEndTime(), endTime));
-
-            TraceEntry traceEntry = traceEntryMap.get(trace);
-            if (traceEntry == null) {
-                traceEntry = new TraceEntry(trace.getName(), startTime, endTime);
-                traceEntryMap.put(trace, traceEntry);
-                addToEntryList(parentTrace, Collections.singletonList(traceEntry));
-            }
-
-            System.out.println("Tree");
-            map = createHash(root);
-
-            LevelEntry levelEntryAux = null;
-            EventEntry eventEntryAux = null;
-
-            // Creating the LevelEntry (key is the level)
-            if (!levelEntryMap.isEmpty()) {
-                for (KeyTree key : map.keySet()) {
-                    System.out.println(key);
-                    // Add to the HashMap
-
-                    if (!levelEntryMap.containsKey(key)) {
-                        levelEntryAux = new LevelEntry(Integer.toString(key.getLevel()), key.getLevel(), startTime, endTime);
-                        levelEntryMap.put(trace, levelEntryAux);
-                        System.out.println(levelEntryAux.fLevelId);
-                        traceEntry.addChild(levelEntryAux);
-                    }
-
-                    // Creating the Events:
-                    long timeX = 0;
-                    // for (KeyTree key : map.keySet()) {
-                    Node<ProfileData> node = map.get(key);
-                    if (node != null) {
-                        eventEntryAux = new EventEntry(node.getNodeLabel(), node.getNodeId(), timeX, timeX + 10);
-                        if (levelEntryAux != null) {
-                            levelEntryAux.addChild(eventEntryAux);
-                            eventEntryMap.put(levelEntryAux, eventEntryAux);
-                        }
-                    }
-
-                    timeX += 10;
-                }
-            }
-
-            // Standard
-            long resolution = Math.max(1, (endTime - startTime) / getDisplayWidth());
-            for (ITimeGraphEntry child : traceEntry.getChildren()) {
-                if (monitor.isCanceled()) {
-                    return;
-                }
-                if (child instanceof TimeGraphEntry) {
-                    for (ITimeGraphEntry queueEntry : child.getChildren()) {
-                        if (queueEntry instanceof TimeGraphEntry) {
-                            TimeGraphEntry eachEntry = (TimeGraphEntry) queueEntry;
-                            List<ITimeEvent> eventList = getEventList(eachEntry, resolution, monitor, map);
-                            if (eventList != null) {
-                                for (ITimeEvent eachEvent : eventList) {
-                                    eachEntry.addEvent(eachEvent);
-                                }
-                            }
-                            redraw();
-                        }
-                    }
-                }
-            }
-            startTime = endTime;
+        if (monitor.isCanceled()) {
+            return;
         }
+        long end = fRoot.getProfileData().getEndTime();
+        long endTime = end + 1;
+
+        setEndTime(Math.max(getEndTime(), endTime));
+
+        traceEntry = new TraceEntry(trace.getName(), startTime, endTime);
+        addToEntryList(parentTrace, Collections.singletonList(traceEntry));
+
+        System.out.println("Tree");
+        map = createHash(root);
+
+        LevelEntry levelEntryAux = null;
+        EventEntry eventEntryAux = null;
+
+        // Creating the LevelEntry (key is the level)
+        levelEntryAux = new LevelEntry("foo", 0, fRoot.getProfileData().getStartTime() , fRoot.getProfileData().getEndTime() + 1 );
+        traceEntry.addChild(levelEntryAux);
+        levelEntryMap.put(trace, levelEntryAux);
+
+        // Creating a eventEntry
+        eventEntryAux = new EventEntry("main", 37, fRoot.getProfileData().getStartTime() +1 , fRoot.getProfileData().getEndTime() );
+
+        // Put as child
+        List<ITimeEvent> eventList = new ArrayList<>(4);
+        ITimeEvent event = new EventNode("main", 37, fRoot.getProfileData().getStartTime() +1 , fRoot.getProfileData().getEndTime() + 1 );
+        eventEntryMap.put(levelEntryAux, eventEntryAux);
+
+        eventList.add(event);
+
+        levelEntryAux.addChild(eventEntryAux);
+
+        start = end;
     }
 
     /**
@@ -204,13 +160,14 @@ public class SampleView extends CallStackView {
         LevelEntry queueNodesEntry = (LevelEntry) entry;
         Node<ProfileData> auxNode;
 
-        /*Do not use the startTime or endTime
-        final long realStart = Math.max(startTime, fRoot.getProfileData().getStartTime());
-        final long realEnd = Math.min(endTime, fRoot.getProfileData().getEndTime());
-
-        if (realEnd <= realStart) {
-            return null;
-        }*/
+        /*
+         * Do not use the startTime or endTime final long realStart =
+         * Math.max(startTime, fRoot.getProfileData().getStartTime()); final
+         * long realEnd = Math.min(endTime,
+         * fRoot.getProfileData().getEndTime());
+         *
+         * if (realEnd <= realStart) { return null; }
+         */
 
         // Event List:
         List<ITimeEvent> eventList = null;
@@ -312,6 +269,65 @@ public class SampleView extends CallStackView {
         public int getNodeId() {
             return fNodeId;
         }
+    }
+
+    // This class is the test for an Interval
+    private static class EventNode implements ITimeEvent {
+
+        private long fStartTime;
+        private long fEndTime;
+
+        int fNodeId;
+        String fLabel;
+
+        public EventNode(String label, int nodeId, long startTime, long endTime) {
+            fNodeId = nodeId;
+            fStartTime = startTime;
+            fEndTime = endTime;
+            fLabel = label;
+        }
+
+        public long getStartTime() {
+            return fStartTime;
+        }
+
+        public long getEndTime() {
+            return fEndTime;
+        }
+
+        public int getAttribute() {
+            return fNodeId;
+        }
+
+        @Override
+        public ITimeGraphEntry getEntry() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public long getTime() {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
+        @Override
+        public long getDuration() {
+            return fEndTime - fStartTime;
+        }
+
+        @Override
+        public ITimeEvent splitBefore(long splitTime) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public ITimeEvent splitAfter(long splitTime) {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
     }
 
     // This function creates a HashMap of level(label) x Node
