@@ -99,14 +99,21 @@ public class SampleView extends CallStackView {
 
         fRoot = root;
 
+        //EndTime:
         long startTime = 0;
+        long start = startTime;
+        setStartTime(startTime);
+
         long endTime = 100000000;//1466105154172095511;
+        setEndTime(fRoot.getProfileData().getEndTime());
 
         TraceEntry traceEntry = traceEntryMap.get(trace);
         if (traceEntry == null) {
             traceEntry = new TraceEntry(trace.getName(), startTime, endTime);
             traceEntryMap.put(trace, traceEntry);
             addToEntryList(parentTrace, Collections.singletonList(traceEntry));
+        }else {
+            traceEntry.updateEndTime(endTime);
         }
 
         /*
@@ -158,8 +165,8 @@ public class SampleView extends CallStackView {
                         TimeGraphEntry eachEntry = (TimeGraphEntry) queueEntry;
                         List<ITimeEvent> eventList = getEventList(eachEntry, startTime, endTime, resolution, monitor, map);
                         if (eventList != null) {
-                            for (ITimeEvent event : eventList) {
-                                eachEntry.addEvent(event);
+                            for (ITimeEvent eachEvent : eventList) {
+                                eachEntry.addEvent(eachEvent);
                             }
                         }
                         redraw();
@@ -189,7 +196,7 @@ public class SampleView extends CallStackView {
         LevelEntry queueNodesEntry = (LevelEntry) entry;
         Node<ProfileData> auxNode;
 
-        final long realStart = Math.max(startTime, fRoot.getProfileData().getEndTime());
+        final long realStart = Math.max(startTime, fRoot.getProfileData().getStartTime());
         final long realEnd = Math.min(endTime, fRoot.getProfileData().getEndTime());
 
         if (realEnd <= realStart) {
