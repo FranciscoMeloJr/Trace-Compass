@@ -100,7 +100,7 @@ public class SampleView extends CallStackView {
         fRoot = root;
 
         long startTime = 0;
-        long endTime = 100;
+        long endTime = 100000000;//1466105154172095511;
 
         TraceEntry traceEntry = traceEntryMap.get(trace);
         if (traceEntry == null) {
@@ -329,6 +329,12 @@ public class SampleView extends CallStackView {
             }
         }
 
+        System.out.println(hmap.size());
+
+        for(KeyTree key : hmap.keySet()) {
+            System.out.println(key);
+        }
         return hmap;
     }
+
 }

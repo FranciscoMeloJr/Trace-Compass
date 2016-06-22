@@ -15,11 +15,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
+import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+
+import com.google.common.collect.Iterables;
 
 /**
  * @author frank
@@ -76,6 +79,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         GraphvizVisitor dot;
 
         HashMap<String, Node<ProfileData>> hashMap;
+        private ITmfEventField first;
 
         public RequestTest() {
             super(ITmfEvent.class, TmfTimeRange.ETERNITY, 0, ITmfEventRequest.ALL_DATA, ExecutionType.BACKGROUND);
@@ -113,6 +117,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             if (eventName.contains("irq_handler_entry") || eventName.contains("lttng_ust_cyg_profile:func_entry") || eventName.contains("softirq_entry")) {
                 String content = event.getContent().toString();
+                System.out.println(event.getType().getFieldNames());
+                first = Iterables.get(event.getContent().getFields(), 0);
+                content = first.toString();
+
                 aux = Node.create(new ProfileData(0, content));
 
                 System.out.println("Pushing" + aux);
@@ -122,14 +130,16 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 if (eventName.contains("irq_handler_exit") || eventName.contains("lttng_ust_cyg_profile:func_exit") || eventName.contains("softirq_exit")) {
                     System.out.println("Creating");
                     endTime = event.getTimestamp().getValue();
+                    System.out.println(endTime);
                     if (!tmp.isEmpty()) {
                         aux = tmp.pop();
 
                         // Timestamp:
                         data = aux.fProfileData;
                         data.fWeight += endTime;
-
+                        data.setEndTime(endTime);
                         aux.fProfileData = data;
+
                         temp.push(aux);
                         // HashMap addition:
                         if (!hashMap.containsKey(aux.getNodeLabel())) {
