@@ -101,6 +101,10 @@ public class SampleView extends CallStackView {
         module.schedule();
         module.waitForCompletion();
 
+        // Take the tree and put as fRoot:
+        Node<ProfileData> root = module.getTree();
+        fRoot = root;
+
         long startTime = fRoot.getProfileData().getStartTime();
         long start = startTime;
         setStartTime(Math.min(getStartTime(), startTime));
@@ -110,10 +114,6 @@ public class SampleView extends CallStackView {
             if (monitor.isCanceled()) {
                 return;
             }
-
-            // Take the tree and put as fRoot:
-            Node<ProfileData> root = module.getTree();
-            fRoot = root;
 
             long end = fRoot.getProfileData().getEndTime();
             long endTime = end + 1;// 1466105154172095511;
@@ -125,8 +125,6 @@ public class SampleView extends CallStackView {
                 traceEntry = new TraceEntry(trace.getName(), startTime, endTime);
                 traceEntryMap.put(trace, traceEntry);
                 addToEntryList(parentTrace, Collections.singletonList(traceEntry));
-            } else {
-                traceEntry.updateEndTime(endTime);
             }
 
             System.out.println("Tree");
@@ -162,8 +160,6 @@ public class SampleView extends CallStackView {
 
                     timeX += 10;
                 }
-            } else {
-                ((TimeGraphEntry) levelEntryMap).updateEndTime(endTime);
             }
 
             // Standard
@@ -176,7 +172,7 @@ public class SampleView extends CallStackView {
                     for (ITimeGraphEntry queueEntry : child.getChildren()) {
                         if (queueEntry instanceof TimeGraphEntry) {
                             TimeGraphEntry eachEntry = (TimeGraphEntry) queueEntry;
-                            List<ITimeEvent> eventList = getEventList(eachEntry, startTime, endTime, resolution, monitor, map);
+                            List<ITimeEvent> eventList = getEventList(eachEntry, resolution, monitor, map);
                             if (eventList != null) {
                                 for (ITimeEvent eachEvent : eventList) {
                                     eachEntry.addEvent(eachEvent);
@@ -203,18 +199,18 @@ public class SampleView extends CallStackView {
      * @param root
      * @return
      */
-    protected @Nullable List<ITimeEvent> getEventList(TimeGraphEntry entry,
-            long startTime, long endTime, long resolution, IProgressMonitor monitor, Map<KeyTree, Node<ProfileData>> map) {
+    protected @Nullable List<ITimeEvent> getEventList(TimeGraphEntry entry, long resolution, IProgressMonitor monitor, Map<KeyTree, Node<ProfileData>> map) {
 
         LevelEntry queueNodesEntry = (LevelEntry) entry;
         Node<ProfileData> auxNode;
 
+        /*Do not use the startTime or endTime
         final long realStart = Math.max(startTime, fRoot.getProfileData().getStartTime());
         final long realEnd = Math.min(endTime, fRoot.getProfileData().getEndTime());
 
         if (realEnd <= realStart) {
             return null;
-        }
+        }*/
 
         // Event List:
         List<ITimeEvent> eventList = null;
