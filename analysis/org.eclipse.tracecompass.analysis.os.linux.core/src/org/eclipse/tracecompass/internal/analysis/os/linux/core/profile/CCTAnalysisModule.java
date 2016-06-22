@@ -168,6 +168,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             while (!temp.isEmpty()) {
                 aux = temp.pop();
                 fCurrent.addChild(aux);
+                fCurrent.fProfileData.fendTime += aux.fProfileData.getEndTime();
                 fCurrent = aux;
             }
 
@@ -181,7 +182,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             System.out.println("end");
         }
 
-        public  Node<ProfileData> getTree() {
+        public Node<ProfileData> getTree() {
             return fNode;
         }
     }
@@ -255,6 +256,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
     }
+
     // Which kind of tree:
     public enum Tree {
         ECCT, DCT, CG;
@@ -272,8 +274,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     /**
-     * @author frank
-     * This class implements IProfileData to be implemented on the tests related with Profiling and ECCT
+     * @author frank This class implements IProfileData to be implemented on the
+     *         tests related with Profiling and ECCT
      */
 
     public class GraphvizVisitor implements IProfileVisitor<ProfileData> {
@@ -381,6 +383,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
         }
     }
+
     protected class TestData implements IProfileData {
 
         private String fLabel;
