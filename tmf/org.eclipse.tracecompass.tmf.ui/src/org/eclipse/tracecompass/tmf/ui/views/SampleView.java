@@ -42,6 +42,13 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
  * @since 2.0
  */
 
+/*
+/* Instructions:
+* TimeGraphEntry can have children: then they appear as child in
+* the tree viewer on the left ITimeEvent are the intervals that
+* gets drawn in the time graph view on the right side
+*/
+
 public class SampleView extends CallStackView {
 
     /**
@@ -94,88 +101,94 @@ public class SampleView extends CallStackView {
         module.schedule();
         module.waitForCompletion();
 
-        // Read the tree but we will not use it
-        Node<ProfileData> root = module.getTree();
-
-        fRoot = root;
-
-        //EndTime:
-        long startTime = 0;
+        long startTime = fRoot.getProfileData().getStartTime();
         long start = startTime;
-        setStartTime(startTime);
+        setStartTime(Math.min(getStartTime(), startTime));
 
-        long endTime = 100000000;//1466105154172095511;
-        setEndTime(fRoot.getProfileData().getEndTime());
-
-        TraceEntry traceEntry = traceEntryMap.get(trace);
-        if (traceEntry == null) {
-            traceEntry = new TraceEntry(trace.getName(), startTime, endTime);
-            traceEntryMap.put(trace, traceEntry);
-            addToEntryList(parentTrace, Collections.singletonList(traceEntry));
-        }else {
-            traceEntry.updateEndTime(endTime);
-        }
-
-        /*
-         * TimeGraphEntry can have children: then they appear as child in the
-         * tree viewer on the left ITimeEvent are the intervals that gets drawn
-         * in the time graph view on the right side
-         */
-
-        System.out.println("Tree");
-        map = createHash(root);
-
-        LevelEntry levelEntryAux = null;
-        EventEntry eventEntryAux = null;
-
-        // Creating the LevelEntry:
-        for (KeyTree key : map.keySet()) {
-            System.out.println(key);
-            // Add to the HashMap
-            if (!levelEntryMap.containsKey(key)) {
-                levelEntryAux = new LevelEntry(Integer.toString(key.getLevel()), key.getLevel(), startTime, endTime);
-                levelEntryMap.put(trace, levelEntryAux);
-                traceEntry.addChild(levelEntryAux);
-            }
-
-            // Creating the Events:
-            long timeX = 0;
-            // for (KeyTree key : map.keySet()) {
-            Node<ProfileData> node = map.get(key);
-            if (node != null) {
-                eventEntryAux = new EventEntry(node.getNodeLabel(), node.getNodeId(), timeX, timeX + 10);
-                if (levelEntryAux != null) {
-                    levelEntryAux.addChild(levelEntryAux);
-                    eventEntryMap.put(levelEntryAux, eventEntryAux);
-                }
-            }
-
-            timeX += 10;
-        }
-
-        // Standard
-        long resolution = Math.max(1, (endTime - startTime) / getDisplayWidth());
-        for (ITimeGraphEntry child : traceEntry.getChildren()) {
+        boolean complete = false;
+        while (!complete) {
             if (monitor.isCanceled()) {
                 return;
             }
-            if (child instanceof TimeGraphEntry) {
-                for (ITimeGraphEntry queueEntry : child.getChildren()) {
-                    if (queueEntry instanceof TimeGraphEntry) {
-                        TimeGraphEntry eachEntry = (TimeGraphEntry) queueEntry;
-                        List<ITimeEvent> eventList = getEventList(eachEntry, startTime, endTime, resolution, monitor, map);
-                        if (eventList != null) {
-                            for (ITimeEvent eachEvent : eventList) {
-                                eachEntry.addEvent(eachEvent);
-                            }
+
+            // Take the tree and put as fRoot:
+            Node<ProfileData> root = module.getTree();
+            fRoot = root;
+
+            long end = fRoot.getProfileData().getEndTime();
+            long endTime = end + 1;// 1466105154172095511;
+
+            setEndTime(Math.max(getEndTime(), endTime));
+
+            TraceEntry traceEntry = traceEntryMap.get(trace);
+            if (traceEntry == null) {
+                traceEntry = new TraceEntry(trace.getName(), startTime, endTime);
+                traceEntryMap.put(trace, traceEntry);
+                addToEntryList(parentTrace, Collections.singletonList(traceEntry));
+            } else {
+                traceEntry.updateEndTime(endTime);
+            }
+
+            System.out.println("Tree");
+            map = createHash(root);
+
+            LevelEntry levelEntryAux = null;
+            EventEntry eventEntryAux = null;
+
+            // Creating the LevelEntry (key is the level)
+            if (!levelEntryMap.isEmpty()) {
+                for (KeyTree key : map.keySet()) {
+                    System.out.println(key);
+                    // Add to the HashMap
+
+                    if (!levelEntryMap.containsKey(key)) {
+                        levelEntryAux = new LevelEntry(Integer.toString(key.getLevel()), key.getLevel(), startTime, endTime);
+                        levelEntryMap.put(trace, levelEntryAux);
+                        System.out.println(levelEntryAux.fLevelId);
+                        traceEntry.addChild(levelEntryAux);
+                    }
+
+                    // Creating the Events:
+                    long timeX = 0;
+                    // for (KeyTree key : map.keySet()) {
+                    Node<ProfileData> node = map.get(key);
+                    if (node != null) {
+                        eventEntryAux = new EventEntry(node.getNodeLabel(), node.getNodeId(), timeX, timeX + 10);
+                        if (levelEntryAux != null) {
+                            levelEntryAux.addChild(eventEntryAux);
+                            eventEntryMap.put(levelEntryAux, eventEntryAux);
                         }
-                        redraw();
+                    }
+
+                    timeX += 10;
+                }
+            } else {
+                ((TimeGraphEntry) levelEntryMap).updateEndTime(endTime);
+            }
+
+            // Standard
+            long resolution = Math.max(1, (endTime - startTime) / getDisplayWidth());
+            for (ITimeGraphEntry child : traceEntry.getChildren()) {
+                if (monitor.isCanceled()) {
+                    return;
+                }
+                if (child instanceof TimeGraphEntry) {
+                    for (ITimeGraphEntry queueEntry : child.getChildren()) {
+                        if (queueEntry instanceof TimeGraphEntry) {
+                            TimeGraphEntry eachEntry = (TimeGraphEntry) queueEntry;
+                            List<ITimeEvent> eventList = getEventList(eachEntry, startTime, endTime, resolution, monitor, map);
+                            if (eventList != null) {
+                                for (ITimeEvent eachEvent : eventList) {
+                                    eachEntry.addEvent(eachEvent);
+                                }
+                            }
+                            redraw();
+                        }
                     }
                 }
             }
+            startTime = endTime;
         }
-        startTime = endTime;
-
     }
 
     /**
@@ -338,7 +351,7 @@ public class SampleView extends CallStackView {
 
         System.out.println(hmap.size());
 
-        for(KeyTree key : hmap.keySet()) {
+        for (KeyTree key : hmap.keySet()) {
             System.out.println(key);
         }
         return hmap;
