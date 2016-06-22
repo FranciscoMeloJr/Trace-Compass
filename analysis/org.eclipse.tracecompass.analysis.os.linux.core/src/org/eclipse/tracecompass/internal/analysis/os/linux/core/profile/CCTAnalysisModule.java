@@ -114,6 +114,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             if (eventName.contains("irq_handler_entry") || eventName.contains("lttng_ust_cyg_profile:func_entry") || eventName.contains("softirq_entry")) {
                 String content = event.getContent().toString();
                 aux = Node.create(new ProfileData(0, content));
+
                 System.out.println("Pushing" + aux);
                 tmp.push(aux);
 

@@ -11,8 +11,8 @@ public class ProfileData implements IProfileData {
 
     private String fLabel;
     int fWeight;
-    long startTime;
-    long endTime;
+    long fstartTime;
+    long fendTime;
 
     // Constructor:
     public ProfileData(int weight, String label) {
@@ -23,7 +23,16 @@ public class ProfileData implements IProfileData {
         }
         fLabel = label;
     }
-
+    // Constructor:
+    public ProfileData(int weight, String label, long start) {
+        if (weight == 0) {
+            fWeight = 0;
+        } else {
+            fWeight = weight;
+        }
+        fLabel = label;
+        fstartTime = start;
+    }
     // Constructor:
     public ProfileData(long weight, String label) {
         fWeight = (int) weight;
@@ -63,18 +72,18 @@ public class ProfileData implements IProfileData {
 
     //Change for StackCall
     public void setStartTime(long start) {
-        startTime = start;
+        fstartTime = start;
     }
 
     public void setEndTime(long end) {
-        endTime = end;
+        fendTime = end;
     }
     public long getStartTime() {
-        return startTime;
+        return fstartTime;
     }
 
     public long getEndTime() {
-        return endTime;
+        return fendTime;
     }
 
     @Override

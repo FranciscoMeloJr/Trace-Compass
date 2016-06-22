@@ -16,7 +16,6 @@ import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfile
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.Node;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileData;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileTraversal.KeyTree;
-import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -49,6 +48,7 @@ public class SampleView extends CallStackView {
      * The ID of the view as specified by the extension.
      */
     public static final String ID1 = "org.eclipse.tracecompass.tmf.ui.views.SampleView";
+    private Node<ProfileData> fRoot;
 
     /**
      * The constructor.
@@ -95,8 +95,10 @@ public class SampleView extends CallStackView {
         module.waitForCompletion();
 
         // Read the tree but we will not use it
-        Node<ProfileData> root = module.getTree(); // how to solve this problem?
-                                                   // ProfileData class?
+        Node<ProfileData> root = module.getTree();
+
+        fRoot = root;
+
         long startTime = 0;
         long endTime = 100;
 
@@ -116,16 +118,17 @@ public class SampleView extends CallStackView {
         System.out.println("Tree");
         map = createHash(root);
 
-        LevelEntry levelAux = null;
-        EventEntry eventAux = null;
+        LevelEntry levelEntryAux = null;
+        EventEntry eventEntryAux = null;
 
         // Creating the LevelEntry:
         for (KeyTree key : map.keySet()) {
             System.out.println(key);
             // Add to the HashMap
             if (!levelEntryMap.containsKey(key)) {
-                levelAux = new LevelEntry(Integer.toString(key.getLevel()), key.getLevel(), startTime, endTime);
-                levelEntryMap.put(trace, levelAux);
+                levelEntryAux = new LevelEntry(Integer.toString(key.getLevel()), key.getLevel(), startTime, endTime);
+                levelEntryMap.put(trace, levelEntryAux);
+                traceEntry.addChild(levelEntryAux);
             }
 
             // Creating the Events:
@@ -133,11 +136,13 @@ public class SampleView extends CallStackView {
             // for (KeyTree key : map.keySet()) {
             Node<ProfileData> node = map.get(key);
             if (node != null) {
-                eventAux = new EventEntry(node.getNodeLabel(), node.getNodeId(), timeX, timeX + 10);
-                if (levelAux != null) {
-                    eventEntryMap.put(levelAux, eventAux);
+                eventEntryAux = new EventEntry(node.getNodeLabel(), node.getNodeId(), timeX, timeX + 10);
+                if (levelEntryAux != null) {
+                    levelEntryAux.addChild(levelEntryAux);
+                    eventEntryMap.put(levelEntryAux, eventEntryAux);
                 }
             }
+
             timeX += 10;
         }
 
@@ -184,8 +189,8 @@ public class SampleView extends CallStackView {
         LevelEntry queueNodesEntry = (LevelEntry) entry;
         Node<ProfileData> auxNode;
 
-        final long realStart = Math.max(startTime, 0);
-        final long realEnd = Math.min(endTime,data.getWeight() + 1);
+        final long realStart = Math.max(startTime, fRoot.getProfileData().getEndTime());
+        final long realEnd = Math.min(endTime, fRoot.getProfileData().getEndTime());
 
         if (realEnd <= realStart) {
             return null;
@@ -195,20 +200,17 @@ public class SampleView extends CallStackView {
         List<ITimeEvent> eventList = null;
         eventList = new ArrayList<>();
 
-        try {
-            int level = queueNodesEntry.getLevel();
+        int level = queueNodesEntry.getLevel();
 
-            for (KeyTree key : map.keySet()) {
-                // Run throughout them and take just the level of this Entry
-                if (key.getLevel() == level) {
-                    auxNode = map.get(key);
-                    // Adding the event:
+        for (KeyTree key : map.keySet()) {
+            // Run throughout them and take just the level of this Entry
+            if (key.getLevel() == level) {
+                auxNode = map.get(key);
+                // Adding the event:
+                if (auxNode != null) {
                     eventList.add(new TimeEvent(queueNodesEntry, auxNode.getProfileData().getStartTime(), auxNode.getProfileData().getEndTime()));
                 }
             }
-
-        } catch (StateSystemDisposedException e) {
-            /* Ignored */
         }
         return eventList;
 
@@ -289,6 +291,10 @@ public class SampleView extends CallStackView {
         @Override
         public boolean hasTimeEvents() {
             return false;
+        }
+
+        public int getNodeId() {
+            return fNodeId;
         }
     }
 
