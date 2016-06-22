@@ -1,5 +1,6 @@
 package org.eclipse.tracecompass.tmf.ui.views;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -22,6 +23,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 
 /**
@@ -100,9 +102,7 @@ public class SampleView extends CallStackView {
 
         TraceEntry traceEntry = traceEntryMap.get(trace);
         if (traceEntry == null) {
-            traceEntry = new TraceEntry(trace.getName(), startTime, endTime); // end
-                                                                              // +
-                                                                              // 1
+            traceEntry = new TraceEntry(trace.getName(), startTime, endTime);
             traceEntryMap.put(trace, traceEntry);
             addToEntryList(parentTrace, Collections.singletonList(traceEntry));
         }
@@ -113,30 +113,35 @@ public class SampleView extends CallStackView {
          * in the time graph view on the right side
          */
 
-        // Creating the LevelEntry:
         System.out.println("Tree");
         map = createHash(root);
 
+        LevelEntry levelAux = null;
+        EventEntry eventAux = null;
+
+        // Creating the LevelEntry:
         for (KeyTree key : map.keySet()) {
             System.out.println(key);
             // Add to the HashMap
             if (!levelEntryMap.containsKey(key)) {
-                LevelEntry aux = new LevelEntry(Integer.toString(key.getLevel()), key.getLevel(), startTime, endTime);
-                levelEntryMap.put(trace, aux);
+                levelAux = new LevelEntry(Integer.toString(key.getLevel()), key.getLevel(), startTime, endTime);
+                levelEntryMap.put(trace, levelAux);
             }
-        }
 
-        // Creating the Events:
-        long timeX = 0;
-        for (KeyTree key : map.keySet()) {
+            // Creating the Events:
+            long timeX = 0;
+            // for (KeyTree key : map.keySet()) {
             Node<ProfileData> node = map.get(key);
-            if(node != null) {
-                EventEntry aux = new EventEntry(node.getNodeLabel(), node.getNodeId(), timeX, timeX + 10);
+            if (node != null) {
+                eventAux = new EventEntry(node.getNodeLabel(), node.getNodeId(), timeX, timeX + 10);
+                if (levelAux != null) {
+                    eventEntryMap.put(levelAux, eventAux);
+                }
             }
             timeX += 10;
         }
 
-        //Standard
+        // Standard
         long resolution = Math.max(1, (endTime - startTime) / getDisplayWidth());
         for (ITimeGraphEntry child : traceEntry.getChildren()) {
             if (monitor.isCanceled()) {
@@ -164,7 +169,8 @@ public class SampleView extends CallStackView {
     /**
      * This method creates the status of the Events
      *
-     * @param entry
+     * @param entry:
+     *            Level Entry
      * @param startTime
      * @param endTime
      * @param resolution
@@ -173,13 +179,13 @@ public class SampleView extends CallStackView {
      * @return
      */
     protected @Nullable List<ITimeEvent> getEventList(TimeGraphEntry entry,
-            long startTime, long endTime, long resolution, IProgressMonitor monitor, Map<ITmfTrace, LevelEntry> map) {
+            long startTime, long endTime, long resolution, IProgressMonitor monitor, Map<KeyTree, Node<ProfileData>> map) {
 
         LevelEntry queueNodesEntry = (LevelEntry) entry;
-        int level = queueNodesEntry.getLevel();
+        Node<ProfileData> auxNode;
 
         final long realStart = Math.max(startTime, 0);
-        final long realEnd = Math.min(endTime, data.getWeight() + 1);
+        final long realEnd = Math.min(endTime,data.getWeight() + 1);
 
         if (realEnd <= realStart) {
             return null;
@@ -187,11 +193,19 @@ public class SampleView extends CallStackView {
 
         // Event List:
         List<ITimeEvent> eventList = null;
+        eventList = new ArrayList<>();
 
         try {
+            int level = queueNodesEntry.getLevel();
 
-            eventList = new ArrayList<>();
-            eventList  // addicionar o evento com entrada e final - add(new TimeEvent(entry, lastEndTime, time - lastEndTime));
+            for (KeyTree key : map.keySet()) {
+                // Run throughout them and take just the level of this Entry
+                if (key.getLevel() == level) {
+                    auxNode = map.get(key);
+                    // Adding the event:
+                    eventList.add(new TimeEvent(queueNodesEntry, auxNode.getProfileData().getStartTime(), auxNode.getProfileData().getEndTime()));
+                }
+            }
 
         } catch (StateSystemDisposedException e) {
             /* Ignored */
