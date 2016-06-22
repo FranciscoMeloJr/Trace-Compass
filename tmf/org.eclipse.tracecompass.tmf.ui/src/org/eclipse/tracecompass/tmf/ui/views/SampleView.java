@@ -76,7 +76,6 @@ public class SampleView extends CallStackView {
         Map<ITmfTrace, LevelEntry> levelEntryMap = new HashMap<>();
         Map<LevelEntry, EventEntry> eventEntryMap = new HashMap<>();
 
-
         // Selects only the CCTAnalysis module
         for (IAnalysisModule mod : iter) {
             if (mod instanceof CCTAnalysisModule) {
@@ -131,30 +130,26 @@ public class SampleView extends CallStackView {
         long timeX = 0;
         for (KeyTree key : map.keySet()) {
             Node<ProfileData> node = map.get(key);
-            EventEntry aux = new EventEntry(node.getNodeLabel(), node.getNodeId(), timeX, timeX + 10); // (String
-                                                                                                       // name,
-                                                                                                       // int
-                                                                                                       // nodeId,
-                                                                                                       // long
-                                                                                                       // startTime,
-                                                                                                       // long
-                                                                                                       // endTime);
+            if(node != null) {
+                EventEntry aux = new EventEntry(node.getNodeLabel(), node.getNodeId(), timeX, timeX + 10);
+            }
             timeX += 10;
         }
 
+        //Standard
         long resolution = Math.max(1, (endTime - startTime) / getDisplayWidth());
         for (ITimeGraphEntry child : traceEntry.getChildren()) {
             if (monitor.isCanceled()) {
                 return;
             }
             if (child instanceof TimeGraphEntry) {
-                for (ITimeGraphEntry queueSlot : child.getChildren()) {
-                    if (queueSlot instanceof TimeGraphEntry) {
-                        TimeGraphEntry entry = (TimeGraphEntry) queueSlot;
-                        List<ITimeEvent> eventList = getEventList(entry, startTime, endTime, resolution, monitor);
+                for (ITimeGraphEntry queueEntry : child.getChildren()) {
+                    if (queueEntry instanceof TimeGraphEntry) {
+                        TimeGraphEntry eachEntry = (TimeGraphEntry) queueEntry;
+                        List<ITimeEvent> eventList = getEventList(eachEntry, startTime, endTime, resolution, monitor, map);
                         if (eventList != null) {
                             for (ITimeEvent event : eventList) {
-                                entry.addEvent(event);
+                                eachEntry.addEvent(event);
                             }
                         }
                         redraw();
@@ -162,7 +157,6 @@ public class SampleView extends CallStackView {
                 }
             }
         }
-
         startTime = endTime;
 
     }
@@ -179,11 +173,14 @@ public class SampleView extends CallStackView {
      * @return
      */
     protected @Nullable List<ITimeEvent> getEventList(TimeGraphEntry entry,
-            long startTime, long endTime, long resolution, IProgressMonitor monitor, Node<ProfileData> root) {
-        ProfileData data = root.getProfileData();
+            long startTime, long endTime, long resolution, IProgressMonitor monitor, Map<ITmfTrace, LevelEntry> map) {
+
+        LevelEntry queueNodesEntry = (LevelEntry) entry;
+        int level = queueNodesEntry.getLevel();
 
         final long realStart = Math.max(startTime, 0);
         final long realEnd = Math.min(endTime, data.getWeight() + 1);
+
         if (realEnd <= realStart) {
             return null;
         }
@@ -193,6 +190,8 @@ public class SampleView extends CallStackView {
 
         try {
 
+            eventList = new ArrayList<>();
+            eventList  // addicionar o evento com entrada e final - add(new TimeEvent(entry, lastEndTime, time - lastEndTime));
 
         } catch (StateSystemDisposedException e) {
             /* Ignored */
@@ -256,6 +255,10 @@ public class SampleView extends CallStackView {
         @Override
         public boolean hasTimeEvents() {
             return false;
+        }
+
+        public int getLevel() {
+            return fLevelId;
         }
     }
 
