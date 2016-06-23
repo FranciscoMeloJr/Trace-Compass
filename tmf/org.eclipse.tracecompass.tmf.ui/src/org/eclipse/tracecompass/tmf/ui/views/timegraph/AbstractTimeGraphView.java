@@ -287,11 +287,18 @@ public abstract class AbstractTimeGraphView extends TmfView implements ITmfTimeA
     /** The find target to use */
     private final FindTarget fFindTarget;
 
+    private boolean fHandleTimeSignals = true;
+
+    /**
+     * @author frank
+     * @since 2.0
+     *
+     */
     // ------------------------------------------------------------------------
     // Classes
     // ------------------------------------------------------------------------
 
-    private interface ITimeGraphWrapper {
+    public interface ITimeGraphWrapper {
 
         void setTimeGraphContentProvider(ITimeGraphContentProvider timeGraphContentProvider);
 
@@ -1155,6 +1162,16 @@ public abstract class AbstractTimeGraphView extends TmfView implements ITmfTimeA
             tgWrapper.setAutoExpandLevel(level);
         }
     }
+    /*
+     * This function set the HandleTime to false, since on SampleView, it is not used
+     * */
+    /**
+     * @param handle
+     * @since 2.0
+     */
+    protected void setHandleTimeSignals(boolean handle) {
+        fHandleTimeSignals = handle;
+    }
 
     /**
      * Gets the entry list for a trace
@@ -1530,7 +1547,7 @@ public abstract class AbstractTimeGraphView extends TmfView implements ITmfTimeA
      */
     @TmfSignalHandler
     public void selectionRangeUpdated(final TmfSelectionRangeUpdatedSignal signal) {
-        if (signal.getSource() == this || fTrace == null) {
+        if (signal.getSource() == this || fTrace == null || !fHandleTimeSignals) {
             return;
         }
         final long beginTime = signal.getBeginTime().toNanos();
@@ -1561,7 +1578,7 @@ public abstract class AbstractTimeGraphView extends TmfView implements ITmfTimeA
      */
     @TmfSignalHandler
     public void windowRangeUpdated(final TmfWindowRangeUpdatedSignal signal) {
-        if (signal.getSource() == this || fTrace == null) {
+        if (signal.getSource() == this || fTrace == null || !fHandleTimeSignals) {
             return;
         }
         if (signal.getCurrentRange().getIntersection(fTrace.getTimeRange()) == null) {

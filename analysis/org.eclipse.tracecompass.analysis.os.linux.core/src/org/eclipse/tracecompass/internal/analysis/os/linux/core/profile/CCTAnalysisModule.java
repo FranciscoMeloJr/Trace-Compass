@@ -80,6 +80,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         HashMap<String, Node<ProfileData>> hashMap;
         private ITmfEventField first;
+        int level;
 
         public RequestTest() {
             super(ITmfEvent.class, TmfTimeRange.ETERNITY, 0, ITmfEventRequest.ALL_DATA, ExecutionType.BACKGROUND);
@@ -92,6 +93,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             // HashMap
             hashMap = new HashMap();
+
+            level = 0;
         }
 
         /*
@@ -115,7 +118,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             Node<ProfileData> nodeHash;
             ProfileData data;
 
-            if (eventName.contains("irq_handler_entry") || eventName.contains("lttng_ust_cyg_profile:func_entry") || eventName.contains("softirq_entry")) {
+
+            if (eventName.equals("lttng_ust_cyg_profile:func_entry")) {
                 String content = event.getContent().toString();
                 System.out.println(event.getType().getFieldNames());
                 first = Iterables.get(event.getContent().getFields(), 0);
@@ -127,7 +131,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 tmp.push(aux);
 
             } else {
-                if (eventName.contains("irq_handler_exit") || eventName.contains("lttng_ust_cyg_profile:func_exit") || eventName.contains("softirq_exit")) {
+                if (eventName.contains("lttng_ust_cyg_profile:func_exit")) {
                     System.out.println("Creating");
                     endTime = event.getTimestamp().getValue();
                     System.out.println(endTime);

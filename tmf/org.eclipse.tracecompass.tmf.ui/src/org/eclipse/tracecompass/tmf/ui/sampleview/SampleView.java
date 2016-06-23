@@ -44,7 +44,8 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 
 /*
  * TimeGraphEntry can have children: then they appear as child in the tree
- * viewer on the left ITimeEvent are the intervals that gets drawn in the time
+ * viewer on the left
+ * ITimeEvent are the intervals that gets drawn in the time
  * graph view on the right side
  */
 
@@ -61,6 +62,7 @@ public class SampleView extends CallStackView {
      */
     public SampleView() {
         super();
+        setHandleTimeSignals(false);
     }
 
     /**
@@ -90,9 +92,19 @@ public class SampleView extends CallStackView {
         module.schedule();
         module.waitForCompletion();
 
-        // Take the tree and put as fRoot:
+        // Get the data from the module
         Node<ProfileData> root = module.getTree();
         fRoot = root;
+        // Find the beginning and end of this view and set it using (i think) getTimeGraphWrapper or something.getTimeGraphViewer.setStart...
+        getTimeGraphViewer().setStartFinishTime(0, 10);
+
+        // Build your entries
+
+        // For each entry, get the list of events
+
+        // enjoy the show
+
+
 
         // For the View:
         TraceEntry traceEntry = null;
@@ -102,14 +114,14 @@ public class SampleView extends CallStackView {
         // Map of the nodes:
         Map<KeyTree, Node<ProfileData>> map;
 
-        long startTime = fRoot.getProfileData().getStartTime();
+        long startTime = 0; // fRoot.getProfileData().getStartTime();
         long start = startTime;
         setStartTime(Math.min(getStartTime(), startTime));
 
         if (monitor.isCanceled()) {
             return;
         }
-        long end = fRoot.getProfileData().getEndTime();
+        long end = 15;//fRoot.getProfileData().getEndTime();
         long endTime = end + 1;
 
         setEndTime(Math.max(getEndTime(), endTime));
@@ -124,12 +136,10 @@ public class SampleView extends CallStackView {
         EventEntry eventEntryAux = null;
 
         // Creating the LevelEntry (key is the level)
-        levelEntryAux = new LevelEntry("foo", 0, fRoot.getProfileData().getStartTime(), fRoot.getProfileData().getEndTime() + 1);
-        traceEntry.addChild(levelEntryAux);
-        levelEntryMap.put(trace, levelEntryAux);
+        levelEntryAux = new LevelEntry("foo", 0, 0, 10);
 
         // Creating a eventEntry
-        eventEntryAux = new EventEntry("main", 37, fRoot.getProfileData().getStartTime() + 1, fRoot.getProfileData().getEndTime());
+        eventEntryAux = new EventEntry("main", 37, 1, 8);
 
         // Put as child
         List<ITimeEvent> eventList = new ArrayList<>(4);
@@ -141,14 +151,16 @@ public class SampleView extends CallStackView {
 
         levelEntryAux.addChild(eventEntryAux);
 
+        traceEntry.addChild(levelEntryAux);
+        levelEntryMap.put(trace, levelEntryAux);
+
         start = end;
     }
 
     /**
      * This method creates the status of the Events
      *
-     * @param entry:
-     *            Level Entry
+     * @param entry  Level Entry
      * @param startTime
      * @param endTime
      * @param resolution
@@ -215,6 +227,7 @@ public class SampleView extends CallStackView {
 
     }
 
+    //Maybe change this method here:
     @Override
     public void createPartControl(Composite parent) {
         super.createPartControl(parent);
