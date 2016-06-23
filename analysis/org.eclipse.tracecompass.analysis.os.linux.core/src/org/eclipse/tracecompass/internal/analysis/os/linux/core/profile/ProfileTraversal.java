@@ -689,7 +689,7 @@ public class ProfileTraversal {
      * @param node1
      * @param node2
      * @return
-     * @return Node
+     * @return Node<T>
      */
     public static <T extends IProfileData> Node<T> minus(Node<T> node1, Node<T> node2) {
 
