@@ -1,4 +1,4 @@
-package org.eclipse.tracecompass.tmf.ui.views;
+package org.eclipse.tracecompass.tmf.ui.sampleview;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -96,7 +96,7 @@ public class SampleView extends CallStackView {
         Node<ProfileData> root = module.getTree();
         fRoot = root;
         // Find the beginning and end of this view and set it using (i think) getTimeGraphWrapper or something.getTimeGraphViewer.setStart...
-        getTimeGraphViewer().setStartFinishTime(0, 10);
+        //getTimeGraphViewer().setStartFinishTime(0, 10);
 
         // Build your entries
 
@@ -233,6 +233,31 @@ public class SampleView extends CallStackView {
         super.createPartControl(parent);
     }
 
+    /*This function creates the widgets on the screen
+    @Override
+    public void createPartControl(Composite parent) {
+        //This will give problem, because the sample view extends call stack view
+        super.createPartControl(parent);
+
+        getTimeGraphViewer().addTimeListener(new ITimeGraphTimeListener() {
+            @Override
+            public void timeSelected(TimeGraphTimeEvent event) {
+                synchingToTime(event.getBeginTime());
+            }
+        });
+
+
+        contributeToActionBars();
+        loadSortOption();
+
+        IEditorPart editor = getSite().getPage().getActiveEditor();
+        if (editor instanceof ITmfTraceEditor) {
+            ITmfTrace trace = ((ITmfTraceEditor) editor).getTrace();
+            if (trace != null) {
+                traceSelected(new TmfTraceSelectedSignal(this, trace));
+            }
+        }
+    }*/
     // TraceEntry is a trace
     private static class TraceEntry extends TimeGraphEntry {
         public TraceEntry(String name, long startTime, long endTime) {
