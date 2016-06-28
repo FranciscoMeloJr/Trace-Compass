@@ -104,7 +104,7 @@
       </category>
       <view
             category="org.eclipse.tracecompass.tmf.ui"
-            class="org.eclipse.tracecompass.tmf.ui.views.SampleView"
+            class="org.eclipse.tracecompass.tmf.ui.sampleview.SampleView"
             icon="icons/sample.gif"
             id="org.eclipse.tracecompass.tmf.ui.views.SampleView"
             name="CCT View">
