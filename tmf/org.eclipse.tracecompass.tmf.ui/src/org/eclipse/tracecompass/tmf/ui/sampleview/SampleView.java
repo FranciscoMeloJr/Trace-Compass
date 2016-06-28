@@ -22,13 +22,16 @@ import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileT
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.Messages;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
+import org.eclipse.tracecompass.tmf.core.signal.TmfWindowRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
+import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestampDelta;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackEntry;
 import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackPresentationProvider;
+import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackView;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.AbstractTimeGraphView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphContentProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
@@ -276,6 +279,10 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         // view
         super.createPartControl(parent);
 
+        TmfTimeRange range = new TmfTimeRange(TmfTimestamp.fromNanos(0), TmfTimestamp.fromNanos(15));
+        broadcast(new TmfWindowRangeUpdatedSignal(SampleView.this, range));
+        getTimeGraphViewer().setStartFinishTime(0, 15);
+
     }
 
     // TraceEntry is a trace
@@ -448,11 +455,6 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         return hmap;
     }
 
-    @Override
-    protected @Nullable List<@NonNull ITimeEvent> getEventList(@NonNull TimeGraphEntry entry, long startTime, long endTime, long resolution, @NonNull IProgressMonitor monitor) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
     // Copied methods:
     private static final Image PROCESS_IMAGE = Activator.getDefault().getImageFromPath("icons/obj16/process_obj.gif"); //$NON-NLS-1$
@@ -541,5 +543,12 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
             }
             return new ITimeGraphEntry[0];
         }
+    }
+
+    @Override
+    protected @Nullable List<@NonNull ITimeEvent> getEventList(@NonNull TimeGraphEntry entry, long startTime, long endTime, long resolution, @NonNull IProgressMonitor monitor) {
+
+
+        return null;
     }
 }
