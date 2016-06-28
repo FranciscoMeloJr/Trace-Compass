@@ -31,7 +31,6 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackEntry;
 import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackPresentationProvider;
-import org.eclipse.tracecompass.tmf.ui.views.callstack.CallStackView;
 import org.eclipse.tracecompass.tmf.ui.views.timegraph.AbstractTimeGraphView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphContentProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
@@ -98,6 +97,8 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         setFilterLabelProvider(new SampleViewTreeLabelProvider());
 
         setHandleTimeSignals(false);
+        setStartTime(0);
+        setEndTime(15);
     }
 
     /**

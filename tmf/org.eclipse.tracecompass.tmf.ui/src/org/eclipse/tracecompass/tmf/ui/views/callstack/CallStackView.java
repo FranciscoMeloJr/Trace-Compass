@@ -393,6 +393,7 @@ public class CallStackView extends AbstractTimeGraphView {
                         long entryTime = entry.getFunctionEntryTime();
                         long exitTime = entry.getFunctionExitTime();
                         TmfTimeRange range = new TmfTimeRange(TmfTimestamp.fromNanos(entryTime), TmfTimestamp.fromNanos(exitTime));
+                        System.out.println(range);
                         broadcast(new TmfWindowRangeUpdatedSignal(CallStackView.this, range));
                         getTimeGraphViewer().setStartFinishTime(entryTime, exitTime);
                         startZoomThread(entryTime, exitTime);
