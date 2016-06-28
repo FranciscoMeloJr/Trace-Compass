@@ -24,6 +24,7 @@ import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.statesystem.core.exceptions.StateSystemDisposedException;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
 import org.eclipse.tracecompass.statesystem.core.statevalue.ITmfStateValue;
+import org.eclipse.tracecompass.tmf.ui.sampleview.SampleView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
@@ -47,6 +48,7 @@ public class CallStackPresentationProvider extends TimeGraphPresentationProvider
     public static final int NUM_COLORS = 360;
 
     private CallStackView fView;
+    private SampleView fView1;
 
     /**
      * Minimum width of a displayed state below which we will not print any text
@@ -105,6 +107,22 @@ public class CallStackPresentationProvider extends TimeGraphPresentationProvider
      */
     public void setCallStackView(CallStackView view) {
         fView = view;
+    }
+
+    //In house method 1
+    /**
+     * @param view
+     * @since 2.0
+     */
+    public void setSampleView(SampleView view) {
+        fView1 = view;
+    }
+  //In house method 2
+    /**
+     * @since 2.0
+     */
+    public SampleView getSampleView() {
+        return fView1;
     }
 
     @Override
