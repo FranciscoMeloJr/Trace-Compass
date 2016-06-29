@@ -107,9 +107,9 @@ public class SampleView extends CallStackView {
         // Map of the nodes:
         Map<KeyTree, Node<ProfileData>> map;
 
-        long startTime = fRoot.getProfileData().getStartTime();
-        long start = startTime;
-        setStartTime(Math.min(getStartTime(), startTime));
+        //long startTime = 0; //fRoot.getProfileData().getStartTime();
+        long start = 0; //startTime;
+        //setStartTime(Math.min(getStartTime(), startTime));
 
         if (monitor.isCanceled()) {
             return;
