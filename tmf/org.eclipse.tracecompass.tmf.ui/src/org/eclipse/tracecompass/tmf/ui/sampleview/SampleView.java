@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.CCTAnalysisModule;
@@ -17,6 +18,7 @@ import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfile
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.Node;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileData;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileTraversal.KeyTree;
+import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
@@ -57,7 +59,7 @@ public class SampleView extends CallStackView {
      */
     public static final String ID1 = "org.eclipse.tracecompass.tmf.ui.views.SampleView";
     private Node<ProfileData> fRoot;
-
+    Map<KeyTree, Node<ProfileData>> fMap;
     /**
      * The constructor.
      */
@@ -107,9 +109,9 @@ public class SampleView extends CallStackView {
         // Map of the nodes:
         Map<KeyTree, Node<ProfileData>> map;
 
-        //long startTime = 0; //fRoot.getProfileData().getStartTime();
-        long start = 0; //startTime;
-        //setStartTime(Math.min(getStartTime(), startTime));
+        long startTime = 0; //fRoot.getProfileData().getStartTime();
+        long start = startTime;
+        setStartTime(Math.min(getStartTime(), startTime));
 
         if (monitor.isCanceled()) {
             return;
@@ -126,6 +128,7 @@ public class SampleView extends CallStackView {
 
         System.out.println("Tree");
         map = createHash(root);
+        fMap = map;
 
         // List of levels:
         LevelEntry levelEntryAux1= null;
@@ -165,6 +168,22 @@ public class SampleView extends CallStackView {
         levelEntryAux1.addChild(eventEntryAux1);
         levelEntryAux1.addChild(eventEntryAux2);
 
+
+        Consumer<TimeGraphEntry> consumer = new Consumer<TimeGraphEntry>() {
+            @Override
+            public void accept(TimeGraphEntry entry) {
+                if (monitor.isCanceled()) {
+                    return;
+                }
+                if (entry instanceof LevelEntry) {
+                    buildStatusEvents(parentTrace, (LevelEntry) entry, monitor, Long.valueOf(0), Long.valueOf(15));
+                    return;
+                }
+                entry.getChildren().forEach(this);
+            }
+
+        };
+        traceEntry.getChildren().forEach(consumer);
         start = end;
     }
 
@@ -180,11 +199,11 @@ public class SampleView extends CallStackView {
      * @param root
      * @return
      */
-    protected @Nullable List<ITimeEvent> getEventList(TimeGraphEntry entry, long resolution, IProgressMonitor monitor, Map<KeyTree, Node<ProfileData>> map) {
+    protected @Nullable List<ITimeEvent> getEventList(TimeGraphEntry entry, long resolution, IProgressMonitor monitor) {
 
         LevelEntry queueNodesEntry = (LevelEntry) entry;
         Node<ProfileData> auxNode;
-
+        Map<KeyTree, Node<ProfileData>> map  = fMap;
         /*
          * Do not use the startTime or endTime final long realStart =
          * Math.max(startTime, fRoot.getProfileData().getStartTime()); final
@@ -206,7 +225,7 @@ public class SampleView extends CallStackView {
                 auxNode = map.get(key);
                 // Adding the event:
                 if (auxNode != null) {
-                    eventList.add(new TimeEvent(queueNodesEntry, auxNode.getProfileData().getStartTime(), auxNode.getProfileData().getEndTime()));
+                    eventList.add(new TimeEvent(queueNodesEntry, 2,5));//auxNode.getProfileData().getStartTime(), auxNode.getProfileData().getEndTime()));
                 }
             }
         }
@@ -214,6 +233,21 @@ public class SampleView extends CallStackView {
 
     }
 
+    private void buildStatusEvents(ITmfTrace trace, LevelEntry entry, @NonNull IProgressMonitor monitor, long start, long end) {
+
+        long resolution = Math.max(1, (end - 0) / getDisplayWidth());
+        List<ITimeEvent> eventList = getEventList(entry, start, end + 1, resolution, monitor);
+        //ITmfStateSystem ss = entry.getStateSystem();
+
+        if (eventList != null) {
+            entry.setEventList(eventList);
+            System.out.println(entry);
+        }
+        if (trace == getTrace()) {
+            redraw();
+        }
+
+    }
     /**
      * This function makes the levelOrderTraversal of a tree, which contains a
      * generic node
