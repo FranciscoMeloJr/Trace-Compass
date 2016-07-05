@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.CCTAnalysisModule;
@@ -170,7 +169,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
 
         long startTime = 0; // fRoot.getProfileData().getStartTime();
         long start = startTime;
-        setStartTime(Math.min(getStartTime(), startTime));
+        setStartTime(0);
 
         if (monitor.isCanceled()) {
             return;
@@ -178,7 +177,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         long end = 15;// fRoot.getProfileData().getEndTime();
         long endTime = end + 1;
 
-        setEndTime(Math.max(getEndTime(), endTime));
+        setEndTime(16);
 
         traceEntry = new TraceEntry(trace.getName(), startTime, endTime);
         addToEntryList(parentTrace, Collections.singletonList(traceEntry));
@@ -201,8 +200,8 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         // Put as child
         List<ITimeEvent> eventList = new ArrayList<>(4);
         ITimeEvent event = new TimeEvent(eventEntryAux, 3, 5, 1);// new
-                                                                 // EventNode("main",
-                                                                 // 37, 2, 7);//
+                                                                 // EventNode("main",37,
+                                                                 // 2, 7);
                                                                  // fRoot.getProfileData().getStartTime()
 
         eventEntryMap.put(levelEntryAux, eventEntryAux);
@@ -222,14 +221,14 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
 
         if (parentTrace == getTrace()) {
             synchronized (this) {
-                setStartTime(getStartTime() == SWT.DEFAULT ? start : Math.min(getStartTime(), start));
-                setEndTime(getEndTime() == SWT.DEFAULT ? end + 1 : Math.max(getEndTime(), end + 1));
+                setStartTime(0);
+                setEndTime(16);
             }
-            synchingToTime(getTimeGraphViewer().getSelectionBegin());
+            synchingToTime(0);//getTimeGraphViewer().getSelectionBegin());
             refresh();
             // getTimeGraphViewer().refresh();
         }
-        start = end;
+        // start = end;
         // refresh();
     }
 
@@ -398,11 +397,6 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         public EventEntry(String name, int nodeId, long startTime, long endTime) {
             super(name, startTime, endTime);
             fNodeId = nodeId;
-        }
-
-        @Override
-        public boolean hasTimeEvents() {
-            return false;
         }
 
         public int getNodeId() {
