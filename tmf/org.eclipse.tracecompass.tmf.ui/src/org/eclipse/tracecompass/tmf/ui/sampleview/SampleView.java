@@ -82,11 +82,11 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
             Messages.CallStackView_DepthColumn,
             Messages.CallStackView_EntryTimeColumn,
             Messages.CallStackView_ExitTimeColumn,
-            Messages.CallStackView_DurationColumn
+            Messages.SampleView_A
     };
 
     private static final String[] FILTER_COLUMN_NAMES = new String[] {
-            Messages.CallStackView_ThreadColumn
+            Messages.SampleView_NameColumn
     };
 
     /**
@@ -189,30 +189,45 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         fMap = map;
 
         LevelEntry levelEntryAux = null;
+        LevelEntry levelEntryAux1 = null;
+
         EventEntry eventEntryAux = null;
+        EventEntry eventEntryAux1 = null;
 
         // Creating the LevelEntry (key is the level)
         levelEntryAux = new LevelEntry("level 0", 57, 0, 10);
 
+        // Creating the LevelEntry (key is the level)
+        levelEntryAux1 = new LevelEntry("level 1", 57, 0, 10);
+
         // Creating a eventEntry
-        eventEntryAux = new EventEntry("function 1", 37, 1, 8);
+        eventEntryAux = new EventEntry("function 1", 37, 1, 15);
+        eventEntryAux1 = new EventEntry("function 2", 25, 9, 15);
 
         // Put as child
         List<ITimeEvent> eventList = new ArrayList<>(4);
-        ITimeEvent event = new TimeEvent(eventEntryAux, 3, 5, 1);// new
-                                                                 // EventNode("main",37,
-                                                                 // 2, 7);
-                                                                 // fRoot.getProfileData().getStartTime()
+        ITimeEvent event = new TimeEvent(eventEntryAux, 1, 13, 1); //so it will end at 8
+        ITimeEvent event1 = new TimeEvent(eventEntryAux1, 1, 5, 1); //so it will end at 14
+        ITimeEvent event2 = new TimeEvent(eventEntryAux1, 7, 7, 1);
 
         eventEntryMap.put(levelEntryAux, eventEntryAux);
+        eventEntryMap.put(levelEntryAux1, eventEntryAux1);
 
         eventList.add(event);
+        eventList.add(event1);
+        eventList.add(event2);
+
         eventEntryAux.addEvent(event);
+        eventEntryAux1.addEvent(event2);
+        eventEntryAux1.addEvent(event1);
 
         levelEntryAux.addChild(eventEntryAux);
+        levelEntryAux1.addChild(eventEntryAux1);
 
         traceEntry.addChild(levelEntryAux);
+        traceEntry.addChild(levelEntryAux1);
         levelEntryMap.put(trace, levelEntryAux);
+        levelEntryMap.put(trace, levelEntryAux1);
 
         // Consumer:
         /*

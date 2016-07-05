@@ -338,6 +338,10 @@ public class Messages extends NLS {
     public static String CallStackView_ConfigureSymbolProvidersText;
     public static String CallStackView_ConfigureSymbolProvidersTooltip;
 
+    //New Sample View:
+    public static String SampleView_A;
+    public static String SampleView_NameColumn;
+
     public static String CopyToClipboardOperation_TaskName;
     public static String CopyToClipboardOperation_OutOfMemoryErrorTitle;
     public static String CopyToClipboardOperation_OutOfMemoryErrorMessage;
