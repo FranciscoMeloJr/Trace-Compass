@@ -188,58 +188,65 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         // Making it global:
         fMap = map;
 
-        LevelEntry levelEntryAux = null;
         LevelEntry levelEntryAux1 = null;
         LevelEntry levelEntryAux2 = null;
+        LevelEntry levelEntryAux3 = null;
 
-        EventEntry eventEntryAux = null;
         EventEntry eventEntryAux1 = null;
+        EventEntry eventEntryAux2 = null;
+        EventEntry eventEntryAux3 = null;
 
         // Creating the LevelEntry (key is the level)
-        levelEntryAux = new LevelEntry("level 0", 0, 0, 10);
+        levelEntryAux1 = new LevelEntry("Tree", 0, 0, 10);
 
         // Creating the second LevelEntry
-        levelEntryAux1 = new LevelEntry("level 1", 1, 0, 10);
+        levelEntryAux2 = new LevelEntry("level 1", 1, 0, 10);
 
         // Creating the second LevelEntry
-        levelEntryAux2 = new LevelEntry("level 2", 1, 0, 10);
+        levelEntryAux3 = new LevelEntry("level 2", 1, 0, 10);
 
         // Creating a eventEntry
-        eventEntryAux = new EventEntry("function 1", 37, 1, 15, 0);
-        eventEntryAux1 = new EventEntry("function 2", 25, 9, 15, 1);
+        eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
+        eventEntryAux2 = new EventEntry("level 1", 25, 9, 15, 1);
+        eventEntryAux3 = new EventEntry("level 2", 25, 9, 15, 1);
 
         // Put as child
         List<ITimeEvent> eventList = new ArrayList<>(4);
-        ITimeEvent event = new TimeEvent(eventEntryAux, 1, 13, 1); //so it will end at 8
-        ITimeEvent event1 = new TimeEvent(eventEntryAux1, 1, 5, 1); //so it will end at 14
-        ITimeEvent event2 = new TimeEvent(eventEntryAux1, 7, 7, 1);
+        EventNode event1 = new EventNode(eventEntryAux1, "event node", 27, 1, 14, 1); //so it will end at 8
+        ITimeEvent event2 = new TimeEvent(eventEntryAux2, 1, 5, 1); //so it will end at 14
+        ITimeEvent event3 = new TimeEvent(eventEntryAux2, 7, 7, 1);
+        ITimeEvent event4 = new TimeEvent(eventEntryAux3, 7, 4, 1);
 
-        eventEntryMap.put(levelEntryAux, eventEntryAux);
-        eventEntryMap.put(levelEntryAux, eventEntryAux1);
+        eventEntryMap.put(levelEntryAux1, eventEntryAux1);
+        eventEntryMap.put(levelEntryAux1, eventEntryAux2);
+        eventEntryMap.put(levelEntryAux1, eventEntryAux3);
 
         //put the event on the list:
-        eventList.add(event);
         eventList.add(event1);
         eventList.add(event2);
+        eventList.add(event3);
+        eventList.add(event4);
 
         //Put the time events on the entry
-        eventEntryAux.addEvent(event);
-        eventEntryAux1.addEvent(event2);
         eventEntryAux1.addEvent(event1);
+        eventEntryAux2.addEvent(event3);
+        eventEntryAux2.addEvent(event2);
+        eventEntryAux3.addEvent(event4);
 
         //Put the level entries on the level
-        levelEntryAux.addChild(eventEntryAux);
-        levelEntryAux.addChild(eventEntryAux1);
+        levelEntryAux1.addChild(eventEntryAux1);
+        levelEntryAux1.addChild(eventEntryAux2);
+        levelEntryAux1.addChild(eventEntryAux3);
 
         //Put the level entries on the trace entry
-        traceEntry.addChild(levelEntryAux);
         traceEntry.addChild(levelEntryAux1);
         traceEntry.addChild(levelEntryAux2);
+        traceEntry.addChild(levelEntryAux3);
 
         //Put the trace and the level in a map
-        levelEntryMap.put(trace, levelEntryAux);
         levelEntryMap.put(trace, levelEntryAux1);
         levelEntryMap.put(trace, levelEntryAux2);
+        levelEntryMap.put(trace, levelEntryAux3);
 
 
         if (parentTrace == getTrace()) {
@@ -443,25 +450,45 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
     // This class is the test for an Interval
     protected static class EventNode implements ITimeEvent {
 
-        private long fStartTime;
-        private long fEndTime;
+        private long fTime;
+        private long fDuration;
 
         int fNodeId;
         String fLabel;
+        int fValue;
 
-        public EventNode(String label, int nodeId, long startTime, long endTime) {
+        /** TimeGraphEntry matching this time event */
+        protected ITimeGraphEntry fEntry;
+
+        //Control variable is novalue:
+        private static final int NOVALUE = Integer.MIN_VALUE;
+
+
+        public EventNode(ITimeGraphEntry entry, String label, int nodeId, long time, long duration, int value) {
+            fEntry = entry;
             fNodeId = nodeId;
-            fStartTime = startTime;
-            fEndTime = endTime;
+            fTime = time;
+            fDuration = duration;
             fLabel = label;
+            fValue = value;
         }
 
-        public long getStartTime() {
-            return fStartTime;
+        public boolean hasValue() {
+            return (fValue != NOVALUE);
         }
 
-        public long getEndTime() {
-            return fEndTime;
+        public int getValue() {
+            return fValue;
+        }
+
+        @Override
+        public long getDuration() {
+            return fDuration;
+        }
+
+        @Override
+        public long getTime() {
+            return fTime;
         }
 
         public int getAttribute() {
@@ -472,17 +499,6 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         public ITimeGraphEntry getEntry() {
             // TODO Auto-generated method stub
             return null;
-        }
-
-        @Override
-        public long getTime() {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public long getDuration() {
-            return fEndTime - fStartTime;
         }
 
         @Override
