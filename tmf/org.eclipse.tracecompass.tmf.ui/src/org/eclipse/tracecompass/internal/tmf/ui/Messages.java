@@ -341,6 +341,13 @@ public class Messages extends NLS {
     //New Sample View:
     public static String SampleView_A;
     public static String SampleView_NameColumn;
+    public static String SampleView_FunctionColumn;
+    public static String SampleView_DepthColumn;
+    public static String SampleView_EntryTimeColumn;
+    public static String SampleView_ExitTimeColumn;
+
+    //Provider:
+    public static String SampleViewPresentationProvider_NodeColumn;
 
     public static String CopyToClipboardOperation_TaskName;
     public static String CopyToClipboardOperation_OutOfMemoryErrorTitle;

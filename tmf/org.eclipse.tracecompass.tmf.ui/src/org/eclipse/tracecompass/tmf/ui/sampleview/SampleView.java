@@ -78,10 +78,10 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
 
     // Messages:
     private static final String[] COLUMN_NAMES1 = new String[] {
-            Messages.CallStackView_FunctionColumn,
-            Messages.CallStackView_DepthColumn,
-            Messages.CallStackView_EntryTimeColumn,
-            Messages.CallStackView_ExitTimeColumn,
+            Messages.SampleView_FunctionColumn,
+            Messages.SampleView_DepthColumn,
+            Messages.SampleView_EntryTimeColumn,
+            Messages.SampleView_ExitTimeColumn,
             Messages.SampleView_A
     };
 
@@ -205,8 +205,8 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         levelEntryAux2 = new LevelEntry("level 2", 1, 0, 10);
 
         // Creating a eventEntry
-        eventEntryAux = new EventEntry("function 1", 37, 1, 15);
-        eventEntryAux1 = new EventEntry("function 2", 25, 9, 15);
+        eventEntryAux = new EventEntry("function 1", 37, 1, 15, 0);
+        eventEntryAux1 = new EventEntry("function 2", 25, 9, 15, 1);
 
         // Put as child
         List<ITimeEvent> eventList = new ArrayList<>(4);
@@ -215,7 +215,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         ITimeEvent event2 = new TimeEvent(eventEntryAux1, 7, 7, 1);
 
         eventEntryMap.put(levelEntryAux, eventEntryAux);
-        eventEntryMap.put(levelEntryAux1, eventEntryAux1);
+        eventEntryMap.put(levelEntryAux, eventEntryAux1);
 
         //put the event on the list:
         eventList.add(event);
@@ -229,7 +229,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
 
         //Put the level entries on the level
         levelEntryAux.addChild(eventEntryAux);
-        levelEntryAux1.addChild(eventEntryAux1);
+        levelEntryAux.addChild(eventEntryAux1);
 
         //Put the level entries on the trace entry
         traceEntry.addChild(levelEntryAux);
@@ -240,6 +240,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         levelEntryMap.put(trace, levelEntryAux);
         levelEntryMap.put(trace, levelEntryAux1);
         levelEntryMap.put(trace, levelEntryAux2);
+
 
         if (parentTrace == getTrace()) {
             synchronized (this) {
@@ -413,11 +414,12 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
     protected static class EventEntry extends TimeGraphEntry implements Comparable<EventEntry> {
 
         private final int fNodeId;
-        private final int fDepth = 2;
+        private final int fDepth;
 
-        public EventEntry(String name, int nodeId, long startTime, long endTime) {
+        public EventEntry(String name, int nodeId, long startTime, long endTime, int depth) {
             super(name, startTime, endTime);
             fNodeId = nodeId;
+            fDepth = depth;
         }
 
         public int getNodeId() {
@@ -433,7 +435,6 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
             if (this.fNodeId == obj.fNodeId) {
                 return 0;
             }
-
             return Integer.compare(this.fNodeId, obj.fNodeId);
 
         }

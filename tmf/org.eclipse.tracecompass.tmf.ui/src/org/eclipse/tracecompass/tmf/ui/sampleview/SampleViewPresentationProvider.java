@@ -68,7 +68,7 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
 
     @Override
     public String getStateTypeName(ITimeGraphEntry entry) {
-        return Messages.CallStackPresentationProvider_Thread;
+        return Messages.SampleViewPresentationProvider_NodeColumn;
     }
 
     @Override
@@ -120,7 +120,7 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
             return ret;
         }
         if (event instanceof TimeEvent) {
-            ret = new String("Time" + " function 1");
+            ret = new String("Function name" + " function");
         }
         return ret;
     }
