@@ -100,7 +100,7 @@ public final class SymbolProviderManager {
             }
         }
         // Those with a higher priority need to be on top
-        fProviders.sort(Comparator.comparingLong(o -> -o.priority));
+        fProviders.sort(Comparator.comparingLong(o -> o.priority));
     }
 
     /**

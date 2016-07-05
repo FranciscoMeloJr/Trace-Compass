@@ -18,6 +18,14 @@
             name="%memoryusage.view.name"
             restorable="true">
       </view>
+      <view
+            allowMultiple="false"
+            class="org.eclipse.tracecompass.internal.lttng2.ust.ui.analysis.callstack.FlameGraphView"
+            icon="icons/eview16/memory-usage.png"
+            id="org.eclipse.tracecompass.internal.lttng2.ust.ui.analysis.callstack.stats.flamegraph"
+            name="FlameGraph"
+            restorable="false">
+      </view>
    </extension>
    <extension
          point="org.eclipse.linuxtools.tmf.core.analysis">
@@ -38,6 +46,16 @@
                id="org.eclipse.linuxtools.lttng2.ust.analysis.memory">
          </analysisId>
       </output>
+      <module
+            analysis_module="org.eclipse.tracecompass.internal.lttng2.ust.ui.analysis.callstack.CallStackAnalysis"
+            automatic="false"
+            id="org.eclipse.tracecompass.internal.lttng2.ust.ui.analysis.callstack.stats"
+            name="Call stack statistics">
+         <tracetype
+               applies="true"
+               class="org.eclipse.tracecompass.lttng2.ust.core.trace.LttngUstTrace">
+         </tracetype>
+      </module>
    </extension>
    <extension
          point="org.eclipse.tracecompass.tmf.ui.symbolProvider">
