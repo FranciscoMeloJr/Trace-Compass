@@ -190,15 +190,19 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
 
         LevelEntry levelEntryAux = null;
         LevelEntry levelEntryAux1 = null;
+        LevelEntry levelEntryAux2 = null;
 
         EventEntry eventEntryAux = null;
         EventEntry eventEntryAux1 = null;
 
         // Creating the LevelEntry (key is the level)
-        levelEntryAux = new LevelEntry("level 0", 57, 0, 10);
+        levelEntryAux = new LevelEntry("level 0", 0, 0, 10);
 
-        // Creating the LevelEntry (key is the level)
-        levelEntryAux1 = new LevelEntry("level 1", 57, 0, 10);
+        // Creating the second LevelEntry
+        levelEntryAux1 = new LevelEntry("level 1", 1, 0, 10);
+
+        // Creating the second LevelEntry
+        levelEntryAux2 = new LevelEntry("level 2", 1, 0, 10);
 
         // Creating a eventEntry
         eventEntryAux = new EventEntry("function 1", 37, 1, 15);
@@ -213,26 +217,29 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         eventEntryMap.put(levelEntryAux, eventEntryAux);
         eventEntryMap.put(levelEntryAux1, eventEntryAux1);
 
+        //put the event on the list:
         eventList.add(event);
         eventList.add(event1);
         eventList.add(event2);
 
+        //Put the time events on the entry
         eventEntryAux.addEvent(event);
         eventEntryAux1.addEvent(event2);
         eventEntryAux1.addEvent(event1);
 
+        //Put the level entries on the level
         levelEntryAux.addChild(eventEntryAux);
         levelEntryAux1.addChild(eventEntryAux1);
 
+        //Put the level entries on the trace entry
         traceEntry.addChild(levelEntryAux);
         traceEntry.addChild(levelEntryAux1);
+        traceEntry.addChild(levelEntryAux2);
+
+        //Put the trace and the level in a map
         levelEntryMap.put(trace, levelEntryAux);
         levelEntryMap.put(trace, levelEntryAux1);
-
-        // Consumer:
-        /*
-         * Consumer omitted
-         */
+        levelEntryMap.put(trace, levelEntryAux2);
 
         if (parentTrace == getTrace()) {
             synchronized (this) {
@@ -244,7 +251,6 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
             // getTimeGraphViewer().refresh();
         }
         // start = end;
-        // refresh();
     }
 
     /**
