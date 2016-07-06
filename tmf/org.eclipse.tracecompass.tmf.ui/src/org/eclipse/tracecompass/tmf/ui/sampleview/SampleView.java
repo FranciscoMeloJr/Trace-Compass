@@ -14,6 +14,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.CCTAnalysisModule;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfileData;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfileVisitor;
@@ -189,7 +190,10 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         }
 
 
-        LevelEntry levelEntryAux1 = null;
+        LevelEntry levelEntryAux[];
+        levelEntryAux = new LevelEntry[fMap.size()];
+
+        LevelEntry levelEntryAux1  = null;
         LevelEntry levelEntryAux2 = null;
         LevelEntry levelEntryAux3 = null;
 
@@ -252,6 +256,14 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
             //getTimeGraphViewer().resetStartFinishTime();
         }
         // start = end;
+
+
+        Display.getDefault().asyncExec(new Runnable() {
+             @Override
+             public void run() {
+                getTimeGraphViewer().resetStartFinishTime();
+             }
+         });
 
     }
 
