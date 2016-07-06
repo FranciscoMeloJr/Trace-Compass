@@ -8,6 +8,7 @@ import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.Messages;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
 import org.eclipse.tracecompass.tmf.ui.sampleview.SampleView.EventEntry;
+import org.eclipse.tracecompass.tmf.ui.sampleview.SampleView.EventNode;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.StateItem;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
@@ -132,6 +133,14 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
         }
         if (bounds.width <= fAverageCharWidth) {
             return;
+        }
+        if(event instanceof EventNode)
+        {
+            EventNode entry = (EventNode) event;
+            String label = entry.getLabel();
+
+            gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
+            Utils.drawText(gc, label, bounds.x, bounds.y, bounds.width, bounds.height, true, true);
         }
         if (!(event instanceof EventEntry)) {
             return;

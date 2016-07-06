@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.CCTAnalysisModule;
@@ -37,6 +40,8 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphControl;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphSelection;
 
 /**
  * This sample class demonstrates how to plug-in a new workbench view. The view
@@ -103,7 +108,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         setFilterContentProvider(new SampleViewFilterContentProvider());
         setFilterLabelProvider(new SampleViewTreeLabelProvider());
 
-        setHandleTimeSignals(false);
+        //setHandleTimeSignals(false);
 
         // redraw();
         // Maybe setting the start and end time:
@@ -141,17 +146,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         // Get the data from the module
         Node<ProfileData> root = module.getTree();
         fRoot = root;
-        // Find the beginning and end of this view and set it using (i think)
-        // getTimeGraphWrapper or something.getTimeGraphViewer.setStart...
-        // getTimeGraphViewer().setSelectionRange(0, 25, true);
 
-        // Build your entries
-
-        // For each entry, get the list of events
-
-        // enjoy the show
-
-        // For the View:
         TraceEntry traceEntry = null;
         Map<ITmfTrace, LevelEntry> levelEntryMap = new HashMap<>();
         Map<LevelEntry, EventEntry> eventEntryMap = new HashMap<>();
@@ -199,12 +194,6 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         // Creating the LevelEntry (key is the level)
         levelEntryAux1 = new LevelEntry("Tree", 0, 0, 10);
 
-        // Creating the second LevelEntry
-        levelEntryAux2 = new LevelEntry("level 1", 1, 0, 10);
-
-        // Creating the second LevelEntry
-        levelEntryAux3 = new LevelEntry("level 2", 1, 0, 10);
-
         // Creating a eventEntry
         eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
         eventEntryAux2 = new EventEntry("level 1", 25, 9, 15, 1);
@@ -212,7 +201,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
 
         // Put as child
         List<ITimeEvent> eventList = new ArrayList<>(4);
-        EventNode event1 = new EventNode(eventEntryAux1, "event node", 27, 1, 14, 1); //so it will end at 8
+        EventNode event1 = new EventNode(eventEntryAux1, "Root", 27, 1, 14, 1); //so it will end at 8
         ITimeEvent event2 = new TimeEvent(eventEntryAux2, 1, 5, 1); //so it will end at 14
         ITimeEvent event3 = new TimeEvent(eventEntryAux2, 7, 7, 1);
         ITimeEvent event4 = new TimeEvent(eventEntryAux3, 7, 4, 1);
@@ -240,8 +229,6 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
 
         //Put the level entries on the trace entry
         traceEntry.addChild(levelEntryAux1);
-        traceEntry.addChild(levelEntryAux2);
-        traceEntry.addChild(levelEntryAux3);
 
         //Put the trace and the level in a map
         levelEntryMap.put(trace, levelEntryAux1);
@@ -373,6 +360,22 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
                 synchingToTime(0);
             }
         });
+
+        getTimeGraphViewer().getTimeGraphControl().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseDoubleClick(MouseEvent e) {
+                TimeGraphControl timeGraphControl = getTimeGraphViewer().getTimeGraphControl();
+                ISelection selection = timeGraphControl.getSelection();
+                if (selection instanceof TimeGraphSelection) {
+                    Object o = ((TimeGraphSelection) selection).getFirstElement();
+                    if (o instanceof EventEntry) {
+                        EventEntry event = (EventEntry) o;
+                        System.out.println(event);
+                    }
+                }
+            }
+        });
+
     }
 
     // TraceEntry is a trace
@@ -437,6 +440,19 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
             return fDepth;
         }
 
+        public long getStart() {
+            return super.getStartTime();
+        }
+
+        @Override
+        public String getName() {
+            return super.getName();
+        }
+        @Override
+        public String toString() {
+            return this.getName()+ " " + this.getStart();
+        }
+
         @Override
         public int compareTo(EventEntry obj) {
             if (this.fNodeId == obj.fNodeId) {
@@ -481,6 +497,10 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
             return fValue;
         }
 
+        public String getLabel() {
+            return fLabel;
+        }
+
         @Override
         public long getDuration() {
             return fDuration;
@@ -497,8 +517,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
 
         @Override
         public ITimeGraphEntry getEntry() {
-            // TODO Auto-generated method stub
-            return null;
+            return fEntry;
         }
 
         @Override
@@ -574,7 +593,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
          * provider.getSymbolText(processId, timestamp, address); if (symbol !=
          * null) { name = symbol; } } }
          */
-        return "0xfunction";
+        return "0xfunction"; //$NON-NLS-1$
     }
 
     // Copied methods:
