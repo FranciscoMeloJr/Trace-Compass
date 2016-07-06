@@ -108,7 +108,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         setFilterContentProvider(new SampleViewFilterContentProvider());
         setFilterLabelProvider(new SampleViewTreeLabelProvider());
 
-        //setHandleTimeSignals(false);
+        setHandleTimeSignals(false);
 
         // redraw();
         // Maybe setting the start and end time:
@@ -124,6 +124,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
     @Override
     protected void buildEntryList(final ITmfTrace trace, final ITmfTrace parentTrace, final IProgressMonitor monitor) {
         System.out.println("buildEntryList " + trace.getName());
+
         Iterable<CCTAnalysisModule> iter = TmfTraceUtils.getAnalysisModulesOfClass(trace, CCTAnalysisModule.class);
         CCTAnalysisModule module = null;
 
@@ -177,11 +178,16 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         traceEntry = new TraceEntry(trace.getName(), startTime, endTime);
         addToEntryList(parentTrace, Collections.singletonList(traceEntry));
 
-        System.out.println("Tree");
+        System.out.println("Tree:");
         map = createHash(root);
 
         // Making it global:
         fMap = map;
+
+        for ( KeyTree key : fMap.keySet()) {
+            System.out.println("Label " +  key.getLabel() + " level " + key.getLevel());
+        }
+
 
         LevelEntry levelEntryAux1 = null;
         LevelEntry levelEntryAux2 = null;
@@ -201,10 +207,10 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
 
         // Put as child
         List<ITimeEvent> eventList = new ArrayList<>(4);
-        EventNode event1 = new EventNode(eventEntryAux1, "Root", 27, 1, 14, 1); //so it will end at 8
-        ITimeEvent event2 = new TimeEvent(eventEntryAux2, 1, 5, 1); //so it will end at 14
-        ITimeEvent event3 = new TimeEvent(eventEntryAux2, 7, 7, 1);
-        ITimeEvent event4 = new TimeEvent(eventEntryAux3, 7, 4, 1);
+        EventNode event1 = new EventNode(eventEntryAux1, "Root", 27, 1, 14, 1); //entry, label, id, begin, end, display
+        //EventNode event2 = new EventNode(eventEntryAux2, "0x4006a3", 5, 1, 5, 1); //ITimeEvent event2 = new TimeEvent(eventEntryAux2, 1, 5, 1); //so it will end at 14
+        EventNode event3 = new EventNode(eventEntryAux2, "0x400666", 6, 7, 7, 1); //ITimeEvent event3 = new TimeEvent(eventEntryAux2, 7, 7, 1);
+        EventNode event4 = new EventNode(eventEntryAux3, "0x4005f6", 6, 7, 7, 1); //ITimeEvent event4 = new TimeEvent(eventEntryAux3, 7, 4, 1);
 
         eventEntryMap.put(levelEntryAux1, eventEntryAux1);
         eventEntryMap.put(levelEntryAux1, eventEntryAux2);
@@ -212,14 +218,14 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
 
         //put the event on the list:
         eventList.add(event1);
-        eventList.add(event2);
+        //eventList.add(event2);
         eventList.add(event3);
         eventList.add(event4);
 
         //Put the time events on the entry
         eventEntryAux1.addEvent(event1);
         eventEntryAux2.addEvent(event3);
-        eventEntryAux2.addEvent(event2);
+        //eventEntryAux2.addEvent(event2);
         eventEntryAux3.addEvent(event4);
 
         //Put the level entries on the level
@@ -235,7 +241,6 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         levelEntryMap.put(trace, levelEntryAux2);
         levelEntryMap.put(trace, levelEntryAux3);
 
-
         if (parentTrace == getTrace()) {
             synchronized (this) {
                 setStartTime(0);
@@ -244,8 +249,10 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
             synchingToTime(0);//getTimeGraphViewer().getSelectionBegin());
             refresh();
             // getTimeGraphViewer().refresh();
+            //getTimeGraphViewer().resetStartFinishTime();
         }
         // start = end;
+
     }
 
     /**
