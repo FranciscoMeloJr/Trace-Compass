@@ -252,7 +252,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
             }
             synchingToTime(0);//getTimeGraphViewer().getSelectionBegin());
             refresh();
-            // getTimeGraphViewer().refresh();
+            //getTimeGraphViewer().refresh();
             //getTimeGraphViewer().resetStartFinishTime();
         }
         // start = end;

@@ -171,6 +171,9 @@ public class TimeGraphViewer implements ITimeDataProvider, IMarkerAxisListener, 
     private Action fPreviousMarkerAction;
     private MenuManager fMarkersMenu;
 
+    //New action
+    private Action fSelectAction;
+
     /** The list of bookmarks */
     private final List<IMarkerEvent> fBookmarks = new ArrayList<>();
 
@@ -1905,7 +1908,29 @@ public class TimeGraphViewer implements ITimeDataProvider, IMarkerAxisListener, 
         }
         return fResetScaleAction;
     }
-
+    // New function
+    /**
+     * Get the reset scale action.
+     *
+     * @return The Action object
+     * @since 2.0
+     */
+    public Action getSelectAction() {
+        if (fSelectAction == null) {
+            // resetScale
+            fSelectAction = new Action() {
+                @Override
+                public void run() {
+                    //resetStartFinishTime();
+                    System.out.println("New Bottom");
+                }
+            };
+            fSelectAction.setText(Messages.TmfTimeGraphViewer_SelectActionNameText);
+            fSelectAction.setToolTipText(Messages.TmfTimeGraphViewer_SelectActionToolTipText);
+            fSelectAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_HOME_MENU));
+        }
+        return fSelectAction;
+    }
     /**
      * Get the show legend action.
      *

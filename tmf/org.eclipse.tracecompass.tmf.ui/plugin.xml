@@ -103,6 +103,7 @@
             name="New Category">
       </category>
       <view
+            allowMultiple="true"
             category="org.eclipse.tracecompass.tmf.ui"
             class="org.eclipse.tracecompass.tmf.ui.sampleview.SampleView"
             icon="icons/sample.gif"
