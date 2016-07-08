@@ -188,14 +188,23 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         // Making it global:
         fMap = map;
 
+        //Used to populate the string:
+        populateStringArray();
+
         for ( KeyTree key : fMap.keySet()) {
             System.out.println("Label " +  key.getLabel() + " level " + key.getLevel());
         }
 
-
         LevelEntry levelEntryAux[];
         levelEntryAux = new LevelEntry[fMap.size()];
 
+        // create the event entry:
+        // EventEntry eventEntryAux[] = createEventEntry();
+
+        //create the node entries:
+        // EventNode eventAux[] = createEventNodes();
+
+        //put the
         LevelEntry levelEntryAux1  = null;
         LevelEntry levelEntryAux2 = null;
         LevelEntry levelEntryAux3 = null;
@@ -269,6 +278,35 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
          });
 
     }
+    //this function creates the level Entries
+    private EventEntry[] createEventEntry()
+    {
+        EventEntry Aux[];
+        //Go through the tree and creates the entries:
+        //eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
+        for (KeyTree key : fMap.keySet()) {
+            //key.getLabel();
+            int temp = key.getLevel();
+            FUNCTION_NAMES.add(temp);
+        }
+
+        return Aux;
+    }
+    //This function create the entries
+    private EventNode[] createEventNodes()
+    {
+        //Go through the tree and creates the nodes:
+        EventNode Aux[];
+
+        for (KeyTree key : fMap.keySet()) {
+            //key.getLabel();
+            FUNCTION_NAMES.add(key.getLabel());
+        }
+
+
+        return Aux;
+    }
+    //This function put them together.
 
     //This function populates the Array of Strings:
     private void populateStringArray()
