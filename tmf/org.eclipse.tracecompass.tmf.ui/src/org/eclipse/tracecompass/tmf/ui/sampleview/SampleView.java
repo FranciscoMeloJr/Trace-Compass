@@ -95,6 +95,9 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
             Messages.SampleView_NameColumn
     };
 
+    // Names of the functions:
+    List<String> FUNCTION_NAMES = new ArrayList<>();
+
     /**
      * The constructor.
      */
@@ -267,6 +270,14 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
 
     }
 
+    //This function populates the Array of Strings:
+    private void populateStringArray()
+    {
+        for (KeyTree key : fMap.keySet()) {
+            //key.getLabel();
+            FUNCTION_NAMES.add(key.getLabel());
+        }
+    }
     /**
      * This method creates the status of the Events
      *
