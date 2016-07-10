@@ -188,11 +188,11 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         // Making it global:
         fMap = map;
 
-        //Used to populate the string:
+        // Used to populate the string:
         populateStringArray();
 
-        for ( KeyTree key : fMap.keySet()) {
-            System.out.println("Label " +  key.getLabel() + " level " + key.getLevel());
+        for (KeyTree key : fMap.keySet()) {
+            System.out.println("Label " + key.getLabel() + " level " + key.getLevel());
         }
 
         LevelEntry levelEntryAux[];
@@ -201,11 +201,11 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         // create the event entry:
         // EventEntry eventEntryAux[] = createEventEntry();
 
-        //create the node entries:
-        // EventNode eventAux[] = createEventNodes();
+        // create the node entries:
+        // EventNode eventAux[] = createEventNodes()
 
-        //put the
-        LevelEntry levelEntryAux1  = null;
+        // put the
+        LevelEntry levelEntryAux1 = null;
         LevelEntry levelEntryAux2 = null;
         LevelEntry levelEntryAux3 = null;
 
@@ -223,36 +223,57 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
 
         // Put as child
         List<ITimeEvent> eventList = new ArrayList<>(4);
-        EventNode event1 = new EventNode(eventEntryAux1, "Root", 27, 1, 14, 1); //entry, label, id, begin, end, display
-        //EventNode event2 = new EventNode(eventEntryAux2, "0x4006a3", 5, 1, 5, 1); //ITimeEvent event2 = new TimeEvent(eventEntryAux2, 1, 5, 1); //so it will end at 14
-        EventNode event3 = new EventNode(eventEntryAux2, "0x400666", 6, 7, 7, 1); //ITimeEvent event3 = new TimeEvent(eventEntryAux2, 7, 7, 1);
-        EventNode event4 = new EventNode(eventEntryAux3, "0x4005f6", 6, 7, 7, 1); //ITimeEvent event4 = new TimeEvent(eventEntryAux3, 7, 4, 1);
+        EventNode event1 = new EventNode(eventEntryAux1, "Root", 27, 1, 14, 1); // entry,
+                                                                                // label,
+                                                                                // id,
+                                                                                // begin,
+                                                                                // end,
+                                                                                // display
+        // EventNode event2 = new EventNode(eventEntryAux2, "0x4006a3", 5, 1, 5,
+        // 1); //ITimeEvent event2 = new TimeEvent(eventEntryAux2, 1, 5, 1);
+        // //so it will end at 14
+        EventNode event3 = new EventNode(eventEntryAux2, "0x400666", 6, 7, 7, 1); // ITimeEvent
+                                                                                  // event3
+                                                                                  // =
+                                                                                  // new
+                                                                                  // TimeEvent(eventEntryAux2,
+                                                                                  // 7,
+                                                                                  // 7,
+                                                                                  // 1);
+        EventNode event4 = new EventNode(eventEntryAux3, "0x4005f6", 6, 7, 7, 1); // ITimeEvent
+                                                                                  // event4
+                                                                                  // =
+                                                                                  // new
+                                                                                  // TimeEvent(eventEntryAux3,
+                                                                                  // 7,
+                                                                                  // 4,
+                                                                                  // 1);
 
         eventEntryMap.put(levelEntryAux1, eventEntryAux1);
         eventEntryMap.put(levelEntryAux1, eventEntryAux2);
         eventEntryMap.put(levelEntryAux1, eventEntryAux3);
 
-        //put the event on the list:
+        // put the event on the list:
         eventList.add(event1);
-        //eventList.add(event2);
+        // eventList.add(event2);
         eventList.add(event3);
         eventList.add(event4);
 
-        //Put the time events on the entry
+        // Put the time events on the entry
         eventEntryAux1.addEvent(event1);
         eventEntryAux2.addEvent(event3);
-        //eventEntryAux2.addEvent(event2);
+        // eventEntryAux2.addEvent(event2);
         eventEntryAux3.addEvent(event4);
 
-        //Put the level entries on the level
+        // Put the level entries on the level
         levelEntryAux1.addChild(eventEntryAux1);
         levelEntryAux1.addChild(eventEntryAux2);
         levelEntryAux1.addChild(eventEntryAux3);
 
-        //Put the level entries on the trace entry
+        // Put the level entries on the trace entry
         traceEntry.addChild(levelEntryAux1);
 
-        //Put the trace and the level in a map
+        // Put the trace and the level in a map
         levelEntryMap.put(trace, levelEntryAux1);
         levelEntryMap.put(trace, levelEntryAux2);
         levelEntryMap.put(trace, levelEntryAux3);
@@ -262,60 +283,66 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
                 setStartTime(0);
                 setEndTime(16);
             }
-            synchingToTime(0);//getTimeGraphViewer().getSelectionBegin());
+            synchingToTime(0);// getTimeGraphViewer().getSelectionBegin());
             refresh();
-            //getTimeGraphViewer().refresh();
-            //getTimeGraphViewer().resetStartFinishTime();
+            // getTimeGraphViewer().refresh();
+            // getTimeGraphViewer().resetStartFinishTime();
         }
         // start = end;
 
-
         Display.getDefault().asyncExec(new Runnable() {
-             @Override
-             public void run() {
+            @Override
+            public void run() {
                 getTimeGraphViewer().resetStartFinishTime();
-             }
-         });
+            }
+        });
 
     }
-    //this function creates the level Entries
-    private EventEntry[] createEventEntry()
-    {
-        EventEntry Aux[];
-        //Go through the tree and creates the entries:
-        //eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
-        for (KeyTree key : fMap.keySet()) {
-            //key.getLabel();
-            int temp = key.getLevel();
-            FUNCTION_NAMES.add(temp);
+
+    // this function creates the level Entries
+    private EventEntry[] createEventEntry(long entry, long exit) {
+        EventEntry Aux[] = null;
+        // Go through the tree and creates the entries:
+        // eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
+        int counter = fMap.size();
+        Aux = new EventEntry[counter];
+        for (int i = 0; i < counter; i++) {
+            Aux[i] = new EventEntry("level " + String.valueOf(i), 37, entry, exit, 0);
+            i++;
         }
 
         return Aux;
     }
-    //This function create the entries
-    private EventNode[] createEventNodes()
-    {
-        //Go through the tree and creates the nodes:
-        EventNode Aux[];
 
+    // This function create the entries
+    private EventNode[] createEventNodes(EventEntry[] arrayEventEntry) {
+        // Go through the tree and creates the nodes:
+        EventNode Aux[] = null;
+        int i;
         for (KeyTree key : fMap.keySet()) {
-            //key.getLabel();
+            // EventNode event4 = new EventNode(eventEntryAux3, "0x4005f6", 6,
+            // 7, 7, 1);
+            // how to link the event node with eventEntry
+            // Problem, how can we know that the
             FUNCTION_NAMES.add(key.getLabel());
+            if (fMap.get(key) != null) {
+                Aux[i] = new EventNode(arrayEventEntry[key.getLevel()], key.getLabel(), fMap.get(key).getNodeId(), 7, 7, 1);
+                i++;
+            }
         }
-
 
         return Aux;
     }
-    //This function put them together.
+    // This function put them together.
 
-    //This function populates the Array of Strings:
-    private void populateStringArray()
-    {
+    // This function populates the Array of Strings:
+    private void populateStringArray() {
         for (KeyTree key : fMap.keySet()) {
-            //key.getLabel();
+            // key.getLabel();
             FUNCTION_NAMES.add(key.getLabel());
         }
     }
+
     /**
      * This method creates the status of the Events
      *
@@ -516,9 +543,10 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         public String getName() {
             return super.getName();
         }
+
         @Override
         public String toString() {
-            return this.getName()+ " " + this.getStart();
+            return this.getName() + " " + this.getStart();
         }
 
         @Override
@@ -544,9 +572,8 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         /** TimeGraphEntry matching this time event */
         protected ITimeGraphEntry fEntry;
 
-        //Control variable is novalue:
+        // Control variable is novalue:
         private static final int NOVALUE = Integer.MIN_VALUE;
-
 
         public EventNode(ITimeGraphEntry entry, String label, int nodeId, long time, long duration, int value) {
             fEntry = entry;
