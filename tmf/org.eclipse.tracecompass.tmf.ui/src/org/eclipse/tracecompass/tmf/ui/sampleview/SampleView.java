@@ -223,31 +223,9 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
 
         // Put as child
         List<ITimeEvent> eventList = new ArrayList<>(4);
-        EventNode event1 = new EventNode(eventEntryAux1, "Root", 27, 1, 14, 1); // entry,
-                                                                                // label,
-                                                                                // id,
-                                                                                // begin,
-                                                                                // end,
-                                                                                // display
-        // EventNode event2 = new EventNode(eventEntryAux2, "0x4006a3", 5, 1, 5,
-        // 1); //ITimeEvent event2 = new TimeEvent(eventEntryAux2, 1, 5, 1);
-        // //so it will end at 14
-        EventNode event3 = new EventNode(eventEntryAux2, "0x400666", 6, 7, 7, 1); // ITimeEvent
-                                                                                  // event3
-                                                                                  // =
-                                                                                  // new
-                                                                                  // TimeEvent(eventEntryAux2,
-                                                                                  // 7,
-                                                                                  // 7,
-                                                                                  // 1);
-        EventNode event4 = new EventNode(eventEntryAux3, "0x4005f6", 6, 7, 7, 1); // ITimeEvent
-                                                                                  // event4
-                                                                                  // =
-                                                                                  // new
-                                                                                  // TimeEvent(eventEntryAux3,
-                                                                                  // 7,
-                                                                                  // 4,
-                                                                                  // 1);
+        EventNode event1 = new EventNode(eventEntryAux1, "Root", 27, 1, 14, 1);
+        EventNode event3 = new EventNode(eventEntryAux2, "0x400666", 6, 7, 7, 1);
+        EventNode event4 = new EventNode(eventEntryAux3, "0x4005f6", 6, 7, 7, 1);
 
         eventEntryMap.put(levelEntryAux1, eventEntryAux1);
         eventEntryMap.put(levelEntryAux1, eventEntryAux2);
@@ -314,24 +292,23 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         return Aux;
     }
 
-    // This function create the entries
+    // This function create the entries, it takes as argument the
+    // arrayEventEntry
     private EventNode[] createEventNodes(EventEntry[] arrayEventEntry) {
         // Go through the tree and creates the nodes:
-        EventNode Aux[] = null;
-        int i;
+        EventNode arrayEventNodes[] = null;
+        arrayEventNodes = new EventNode[10];
+        int i = 0;
         for (KeyTree key : fMap.keySet()) {
-            // EventNode event4 = new EventNode(eventEntryAux3, "0x4005f6", 6,
-            // 7, 7, 1);
-            // how to link the event node with eventEntry
-            // Problem, how can we know that the
+
             FUNCTION_NAMES.add(key.getLabel());
             if (fMap.get(key) != null) {
-                Aux[i] = new EventNode(arrayEventEntry[key.getLevel()], key.getLabel(), fMap.get(key).getNodeId(), 7, 7, 1);
+                arrayEventNodes[i] = new EventNode(arrayEventEntry[key.getLevel()], key.getLabel(), fMap.get(key).getNodeId(), 7, 7, 1);
                 i++;
             }
         }
 
-        return Aux;
+        return arrayEventNodes;
     }
     // This function put them together.
 
