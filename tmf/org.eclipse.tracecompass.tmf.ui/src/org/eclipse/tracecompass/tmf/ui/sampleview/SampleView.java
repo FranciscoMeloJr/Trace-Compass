@@ -196,13 +196,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         }
 
         LevelEntry levelEntryAux[];
-        levelEntryAux = new LevelEntry[fMap.size()];
-
-        // create the event entry:
-        // EventEntry eventEntryAux[] = createEventEntry();
-
-        // create the node entries:
-        // EventNode eventAux[] = createEventNodes()
+        levelEntryAux = new LevelEntry[1];
 
         // put the
         LevelEntry levelEntryAux1 = null;
@@ -216,10 +210,16 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         // Creating the LevelEntry (key is the level)
         levelEntryAux1 = new LevelEntry("Tree", 0, 0, 10);
 
+        //create the event entry:
+        EventEntry eventEntryAux[] = createEventEntry(Long.valueOf(1), Long.valueOf(15), levelEntryAux1, eventEntryMap);
+
         // Creating a eventEntry
         eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
         eventEntryAux2 = new EventEntry("level 1", 25, 9, 15, 1);
         eventEntryAux3 = new EventEntry("level 2", 25, 9, 15, 1);
+
+        // create the node entries:
+        EventNode eventAux[] = createEventNodes(eventEntryAux);
 
         // Put as child
         List<ITimeEvent> eventList = new ArrayList<>(4);
@@ -227,6 +227,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         EventNode event3 = new EventNode(eventEntryAux2, "0x400666", 6, 7, 7, 1);
         EventNode event4 = new EventNode(eventEntryAux3, "0x4005f6", 6, 7, 7, 1);
 
+        //run through the eventEntries (levels) and link with tree(levelEntryAux)
         eventEntryMap.put(levelEntryAux1, eventEntryAux1);
         eventEntryMap.put(levelEntryAux1, eventEntryAux2);
         eventEntryMap.put(levelEntryAux1, eventEntryAux3);
@@ -277,24 +278,28 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
 
     }
 
-    // this function creates the level Entries
-    private EventEntry[] createEventEntry(long entry, long exit) {
-        EventEntry Aux[] = null;
+    // this function creates the level Entries, takes the trace as argument, and a map
+    private EventEntry[] createEventEntry(long entry, long exit, LevelEntry t, Map<LevelEntry, EventEntry> eventEntryMap) {
+        System.out.println("create Event Entry");
+        EventEntry arrayEventEntries[] = null;
         // Go through the tree and creates the entries:
         // eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
         int counter = fMap.size();
-        Aux = new EventEntry[counter];
+        arrayEventEntries = new EventEntry[counter];
         for (int i = 0; i < counter; i++) {
-            Aux[i] = new EventEntry("level " + String.valueOf(i), 37, entry, exit, 0);
+            arrayEventEntries[i] = new EventEntry("level " + String.valueOf(i), 37, entry, exit, 0);
+            eventEntryMap.put(t,  arrayEventEntries[i]);
             i++;
         }
 
-        return Aux;
+        System.out.println(arrayEventEntries.length);
+        return arrayEventEntries;
     }
 
-    // This function create the entries, it takes as argument the
-    // arrayEventEntry
+    // This function create the entries, it takes as argument the array of Event Entries
+    // The map is also used to correlate with the event nodes
     private EventNode[] createEventNodes(EventEntry[] arrayEventEntry) {
+        System.out.println("create Event Nodes");
         // Go through the tree and creates the nodes:
         EventNode arrayEventNodes[] = null;
         arrayEventNodes = new EventNode[10];
@@ -307,17 +312,20 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
                 i++;
             }
         }
-
+        System.out.println(arrayEventNodes.length);
         return arrayEventNodes;
     }
     // This function put them together.
 
     // This function populates the Array of Strings:
     private void populateStringArray() {
+        System.out.println("Populate the String array");
         for (KeyTree key : fMap.keySet()) {
             // key.getLabel();
             FUNCTION_NAMES.add(key.getLabel());
         }
+
+        System.out.println(FUNCTION_NAMES.size());
     }
 
     /**
