@@ -29,16 +29,13 @@ import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileD
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileTraversal.KeyTree;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.Messages;
-import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.signal.TmfWindowRangeUpdatedSignal;
-import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestampDelta;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
-import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider;
 import org.eclipse.tracecompass.tmf.ui.symbols.SymbolProviderManager;
@@ -105,8 +102,6 @@ public class SampleView extends AbstractTimeGraphView {
 
     // Names of the functions:
     List<String> FUNCTION_NAMES = new ArrayList<>();
-    private IAction fHierarchicalAction;
-    private IAction fFlatAction;
 
     /**
      * The constructor.
@@ -263,22 +258,28 @@ public class SampleView extends AbstractTimeGraphView {
         });
 
     }
-    
+
     @Override
     protected void fillLocalMenu(IMenuManager manager) {
         super.fillLocalMenu(manager);
-        
-        MenuManager item = new MenuManager("xx");
-        //fFlatAction = createFlatAction();
-        item.add(fTimeGraphWrapper.getTimeGraphViewer().getSelectAction());
 
-        //fHierarchicalAction = createHierarchicalAction();
-        item.add(fTimeGraphWrapper.getTimeGraphViewer().getSelectAction());
+        MenuManager item = new MenuManager("Functions");
+        //fFlatAction = createFlatAction();
+        //fFlatAction = createFlatAction();
+        for(int i = 0 ; i< FUNCTION_NAMES.size(); i++) {
+            System.out.println(FUNCTION_NAMES.get(i));
+            item.add(createFunctionSelection(FUNCTION_NAMES.get(i)));
+        }
+
+        //Test just to put information on the
+        for(int i = 0 ; i<3; i++) {
+            item.add(createFunctionSelection(Integer.toString(i)));
+        }
 
         manager.add(new Separator());
         manager.add(item);
     }
-    
+
     @Override
     protected void fillLocalToolBar(IToolBarManager manager) {
         super.fillLocalToolBar(manager);
@@ -287,8 +288,8 @@ public class SampleView extends AbstractTimeGraphView {
         manager.add(fTimeGraphWrapper.getTimeGraphViewer().getSelectAction());
     }
 
-    private static IAction createFlatAction() {
-        IAction action = new Action("FlatAction", IAction.AS_RADIO_BUTTON) {
+    private static IAction createFunctionSelection(String name) {
+        IAction action = new Action(name, IAction.AS_RADIO_BUTTON) {
             @Override
             public void run() {
                 System.out.println("X");
@@ -296,18 +297,6 @@ public class SampleView extends AbstractTimeGraphView {
 
         };
         action.setToolTipText("Tip1");
-        return action;
-    }
-
-    private static IAction createHierarchicalAction() {
-        IAction action = new Action("HierarchicalAction", IAction.AS_RADIO_BUTTON) {
-            @Override
-            public void run() {
-                System.out.println("X");
-            }
-        };
-
-        action.setToolTipText("Tip2");
         return action;
     }
 
