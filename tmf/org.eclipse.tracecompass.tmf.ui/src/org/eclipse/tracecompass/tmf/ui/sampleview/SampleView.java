@@ -9,6 +9,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
@@ -23,13 +29,16 @@ import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileD
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileTraversal.KeyTree;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.Messages;
+import org.eclipse.tracecompass.statesystem.core.ITmfStateSystem;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.signal.TmfWindowRangeUpdatedSignal;
+import org.eclipse.tracecompass.tmf.core.statesystem.TmfStateSystemAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestampDelta;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
+import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider;
 import org.eclipse.tracecompass.tmf.ui.symbols.SymbolProviderManager;
@@ -67,8 +76,7 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphSelect
  * graph view on the right side
  */
 
-public class SampleView extends AbstractTimeGraphView {// extends CallStackView
-                                                       // { //
+public class SampleView extends AbstractTimeGraphView {
 
     /**
      * The ID of the view as specified by the extension.
@@ -97,6 +105,8 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
 
     // Names of the functions:
     List<String> FUNCTION_NAMES = new ArrayList<>();
+    private IAction fHierarchicalAction;
+    private IAction fFlatAction;
 
     /**
      * The constructor.
@@ -223,8 +233,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         }
 
         // Put the level entries on the level
-        for(int i = 0 ; i< eventEntryAux.length ; i++)
-        {
+        for (int i = 0; i < eventEntryAux.length; i++) {
             levelEntryAux[0].addChild(eventEntryAux[i]);
         }
 
@@ -254,6 +263,53 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         });
 
     }
+    
+    @Override
+    protected void fillLocalMenu(IMenuManager manager) {
+        super.fillLocalMenu(manager);
+        
+        MenuManager item = new MenuManager("xx");
+        //fFlatAction = createFlatAction();
+        item.add(fTimeGraphWrapper.getTimeGraphViewer().getSelectAction());
+
+        //fHierarchicalAction = createHierarchicalAction();
+        item.add(fTimeGraphWrapper.getTimeGraphViewer().getSelectAction());
+
+        manager.add(new Separator());
+        manager.add(item);
+    }
+    
+    @Override
+    protected void fillLocalToolBar(IToolBarManager manager) {
+        super.fillLocalToolBar(manager);
+
+        // New implementation
+        manager.add(fTimeGraphWrapper.getTimeGraphViewer().getSelectAction());
+    }
+
+    private static IAction createFlatAction() {
+        IAction action = new Action("FlatAction", IAction.AS_RADIO_BUTTON) {
+            @Override
+            public void run() {
+                System.out.println("X");
+            }
+
+        };
+        action.setToolTipText("Tip1");
+        return action;
+    }
+
+    private static IAction createHierarchicalAction() {
+        IAction action = new Action("HierarchicalAction", IAction.AS_RADIO_BUTTON) {
+            @Override
+            public void run() {
+                System.out.println("X");
+            }
+        };
+
+        action.setToolTipText("Tip2");
+        return action;
+    }
 
     // this function creates the level Entries, takes the trace as argument, and
     // a map
@@ -264,7 +320,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         // eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
         int counter = fMap.size();
         arrayEventEntries = new EventEntry[counter];
-        for (int i = 0; i <counter; i++) {
+        for (int i = 0; i < counter; i++) {
             arrayEventEntries[i] = new EventEntry("level " + String.valueOf(i), i, entry, exit, 0);
             System.out.println("EventEntry:" + arrayEventEntries[i].getName());
             eventEntryMap.put(t, arrayEventEntries[i]);
@@ -275,7 +331,6 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
     }
 
     // This function create the entries, it takes as argument the array of Event
-    // Entries
     // The map is also used to correlate with the event nodes
     private EventNode[] createEventNodes(EventEntry[] arrayEventEntry) {
         System.out.println("create Event Nodes");
@@ -286,7 +341,7 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         for (KeyTree key : fMap.keySet()) {
             if (fMap.get(key) != null) {
                 arrayEventNodes[i] = new EventNode(arrayEventEntry[key.getLevel()], key.getLabel(), fMap.get(key).getNodeId(), 7, 7, 1);
-                //put the events on the entry:
+                // put the events on the entry:
                 System.out.println("Adding on level " + key.getLevel() + " Node label: " + arrayEventNodes[i].getLabel());
                 System.out.println("on" + arrayEventEntry[i].getName());
                 arrayEventEntry[key.getLevel()].addEvent(arrayEventNodes[i]);
@@ -567,6 +622,10 @@ public class SampleView extends AbstractTimeGraphView {// extends CallStackView
         @Override
         public long getDuration() {
             return fDuration;
+        }
+
+        public int getDepth() {
+            return 3;
         }
 
         @Override

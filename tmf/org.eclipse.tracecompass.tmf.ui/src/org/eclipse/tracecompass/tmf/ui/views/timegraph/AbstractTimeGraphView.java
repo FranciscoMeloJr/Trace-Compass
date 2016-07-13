@@ -164,8 +164,9 @@ public abstract class AbstractTimeGraphView extends TmfView implements ITmfTimeA
     // Fields
     // ------------------------------------------------------------------------
 
-    /** The timegraph wrapper */
-    private ITimeGraphWrapper fTimeGraphWrapper;
+    /** The timegraph wrapper
+     * @since 2.0*/
+    protected ITimeGraphWrapper fTimeGraphWrapper;
 
     private AtomicInteger fDirty = new AtomicInteger();
 
@@ -2122,8 +2123,6 @@ public abstract class AbstractTimeGraphView extends TmfView implements ITmfTimeA
         manager.add(fTimeGraphWrapper.getTimeGraphViewer().getZoomOutAction());
         manager.add(new Separator());
 
-        //New implementation
-        manager.add(fTimeGraphWrapper.getTimeGraphViewer().getSelectAction());
     }
 
     /**
