@@ -211,7 +211,7 @@ public class SampleView extends AbstractTimeGraphView {
         // Creating a eventEntry
 
         // create the node entries:
-        EventNode eventAux[] = createEventNodes(eventEntryAux);
+         ArrayList<EventNode> eventAux = createEventNodes(eventEntryAux);
 
         // Put as child
         List<ITimeEvent> eventList = new ArrayList<>(4);
@@ -223,8 +223,8 @@ public class SampleView extends AbstractTimeGraphView {
         }
 
         // put the event on the list:
-        for (int i = 0; i < eventAux.length; i++) {
-            eventList.add(eventAux[i]);
+        for (int i = 0; i < eventAux.size(); i++) {
+            eventList.add(eventAux.get(i));
         }
 
         // Put the level entries on the level
@@ -309,8 +309,13 @@ public class SampleView extends AbstractTimeGraphView {
         // eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
         int counter = fMap.size();
         arrayEventEntries = new EventEntry[counter];
+        ArrayList<EventEntry> arrayEntries = new ArrayList<>();
+
         for (int i = 0; i < counter; i++) {
-            arrayEventEntries[i] = new EventEntry("level " + String.valueOf(i), i, entry, exit, 0);
+            EventEntry temp = new EventEntry("level " + String.valueOf(i), i, entry, exit, 0);
+            arrayEventEntries[i] = temp;
+            arrayEntries.add(temp);
+
             System.out.println("EventEntry:" + arrayEventEntries[i].getName());
             eventEntryMap.put(t, arrayEventEntries[i]);
         }
@@ -321,25 +326,29 @@ public class SampleView extends AbstractTimeGraphView {
 
     // This function create the entries, it takes as argument the array of Event
     // The map is also used to correlate with the event nodes
-    private EventNode[] createEventNodes(EventEntry[] arrayEventEntry) {
+    private  ArrayList<EventNode> createEventNodes(EventEntry[] arrayEventEntry) {
         System.out.println("create Event Nodes");
         // Go through the tree and creates the nodes:
-        EventNode arrayEventNodes[] = null;
-        arrayEventNodes = new EventNode[10];
+        //EventNode arrayEventNodes[] = null;
+        //arrayEventNodes = new EventNode[10];
+        ArrayList<EventNode> arrayEvent = new ArrayList<>();
+
         int i = 0;
         for (KeyTree key : fMap.keySet()) {
             if (fMap.get(key) != null) {
-                arrayEventNodes[i] = new EventNode(arrayEventEntry[key.getLevel()], key.getLabel(), fMap.get(key).getNodeId(), 7, 7, 1);
+                EventNode temp = new EventNode(arrayEventEntry[key.getLevel()], key.getLabel(), fMap.get(key).getNodeId(), 7, 7, 1);
+                //arrayEventNodes[i] = temp;
+                arrayEvent.add(temp);
                 // put the events on the entry:
-                System.out.println("Adding on level " + key.getLevel() + " Node label: " + arrayEventNodes[i].getLabel());
+                System.out.println("Adding on level " + key.getLevel() + " Node label: " + arrayEvent.get(i).getLabel());
                 System.out.println("on" + arrayEventEntry[i].getName());
-                arrayEventEntry[key.getLevel()].addEvent(arrayEventNodes[i]);
+                arrayEventEntry[key.getLevel()].addEvent(arrayEvent.get(i));
                 System.out.println("level  " + key.getLevel() + "label " + key.getLabel());
                 i++;
             }
         }
-        System.out.println(arrayEventNodes.length);
-        return arrayEventNodes;
+        System.out.println(arrayEvent.size());
+        return arrayEvent;
     }
     // This function put them together.
 
