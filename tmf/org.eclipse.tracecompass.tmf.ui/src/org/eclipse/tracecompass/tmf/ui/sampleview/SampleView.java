@@ -207,7 +207,7 @@ public class SampleView extends AbstractTimeGraphView {
         levelEntryAux[0] = new LevelEntry("Tree", 0, 0, 10);
 
         // create the event entry:
-        EventEntry eventEntryAux[] = createEventEntry(Long.valueOf(1), Long.valueOf(15), levelEntryAux[0], eventEntryMap);
+        ArrayList<EventEntry> eventEntryAux = createEventEntry(Long.valueOf(1), Long.valueOf(15), levelEntryAux[0], eventEntryMap);
         // Creating a eventEntry
 
         // create the node entries:
@@ -218,8 +218,8 @@ public class SampleView extends AbstractTimeGraphView {
 
         // run through the eventEntries (levels) and link with
         // tree(levelEntryAux)
-        for (int i = 0; i < eventEntryAux.length; i++) {
-            eventEntryMap.put(levelEntryAux[0], eventEntryAux[i]);
+        for (int i = 0; i < eventEntryAux.size(); i++) {
+            eventEntryMap.put(levelEntryAux[0], eventEntryAux.get(i));
         }
 
         // put the event on the list:
@@ -228,8 +228,8 @@ public class SampleView extends AbstractTimeGraphView {
         }
 
         // Put the level entries on the level
-        for (int i = 0; i < eventEntryAux.length; i++) {
-            levelEntryAux[0].addChild(eventEntryAux[i]);
+        for (int i = 0; i < eventEntryAux.size(); i++) {
+            levelEntryAux[0].addChild(eventEntryAux.get(i));
         }
 
         // Put the level entries on the trace entry
@@ -302,31 +302,31 @@ public class SampleView extends AbstractTimeGraphView {
 
     // this function creates the level Entries, takes the trace as argument, and
     // a map
-    private EventEntry[] createEventEntry(long entry, long exit, LevelEntry t, Map<LevelEntry, EventEntry> eventEntryMap) {
+    private  ArrayList<EventEntry> createEventEntry(long entry, long exit, LevelEntry t, Map<LevelEntry, EventEntry> eventEntryMap) {
         System.out.println("create Event Entry size " + fMap.size());
-        EventEntry arrayEventEntries[] = null;
+        //EventEntry arrayEventEntries[] = null;
         // Go through the tree and creates the entries:
         // eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
         int counter = fMap.size();
-        arrayEventEntries = new EventEntry[counter];
+        //arrayEventEntries = new EventEntry[counter];
         ArrayList<EventEntry> arrayEntries = new ArrayList<>();
 
         for (int i = 0; i < counter; i++) {
             EventEntry temp = new EventEntry("level " + String.valueOf(i), i, entry, exit, 0);
-            arrayEventEntries[i] = temp;
+            //arrayEventEntries[i] = temp;
             arrayEntries.add(temp);
 
-            System.out.println("EventEntry:" + arrayEventEntries[i].getName());
-            eventEntryMap.put(t, arrayEventEntries[i]);
+            System.out.println("EventEntry:" + arrayEntries.get(i).getName());
+            eventEntryMap.put(t, arrayEntries.get(i));
         }
 
-        System.out.println(arrayEventEntries.length);
-        return arrayEventEntries;
+        System.out.println(arrayEntries.size());
+        return arrayEntries;
     }
 
     // This function create the entries, it takes as argument the array of Event
     // The map is also used to correlate with the event nodes
-    private  ArrayList<EventNode> createEventNodes(EventEntry[] arrayEventEntry) {
+    private  ArrayList<EventNode> createEventNodes(ArrayList<EventEntry> arrayEventEntry) {
         System.out.println("create Event Nodes");
         // Go through the tree and creates the nodes:
         //EventNode arrayEventNodes[] = null;
@@ -336,13 +336,13 @@ public class SampleView extends AbstractTimeGraphView {
         int i = 0;
         for (KeyTree key : fMap.keySet()) {
             if (fMap.get(key) != null) {
-                EventNode temp = new EventNode(arrayEventEntry[key.getLevel()], key.getLabel(), fMap.get(key).getNodeId(), 7, 7, 1);
+                EventNode temp = new EventNode(arrayEventEntry.get(key.getLevel()), key.getLabel(), fMap.get(key).getNodeId(), 7, 7, 1);
                 //arrayEventNodes[i] = temp;
                 arrayEvent.add(temp);
                 // put the events on the entry:
                 System.out.println("Adding on level " + key.getLevel() + " Node label: " + arrayEvent.get(i).getLabel());
-                System.out.println("on" + arrayEventEntry[i].getName());
-                arrayEventEntry[key.getLevel()].addEvent(arrayEvent.get(i));
+                System.out.println("on" + arrayEventEntry.get(i).getName());
+                arrayEventEntry.get(key.getLevel()).addEvent(arrayEvent.get(i));
                 System.out.println("level  " + key.getLevel() + "label " + key.getLabel());
                 i++;
             }
