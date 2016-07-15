@@ -11,6 +11,7 @@ public class ProfileData implements IProfileData {
 
     private String fLabel;
     int fWeight;
+    int X;
     long fstartTime;
     long fendTime;
 
@@ -101,4 +102,11 @@ public class ProfileData implements IProfileData {
         return new String(fWeight + " " + fLabel);
     }
 
+    public void setX(int nextInt) {
+        X = nextInt;
+    }
+
+    public int getX() {
+        return X;
+    }
 }

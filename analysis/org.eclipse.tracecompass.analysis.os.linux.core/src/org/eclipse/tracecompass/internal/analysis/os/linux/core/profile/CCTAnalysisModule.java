@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.Stack;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -118,6 +119,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             Node<ProfileData> nodeHash;
             ProfileData data;
 
+            Random rand = new Random();
 
             if (eventName.equals("lttng_ust_cyg_profile:func_entry")) {
                 String content = event.getContent().toString();
@@ -142,6 +144,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         data = aux.fProfileData;
                         data.fWeight += endTime;
                         data.setEndTime(endTime);
+                        data.setX(rand.nextInt(100));
                         aux.fProfileData = data;
 
                         temp.push(aux);
