@@ -102,7 +102,7 @@ public class ProfileData implements IProfileData {
         return new String(fWeight + " " + fLabel);
     }
 
-    public void setX(int nextInt) {
+    public void setMetric(int nextInt) {
         X = nextInt;
     }
 

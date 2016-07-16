@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.Stack;
@@ -36,6 +35,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     public static final @NonNull String ID = "org.eclipse.tracecompass.analysis.os.linux.core.profile.cctanalysis.module"; //$NON-NLS-1$
 
     private volatile Node<ProfileData> fRoot;
+    private Node<ProfileData> treeTest = Node.create(new ProfileData(0, "root"));
+    private Node<ProfileData> parent = treeTest;
 
     /**
      * Default constructor
@@ -75,27 +76,18 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     private class RequestTest extends TmfEventRequest {
 
         Node<ProfileData> fNode, fCurrent;
-        Stack<Node<ProfileData>> tmp;
         Stack<Node<ProfileData>> temp;
         GraphvizVisitor dot;
 
-        HashMap<String, Node<ProfileData>> hashMap;
         private ITmfEventField first;
-        int level;
 
         public RequestTest() {
             super(ITmfEvent.class, TmfTimeRange.ETERNITY, 0, ITmfEventRequest.ALL_DATA, ExecutionType.BACKGROUND);
 
-            tmp = new Stack<>();
             temp = new Stack<>();
             fNode = Node.create(new ProfileData(0, "root"));
             fCurrent = fNode;
             dot = new GraphvizVisitor();
-
-            // HashMap
-            hashMap = new HashMap();
-
-            level = 0;
         }
 
         /*
@@ -116,53 +108,44 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             long endTime;
 
             Node<ProfileData> aux;
-            Node<ProfileData> nodeHash;
+
             ProfileData data;
 
             Random rand = new Random();
 
             if (eventName.equals("lttng_ust_cyg_profile:func_entry")) {
-                String content = event.getContent().toString();
                 System.out.println(event.getType().getFieldNames());
                 first = Iterables.get(event.getContent().getFields(), 0);
-                content = first.toString();
+                String label = first.toString();
 
-                aux = Node.create(new ProfileData(0, content));
+                aux = Node.create(new ProfileData(0, label));
+
+                // put on the tree:
+                parent.addChild(aux);
+                parent = aux;
+
+                //but if the node is already there, what should we do?
+                parent = newaddSample(parent, aux, 1);
 
                 System.out.println("Pushing" + aux);
-                tmp.push(aux);
 
             } else {
                 if (eventName.contains("lttng_ust_cyg_profile:func_exit")) {
                     System.out.println("Creating");
                     endTime = event.getTimestamp().getValue();
                     System.out.println(endTime);
-                    if (!tmp.isEmpty()) {
-                        aux = tmp.pop();
 
-                        // Timestamp:
-                        data = aux.fProfileData;
-                        data.fWeight += endTime;
-                        data.setEndTime(endTime);
-                        data.setX(rand.nextInt(100));
-                        aux.fProfileData = data;
+                    //Timestamp:
+                    aux = parent;
+                    data = aux.fProfileData;
+                    data.fWeight += endTime;
+                    data.setEndTime(endTime);
+                    data.setX(rand.nextInt(100));
+                    aux.fProfileData = data;
 
-                        temp.push(aux);
-                        // HashMap addition:
-                        if (!hashMap.containsKey(aux.getNodeLabel())) {
-                            hashMap.put(aux.getNodeLabel(), aux);
-                        } else {
-                            nodeHash = hashMap.get(aux.getNodeLabel());
-                            if (nodeHash != null) {
-                                data = nodeHash.fProfileData;
-                                data.fWeight += endTime;
-                                nodeHash.fProfileData = data;
-                                hashMap.replace(aux.getNodeLabel(), nodeHash);
-                            }
-                        }
-                    } else {
-                        System.out.println("Empty Stack");
-                    }
+                    //Update Reference pointer
+                    parent = parent.getParent();
+
                 }
             }
             System.out.println("Current " + fCurrent.toString());
@@ -206,6 +189,38 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     /**
      * This function add a sample in the calling context tree
+     */
+    public Node<ProfileData> newaddSample(Node<ProfileData> root, Node<ProfileData> sample, int value) //, Tree t)
+    {
+        Tree t = Tree.ECCT;
+
+        Node<ProfileData> current = root;
+        Node<ProfileData> match = null;
+        if (t.equals(Tree.ECCT)) {
+            for (Node<ProfileData> child : current.getChildren()) {
+                // Since it is a calling context tree, the same labels get
+                // merged, otherwise it would be a call tree:
+                String label = sample.fProfileData.getLabel();
+                if (label.equals(child.getNodeLabel())) {
+                    match = child;
+                    break;
+                }
+                // if the node does not exist, create it and set its parent
+                if (match == null) {
+                    match = sample;
+                    current.addChild(match);
+                }
+                // increase the weight
+                match.getProfileData().addWeight(value);
+
+                // update current node
+                current = match;
+            }
+        }
+        return current;
+    }
+    /**
+     * This function add a sample in the tree, which can be CCT
      */
     public void addSample(Node<ProfileData> root, String[] event, int value, Tree t) {
         // for each stack level

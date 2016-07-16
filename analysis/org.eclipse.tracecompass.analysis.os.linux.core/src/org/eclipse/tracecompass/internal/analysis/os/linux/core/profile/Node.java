@@ -16,6 +16,14 @@ public class Node<T extends IProfileData> {
         fId = fCounter.getAndIncrement();
     }
 
+    //This function veryfies if the node is empty
+    public boolean isEmpty() {
+        if(fProfileData != null) {
+            return false;
+        }
+        return true;
+    }
+
     public static <T extends IProfileData> Node<T> create(T data) {
         Node<T> node = new Node<>();
         node.setProfileData(data);
