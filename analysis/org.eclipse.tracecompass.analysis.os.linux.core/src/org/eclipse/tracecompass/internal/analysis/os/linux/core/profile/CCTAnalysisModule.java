@@ -111,23 +111,27 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             ProfileData data;
 
+            //Used just for test:
             Random rand = new Random();
 
             if (eventName.equals("lttng_ust_cyg_profile:func_entry")) {
                 System.out.println(event.getType().getFieldNames());
                 first = Iterables.get(event.getContent().getFields(), 0);
                 String label = first.toString();
+                Long start = event.getTimestamp().getValue();
+                aux = Node.create(new ProfileData(0, label, start, null));
 
-                aux = Node.create(new ProfileData(0, label));
+                // put on the tree - directly putting:
+                // parent.addChild(aux);
+                // parent = aux;
 
-                // put on the tree:
-                parent.addChild(aux);
-                parent = aux;
-
-                //but if the node is already there, what should we do?
+                // Node verification:
                 parent = newaddSample(parent, aux, 1);
 
                 System.out.println("Pushing" + aux);
+                if(parent == null) {
+                    System.out.println("Essa poha ta vazia");
+                }
 
             } else {
                 if (eventName.contains("lttng_ust_cyg_profile:func_exit")) {
@@ -135,15 +139,19 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     endTime = event.getTimestamp().getValue();
                     System.out.println(endTime);
 
-                    //Timestamp:
+                    // Timestamp:
+                    System.out.println("Label" + parent.getNodeLabel());
                     aux = parent;
-                    data = aux.fProfileData;
+
+                    //System.out.println("Label" + aux.getNodeLabel().toString());
+
+                    /*data = aux.fProfileData;
                     data.fWeight += endTime;
                     data.setEndTime(endTime);
-                    data.setX(rand.nextInt(100));
-                    aux.fProfileData = data;
+                    data.setMetric(rand.nextInt(100));
+                    aux.fProfileData = data;*/
 
-                    //Update Reference pointer
+                    // Update Reference pointer
                     parent = parent.getParent();
 
                 }
@@ -190,7 +198,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     /**
      * This function add a sample in the calling context tree
      */
-    public Node<ProfileData> newaddSample(Node<ProfileData> root, Node<ProfileData> sample, int value) //, Tree t)
+    public Node<ProfileData> newaddSample(Node<ProfileData> root, Node<ProfileData> sample, int value) // ,
+                                                                                                       // Tree
+                                                                                                       // t)
     {
         Tree t = Tree.ECCT;
 
@@ -218,40 +228,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
         }
         return current;
-    }
-    /**
-     * This function add a sample in the tree, which can be CCT
-     */
-    public void addSample(Node<ProfileData> root, String[] event, int value, Tree t) {
-        // for each stack level
-
-        Node<ProfileData> current = root;
-        for (String label : event) {
-
-            System.out.println(label + " " + value);
-            Node<ProfileData> match = null;
-            if (t.equals(Tree.ECCT)) {
-                for (Node<ProfileData> child : current.getChildren()) {
-                    // Since it is a calling context tree, the same labels get
-                    // merged, otherwise it would be a call tree:
-                    if (label.equals(child.getNodeLabel())) {
-                        match = child;
-                        break;
-                    }
-                }
-            }
-            // if the node does not exist, create it and set its parent
-            if (match == null) {
-                match = Node.create(new ProfileData(value, label));
-                current.addChild(match);
-            }
-
-            // increase the weight
-            match.getProfileData().addWeight(value);
-
-            // update current node
-            current = match;
-        }
     }
 
     /**

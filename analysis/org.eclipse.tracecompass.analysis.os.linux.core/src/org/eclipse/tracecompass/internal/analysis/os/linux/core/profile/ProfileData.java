@@ -25,14 +25,19 @@ public class ProfileData implements IProfileData {
         fLabel = label;
     }
     // Constructor:
-    public ProfileData(int weight, String label, long start) {
+    public ProfileData(int weight, String label, Long start, Long end) {
         if (weight == 0) {
             fWeight = 0;
         } else {
             fWeight = weight;
         }
         fLabel = label;
-        fstartTime = start;
+        if(start!=null) {
+            fstartTime = start;
+        }
+        if(end!=null) {
+            fendTime = end;
+        }
     }
     // Constructor:
     public ProfileData(long weight, String label) {
