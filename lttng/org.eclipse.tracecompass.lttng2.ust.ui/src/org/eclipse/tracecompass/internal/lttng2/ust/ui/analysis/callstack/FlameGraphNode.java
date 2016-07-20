@@ -46,6 +46,7 @@ public class FlameGraphNode {
         address = Address;
         duration = Duration;
         depth = Depth;
+        System.out.println("Address:" + address + " "+ " duration " + duration + " depth " + depth);
     }
 
     /**
