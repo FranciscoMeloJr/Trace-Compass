@@ -11,6 +11,8 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.internal.lttng2.ust.ui.analysis.callstack;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -96,7 +98,9 @@ public class FlameGraphView extends TmfView {
             protected IStatus run(IProgressMonitor monitor) {
                 callStackAnalysis.waitForCompletion(monitor);
                 Display.getDefault().asyncExec(() -> {
-                            fTimeGraphViewer.setInput(callStackAnalysis.getFirstNodes());
+                    List<FlameGraphNode> temp = callStackAnalysis.getFirstNodes();
+                    fTimeGraphViewer.setInput(temp);
+                    System.out.println(temp.size());
                 });
                 return Status.OK_STATUS;
             }
@@ -126,7 +130,9 @@ public class FlameGraphView extends TmfView {
             protected IStatus run(IProgressMonitor monitor) {
                 callStackAnalysis.waitForCompletion(monitor);
                 Display.getDefault().asyncExec(() -> {
-                        fTimeGraphViewer.setInput(callStackAnalysis.getFirstNodes());
+                    List<FlameGraphNode> temp = callStackAnalysis.getFirstNodes();
+                    fTimeGraphViewer.setInput(temp);
+                    System.out.println(temp.size());
                 });
                 return Status.OK_STATUS;
             }
@@ -156,7 +162,9 @@ public class FlameGraphView extends TmfView {
             protected IStatus run(IProgressMonitor monitor) {
                 callStackAnalysis.waitForCompletion(monitor);
                 Display.getDefault().asyncExec(() -> {
-                        fTimeGraphViewer.setInput(Lists.reverse(callStackAnalysis.getFirstNodes()));
+                    List<FlameGraphNode> temp = Lists.reverse(callStackAnalysis.getFirstNodes());
+                    fTimeGraphViewer.setInput(temp);
+                    System.out.println(temp.size());
                 });
                 return Status.OK_STATUS;
             }

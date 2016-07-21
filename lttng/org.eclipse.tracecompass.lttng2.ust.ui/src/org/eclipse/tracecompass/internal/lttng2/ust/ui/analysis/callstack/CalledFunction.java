@@ -69,6 +69,7 @@ public class CalledFunction implements ISegment {
         fEnd = end;
         faddr = address;
         setFinalSelfTime(fEnd - fStart);
+        System.out.println("Called Function: " + fStart + "faddr: " + faddr);
     }
 
     @Override

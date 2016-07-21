@@ -14,8 +14,10 @@ import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -69,6 +71,8 @@ public class CallStackAnalysis extends TmfAbstractAnalysisModule implements ISeg
     @Override
 
     protected boolean executeAnalysis(@Nullable IProgressMonitor monitor) {
+        Random rand = new Random();
+
         ITmfTrace trace = getTrace();
         if (trace == null) {
             return false;
@@ -92,11 +96,13 @@ public class CallStackAnalysis extends TmfAbstractAnalysisModule implements ISeg
             threadQuarks = ss.getQuarks(processQuark, ((AbstractCallStackAnalysis) module).getThreadsPattern());
             FlameGraphNode firstNode = null;
             for (int threadQuark : threadQuarks) {
+
                 //Create the root node representing the thread
                 FlameGraphNode init=new FlameGraphNode(0L,0L,0);
                 String threadName=ss.getAttributeName(threadQuark);
                 init.setName(threadName);
                 try {
+                    //take the info from the ss:
                     long curTime = ss.getStartTime();
                     long limit = ss.getCurrentEndTime();
                     while (curTime < limit) {
@@ -118,20 +124,31 @@ public class CallStackAnalysis extends TmfAbstractAnalysisModule implements ISeg
                             // Create the segment for the first call event.
                             CalledFunction segment = new CalledFunction(intervalStart, intervalEnd, stateValue.unboxLong());
                             segment.setDepth(0);
-                            firstNode = new FlameGraphNode(stateValue.unboxLong(), intervalEnd - intervalStart, segment.getDepth());
+
+                            // mod 1: Random number
+                            int  n = rand.nextInt(100) + 1;
+
+                            firstNode = new FlameGraphNode(stateValue.unboxLong(), intervalEnd - intervalStart, segment.getDepth(), n);
+
                             firstNode.setMaxDepth(actualQuarks.size());
+
+                            //finds the children of this segment, passing the node as ref:
                             findChildren(segment, 0, ss, actualQuarks.size() - 1, firstNode);
                             // Calculate the statistics for the first segment
                             segmentStatistics.calculateStatistics(segment);
                             init.addChild(firstNode);
+
                         }
                         curTime = interval.getEndTime() + 1;
+
                     }
                     while (!ss.waitUntilBuilt(500)) {
 
                     }
+
                     monitor.worked(1);
                     monitor.done();
+
 
                 } catch (AttributeNotFoundException | StateSystemDisposedException |
 
@@ -139,6 +156,7 @@ public class CallStackAnalysis extends TmfAbstractAnalysisModule implements ISeg
                     return false;
                 }
                 threadNodes.add(init);
+                listNodes(firstNode);
             }
         }
         // sendUpdate(fStore);
@@ -176,6 +194,7 @@ public class CallStackAnalysis extends TmfAbstractAnalysisModule implements ISeg
                     long intervalStart = interval.getStartTime();
                     long intervalEnd = interval.getEndTime();
                     CalledFunction segment = new CalledFunction(intervalStart, intervalEnd + 1, stateValue.unboxLong());
+
                     segment.setDepth(node.getDepth() + 1);
                     FlameGraphNode childNode = new FlameGraphNode(stateValue.unboxLong(), segment.getLength(), segment.getDepth());
                     // Search for the children with the next quark.
@@ -190,6 +209,46 @@ public class CallStackAnalysis extends TmfAbstractAnalysisModule implements ISeg
                 }
             }
         }
+    }
+    // Mod 2 - function:
+    /*this function takes the node and show the label and name*/
+    public void listNodes(FlameGraphNode firstNode)
+    {
+        System.out.println("FlameGraph");
+        System.out.println(Long.toHexString(firstNode.getAddress()));
+
+        HashMap<Long, FlameGraphNode> aux = firstNode.getChildren();
+
+        FlameGraphNode temp = firstNode;
+        boolean cont = true;
+        while(cont)
+        {
+            aux = temp.getChildren();
+            System.out.println(aux.size());
+            for( Long key : aux.keySet())
+            {
+                if(aux.get(key)!=null) {
+                    System.out.println("Aux:"+ aux +" Key " + key + " Aux stored: 0x" + Long.toHexString(aux.get(key).getAddress()));
+                }
+                //taking the FlameNode:
+                temp = aux.get(key);
+            }
+            if(aux.size() == 0) {
+                cont = false;
+            }
+        }
+
+
+        /*int i = 0;
+        while( i < threadNodes.size())
+        {
+            FlameGraphNode aux = threadNodes.get(i);
+            System.out.println("Thread node" + aux );
+
+            System.out.println("Children" + aux.getChildren());
+            i++;
+        }*/
+
     }
 
     @Override

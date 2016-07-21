@@ -39,14 +39,25 @@ public class FlameGraphNode {
     private int nbreCalls = 0;
     private String name;
 
+    //mods 0:
+    private int fN = -1;
+
     /**
-     * Constructor
+     * Constructor mod 1
      */
     FlameGraphNode(Long Address, Long Duration, int Depth) {
+        this(Address, Duration, Depth, 0);
+    }
+
+    /**
+     * Constructor mod 2
+     */
+    FlameGraphNode(Long Address, Long Duration, int Depth, int n) {
         address = Address;
         duration = Duration;
         depth = Depth;
-        System.out.println("Address:" + address + " "+ " duration " + duration + " depth " + depth);
+        fN = n;
+        System.out.println("Address:" + Long.toHexString(address) + " "+ " duration " + duration + " depth " + depth + " fN " + fN);
     }
 
     /**
@@ -229,4 +240,19 @@ private void mergeChildren(FlameGraphNode FirstNode,FlameGraphNode SecondNode)
         name = Name;
     }
 
+    //Mod 4:
+    public void setN(int N) {
+        fN =  N;
+    }
+
+    //mod 4
+    @Override
+    public String toString()
+    {
+          String aux = null;
+          if(name!=null) {
+            aux = new String(name);
+        }
+          return aux;
+    }
 }
