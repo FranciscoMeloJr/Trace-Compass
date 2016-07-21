@@ -227,8 +227,10 @@ public class CallStackAnalysis extends TmfAbstractAnalysisModule implements ISeg
             System.out.println(aux.size());
             for( Long key : aux.keySet())
             {
-                if(aux.get(key)!=null) {
-                    System.out.println("Aux:"+ aux +" Key " + key + " Aux stored: 0x" + Long.toHexString(aux.get(key).getAddress()));
+
+                FlameGraphNode node = aux.get(key);
+                if(node!=null) {
+                    System.out.println("Node:"+ Long.toHexString(node.getAddress()) + node.getDepth());
                 }
                 //taking the FlameNode:
                 temp = aux.get(key);
