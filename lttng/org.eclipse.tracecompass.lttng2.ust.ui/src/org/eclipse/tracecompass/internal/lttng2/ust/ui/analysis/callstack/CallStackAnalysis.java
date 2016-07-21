@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 
@@ -64,7 +65,7 @@ public class CallStackAnalysis extends TmfAbstractAnalysisModule implements ISeg
     private final ISegmentStore<@NonNull ISegment> fStore = new ArrayListStore<>();
     private final ListenerList fListeners = new ListenerList(ListenerList.IDENTITY);
     private final CallStackStatistics segmentStatistics = new CallStackStatistics();
-    //The functions called in the first level
+    // The functions called in the first level
     private List<FlameGraphNode> threadNodes = new ArrayList<>();
     private List<Integer> actualQuarks = null;
 
@@ -87,7 +88,7 @@ public class CallStackAnalysis extends TmfAbstractAnalysisModule implements ISeg
         if (ss == null) {
             return false;
         }
-        if ( monitor == null) {
+        if (monitor == null) {
             return false;
         }
         List<Integer> threadQuarks = Collections.emptyList();
@@ -97,12 +98,12 @@ public class CallStackAnalysis extends TmfAbstractAnalysisModule implements ISeg
             FlameGraphNode firstNode = null;
             for (int threadQuark : threadQuarks) {
 
-                //Create the root node representing the thread
-                FlameGraphNode init=new FlameGraphNode(0L,0L,0);
-                String threadName=ss.getAttributeName(threadQuark);
+                // Create the root node representing the thread
+                FlameGraphNode init = new FlameGraphNode(0L, 0L, 0);
+                String threadName = ss.getAttributeName(threadQuark);
                 init.setName(threadName);
                 try {
-                    //take the info from the ss:
+                    // take the info from the ss:
                     long curTime = ss.getStartTime();
                     long limit = ss.getCurrentEndTime();
                     while (curTime < limit) {
@@ -126,13 +127,14 @@ public class CallStackAnalysis extends TmfAbstractAnalysisModule implements ISeg
                             segment.setDepth(0);
 
                             // mod 1: Random number
-                            int  n = rand.nextInt(100) + 1;
+                            int n = rand.nextInt(100) + 1;
 
                             firstNode = new FlameGraphNode(stateValue.unboxLong(), intervalEnd - intervalStart, segment.getDepth(), n);
 
                             firstNode.setMaxDepth(actualQuarks.size());
 
-                            //finds the children of this segment, passing the node as ref:
+                            // finds the children of this segment, passing the
+                            // node as ref:
                             findChildren(segment, 0, ss, actualQuarks.size() - 1, firstNode);
                             // Calculate the statistics for the first segment
                             segmentStatistics.calculateStatistics(segment);
@@ -148,7 +150,6 @@ public class CallStackAnalysis extends TmfAbstractAnalysisModule implements ISeg
 
                     monitor.worked(1);
                     monitor.done();
-
 
                 } catch (AttributeNotFoundException | StateSystemDisposedException |
 
@@ -210,46 +211,51 @@ public class CallStackAnalysis extends TmfAbstractAnalysisModule implements ISeg
             }
         }
     }
+
     // Mod 2 - function:
-    /*this function takes the node and show the label and name*/
-    public void listNodes(FlameGraphNode firstNode)
-    {
+    /* this function takes the node and show the label and name */
+    public void listNodes(FlameGraphNode firstNode) {
         System.out.println("FlameGraph");
-        System.out.println(Long.toHexString(firstNode.getAddress()));
+        System.out.println("Node:" + Long.toHexString(firstNode.getAddress()) + " Depth " + firstNode.getDepth());
 
         HashMap<Long, FlameGraphNode> aux = firstNode.getChildren();
 
+        // HashMap:
+        // HashMap<Key, FlameGraphNode> hm = new HashMap<>();
+
         FlameGraphNode temp = firstNode;
+
+        // ArrayList:
+        ArrayList<FlameGraphNode> al = new ArrayList();
+        al.add(temp);
+
         boolean cont = true;
-        while(cont)
-        {
-            aux = temp.getChildren();
+        while (cont) {
+            if (aux != null) {
+                aux = temp.getChildren();
+            }
             System.out.println(aux.size());
-            for( Long key : aux.keySet())
-            {
+            for (Long key : aux.keySet()) {
 
                 FlameGraphNode node = aux.get(key);
-                if(node!=null) {
-                    System.out.println("Node:"+ Long.toHexString(node.getAddress()) + node.getDepth());
+                if (node != null) {
+                    System.out.println("Node:" + Long.toHexString(node.getAddress()) + " Depth " + node.getDepth());
+                    // keyMap = new Key(node.getDepth(), node.getAddress());
+                    // System.out.println("HM" + keyMap.hashCode());
+                    // hm.put(keyMap, node);
+                    al.add(node);
                 }
-                //taking the FlameNode:
+                // taking the FlameNode:
                 temp = aux.get(key);
             }
-            if(aux.size() == 0) {
+            if (aux.size() == 0) {
                 cont = false;
             }
         }
 
-
-        /*int i = 0;
-        while( i < threadNodes.size())
-        {
-            FlameGraphNode aux = threadNodes.get(i);
-            System.out.println("Thread node" + aux );
-
-            System.out.println("Children" + aux.getChildren());
-            i++;
-        }*/
+        for (FlameGraphNode node : al) {
+            System.out.println("Address 0x" + Long.toHexString(node.getAddress()));
+        }
 
     }
 
@@ -329,7 +335,7 @@ public class CallStackAnalysis extends TmfAbstractAnalysisModule implements ISeg
 
     /**
      * @param ThreadNodes
-     *      The nodes representing threads
+     *            The nodes representing threads
      */
     public void setFirstNodes(List<FlameGraphNode> ThreadNodes) {
         threadNodes = ThreadNodes;
