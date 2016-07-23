@@ -111,9 +111,27 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             ProfileData data;
 
-            //Used just for test:
+            // Used just for test:
             Random rand = new Random();
 
+            if (eventName.equals("interval:tracepoint")) {
+                System.out.println("Tracepoint");
+                // Fields:
+                // my_string_field, my_integer_field, context._vpid,
+                // context._vtid, context.procname = testF
+
+                ITmfEventField content = event.getContent();
+                for (ITmfEventField field : content.getFields()) {
+                    if(field.getValue().equals("end"))
+                    {
+                        System.out.println("start the ecct");
+                    }
+                    if(field.getValue().equals("begin"))
+                    {
+                        System.out.println("ends the ecct");
+                    }
+                }
+            }
             if (eventName.equals("lttng_ust_cyg_profile:func_entry")) {
                 System.out.println(event.getType().getFieldNames());
                 first = Iterables.get(event.getContent().getFields(), 0);
@@ -129,7 +147,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 parent = newaddSample(parent, aux, 1);
 
                 System.out.println("Pushing" + aux);
-                if(parent == null) {
+                if (parent == null) {
                     System.out.println("Essa poha ta vazia");
                 }
 
@@ -140,19 +158,21 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     System.out.println(endTime);
 
                     // Timestamp:
-                    System.out.println("Label" + parent.getNodeLabel());
+                    // System.out.println("Label" + parent.getNodeLabel());
                     aux = parent;
 
-                    //System.out.println("Label" + aux.getNodeLabel().toString());
+                    // System.out.println("Label" +
+                    // aux.getNodeLabel().toString());
 
-                    /*data = aux.fProfileData;
-                    data.fWeight += endTime;
-                    data.setEndTime(endTime);
-                    data.setMetric(rand.nextInt(100));
-                    aux.fProfileData = data;*/
+                    /*
+                     * data = aux.fProfileData; data.fWeight += endTime;
+                     * data.setEndTime(endTime);
+                     * data.setMetric(rand.nextInt(100)); aux.fProfileData =
+                     * data;
+                     */
 
                     // Update Reference pointer
-                    parent = parent.getParent();
+                    // parent = parent.getParent();
 
                 }
             }
