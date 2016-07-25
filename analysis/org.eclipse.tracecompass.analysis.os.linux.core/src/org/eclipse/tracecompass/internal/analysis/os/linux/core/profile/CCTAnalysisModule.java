@@ -38,6 +38,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     private Node<ProfileData> treeTest = Node.create(new ProfileData(0, "root"));
     private Node<ProfileData> parent = treeTest;
 
+    // ArrayList of ECCTs:
+    private ArrayList<Node<ProfileData>> ArrayECCTs = new ArrayList<>();
+
     /**
      * Default constructor
      */
@@ -122,58 +125,26 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
                 ITmfEventField content = event.getContent();
                 for (ITmfEventField field : content.getFields()) {
-                    if(field.getValue().equals("end"))
-                    {
+                    if (field.getValue().equals("begin")) {
                         System.out.println("start the ecct");
+
+                        if (eventName.equals("lttng_ust_cyg_profile:func_entry")) {
+                            System.out.println(event.getType().getFieldNames());
+                            first = Iterables.get(event.getContent().getFields(), 0);
+                            String label = first.toString();
+                            Long start = event.getTimestamp().getValue();
+                            aux = Node.create(new ProfileData(0, label, start, null));
+                        } else {
+                            if (eventName.contains("lttng_ust_cyg_profile:func_exit")) {
+
+                            }
+                        }
+
                     }
-                    if(field.getValue().equals("begin"))
-                    {
+                    if (field.getValue().equals("end")) {
                         System.out.println("ends the ecct");
+                        ArrayECCTs.add(fRoot);
                     }
-                }
-            }
-            if (eventName.equals("lttng_ust_cyg_profile:func_entry")) {
-                System.out.println(event.getType().getFieldNames());
-                first = Iterables.get(event.getContent().getFields(), 0);
-                String label = first.toString();
-                Long start = event.getTimestamp().getValue();
-                aux = Node.create(new ProfileData(0, label, start, null));
-
-                // put on the tree - directly putting:
-                // parent.addChild(aux);
-                // parent = aux;
-
-                // Node verification:
-                parent = newaddSample(parent, aux, 1);
-
-                System.out.println("Pushing" + aux);
-                if (parent == null) {
-                    System.out.println("Essa poha ta vazia");
-                }
-
-            } else {
-                if (eventName.contains("lttng_ust_cyg_profile:func_exit")) {
-                    System.out.println("Creating");
-                    endTime = event.getTimestamp().getValue();
-                    System.out.println(endTime);
-
-                    // Timestamp:
-                    // System.out.println("Label" + parent.getNodeLabel());
-                    aux = parent;
-
-                    // System.out.println("Label" +
-                    // aux.getNodeLabel().toString());
-
-                    /*
-                     * data = aux.fProfileData; data.fWeight += endTime;
-                     * data.setEndTime(endTime);
-                     * data.setMetric(rand.nextInt(100)); aux.fProfileData =
-                     * data;
-                     */
-
-                    // Update Reference pointer
-                    // parent = parent.getParent();
-
                 }
             }
             System.out.println("Current " + fCurrent.toString());

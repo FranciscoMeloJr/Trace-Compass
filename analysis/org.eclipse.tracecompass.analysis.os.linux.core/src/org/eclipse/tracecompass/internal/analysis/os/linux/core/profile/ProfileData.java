@@ -14,6 +14,7 @@ public class ProfileData implements IProfileData {
     int X;
     long fstartTime;
     long fendTime;
+    long fDuration; //endTime - startTime
 
     // Constructor:
     public ProfileData(int weight, String label) {
@@ -113,5 +114,13 @@ public class ProfileData implements IProfileData {
 
     public int getX() {
         return X;
+    }
+    public void setDuration(long l) {
+        fDuration = l;
+
+    }
+    public long getDuration() {
+        return fDuration;
+
     }
 }
