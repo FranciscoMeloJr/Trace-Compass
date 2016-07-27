@@ -79,9 +79,10 @@ public class ProfileTraversal {
         queue.add(root);
         while (!queue.isEmpty()) {
             Node<T> current = queue.poll();
-            System.out.print(current);
+            System.out.print(current.toString());
             for (Node<T> child : current.getChildren()) {
                 queue.add(child);
+                System.out.println(child);
             }
             result.add(current);
         }

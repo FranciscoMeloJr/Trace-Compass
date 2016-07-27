@@ -211,7 +211,7 @@ public class SampleView extends AbstractTimeGraphView {
         // Creating a eventEntry
 
         // create the node entries:
-         ArrayList<EventNode> eventAux = createEventNodes(eventEntryAux);
+        ArrayList<EventNode> eventAux = createEventNodes(eventEntryAux);
 
         // Put as child
         List<ITimeEvent> eventList = new ArrayList<>(4);
@@ -264,15 +264,15 @@ public class SampleView extends AbstractTimeGraphView {
         super.fillLocalMenu(manager);
 
         MenuManager item = new MenuManager("Functions");
-        //fFlatAction = createFlatAction();
-        //fFlatAction = createFlatAction();
-        for(int i = 0 ; i< FUNCTION_NAMES.size(); i++) {
+        // fFlatAction = createFlatAction();
+        // fFlatAction = createFlatAction();
+        for (int i = 0; i < FUNCTION_NAMES.size(); i++) {
             System.out.println(FUNCTION_NAMES.get(i));
             item.add(createFunctionSelection(FUNCTION_NAMES.get(i)));
         }
 
-        //Test just to put information on the
-        for(int i = 0 ; i<3; i++) {
+        // Test just to put information on the
+        for (int i = 0; i < 3; i++) {
             item.add(createFunctionSelection(Integer.toString(i)));
         }
 
@@ -302,12 +302,12 @@ public class SampleView extends AbstractTimeGraphView {
 
     // this function creates the level Entries, takes the trace as argument, and
     // a map
-    private  ArrayList<EventEntry> createEventEntry(long entry, long exit, LevelEntry t, Map<LevelEntry, EventEntry> eventEntryMap) {
+    private ArrayList<EventEntry> createEventEntry(long entry, long exit, LevelEntry t, Map<LevelEntry, EventEntry> eventEntryMap) {
         System.out.println("create Event Entry size " + fMap.size());
         // Go through the tree and creates the entries:
         // eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
         int counter = fMap.size();
-        //arrayEventEntries = new EventEntry[counter];
+        // arrayEventEntries = new EventEntry[counter];
         ArrayList<EventEntry> arrayEntries = new ArrayList<>();
 
         for (int i = 0; i < counter; i++) {
@@ -324,7 +324,7 @@ public class SampleView extends AbstractTimeGraphView {
 
     // This function create the entries, it takes as argument the array of Event
     // The map is also used to correlate with the event nodes
-    private  ArrayList<EventNode> createEventNodes(ArrayList<EventEntry> arrayEventEntry) {
+    private ArrayList<EventNode> createEventNodes(ArrayList<EventEntry> arrayEventEntry) {
         System.out.println("create Event Nodes");
         // Go through the tree and creates the nodes:
         ArrayList<EventNode> arrayEvent = new ArrayList<>();
