@@ -37,10 +37,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     // ArrayList of ECCTs, which are delimited by static implementation
     private ArrayList<Node<ProfileData>> ArrayECCTs = new ArrayList<>();
 
-    Node<ProfileData> parent = null;
     Node<ProfileData> aux = null;
     Node<ProfileData> fRoot = Node.create(new ProfileData(0, "root"));
-
+    Node<ProfileData> parent = fRoot;
     /**
      * Default constructor
      */
@@ -121,7 +120,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             // Used just for test:
             Random rand = new Random();
 
-            if (eventName.equals("interval:tracepoint")) {
+            //This is used for tracepoints:
+            /*if (eventName.equals("interval:tracepoint")) {
                 System.out.println("Tracepoint");
                 // Fields:
                 // my_string_field, my_integer_field, context._vpid,
@@ -142,7 +142,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         parent = null;
                     }
                 }
-            }
+            }*/
 
             if (eventName.equals("lttng_ust_cyg_profile:func_entry")) {
                 System.out.println("Event" + event.getType().getFieldNames());
@@ -150,6 +150,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 String label = first.toString();
                 Long start = event.getTimestamp().getValue();
                 aux = Node.create(new ProfileData(0, label, start, null));
+
+                System.out.println(" start " +  start);
 
                 // put as a children
                 if (parent != null) {
@@ -165,6 +167,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     Long end = event.getTimestamp().getValue();
                     data.setEndTime(end);
                     data.setDuration(data.getEndTime() - data.getStartTime());
+                    //cout << duration
+                    System.out.print(" endTime " + data.getEndTime());
+                    System.out.println(" duration " + data.getDuration());
+
                     aux.setProfileData(data);
                     aux = parent;
                     // put as a children
@@ -179,20 +185,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         @Override
         public void handleCompleted() {
-            Node<ProfileData> aux1;
-
             System.out.println("Size " + ArrayECCTs.size());
             for (int i = 0; i < ArrayECCTs.size(); i++) {
                 Node<ProfileData> root = ArrayECCTs.get(i);
                 ProfileTraversal.levelOrderTraversal(root);
 
-            }
-            // Add to the tree:
-            while (!temp.isEmpty()) {
-                aux1 = temp.pop();
-                fCurrent.addChild(aux1);
-                fCurrent.fProfileData.fendTime += aux1.fProfileData.getEndTime();
-                fCurrent = aux1;
             }
 
             System.out.println("Sucess");
@@ -206,7 +203,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
         public Node<ProfileData> getTree() {
-            return fNode;
+            return fRoot;
         }
     }
 

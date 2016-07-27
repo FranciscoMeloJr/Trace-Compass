@@ -20,7 +20,6 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.CCTAnalysisModule;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfileData;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfileVisitor;
@@ -174,15 +173,18 @@ public class SampleView extends AbstractTimeGraphView {
 
         long startTime = 0; // fRoot.getProfileData().getStartTime();
         long start = startTime;
+
         setStartTime(0);
 
         if (monitor.isCanceled()) {
             return;
         }
-        long end = 15;// fRoot.getProfileData().getEndTime();
+        long end = 3000000; //fRoot.getProfileData().getDuration();// fRoot.getProfileData().getEndTime();
         long endTime = end + 1;
 
-        setEndTime(16);
+        System.out.print(" EndTime "  + endTime);
+
+        setEndTime(endTime);
 
         traceEntry = new TraceEntry(trace.getName(), startTime, endTime);
         addToEntryList(parentTrace, Collections.singletonList(traceEntry));
@@ -204,10 +206,10 @@ public class SampleView extends AbstractTimeGraphView {
         levelEntryAux = new LevelEntry[1];
 
         // Creating the LevelEntry (key is the level)
-        levelEntryAux[0] = new LevelEntry("Tree", 0, 0, 10);
+        levelEntryAux[0] = new LevelEntry("Tree", 0, 0, endTime+1);
 
         // create the event entry:
-        ArrayList<EventEntry> eventEntryAux = createEventEntry(Long.valueOf(1), Long.valueOf(15), levelEntryAux[0], eventEntryMap);
+        ArrayList<EventEntry> eventEntryAux = createEventEntry(Long.valueOf(1), endTime, levelEntryAux[0], eventEntryMap);
         // Creating a eventEntry
 
         // create the node entries:
@@ -241,7 +243,7 @@ public class SampleView extends AbstractTimeGraphView {
         if (parentTrace == getTrace()) {
             synchronized (this) {
                 setStartTime(0);
-                setEndTime(16);
+                setEndTime(endTime);
             }
             synchingToTime(0);// getTimeGraphViewer().getSelectionBegin());
             refresh();
@@ -250,12 +252,12 @@ public class SampleView extends AbstractTimeGraphView {
         }
         // start = end;
 
-        Display.getDefault().asyncExec(new Runnable() {
+        /*Display.getDefault().asyncExec(new Runnable() {
             @Override
             public void run() {
                 getTimeGraphViewer().resetStartFinishTime();
             }
-        });
+        });*/
 
     }
 
@@ -332,13 +334,11 @@ public class SampleView extends AbstractTimeGraphView {
         int i = 0;
         for (KeyTree key : fMap.keySet()) {
             if (fMap.get(key) != null) {
-                EventNode temp = new EventNode(arrayEventEntry.get(key.getLevel()), key.getLabel(), fMap.get(key).getNodeId(), 7, 7, 1);
+                EventNode temp = new EventNode(arrayEventEntry.get(key.getLevel()), key.getLabel(), fMap.get(key).getNodeId(), 0,  fMap.get(key).getProfileData().getDuration(), 1);
                 arrayEvent.add(temp);
                 // put the events on the entry:
-                System.out.println("Adding on level " + key.getLevel() + " Node label: " + arrayEvent.get(i).getLabel());
-                System.out.println("on" + arrayEventEntry.get(i).getName());
                 arrayEventEntry.get(key.getLevel()).addEvent(arrayEvent.get(i));
-                System.out.println("level  " + key.getLevel() + "label " + key.getLabel());
+                System.out.println("level  " + key.getLevel() + "label " + key.getLabel() + " " + fMap.get(key).getProfileData().getDuration());
                 i++;
             }
         }

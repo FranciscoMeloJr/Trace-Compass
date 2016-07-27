@@ -82,7 +82,7 @@ public class ProfileTraversal {
             System.out.print(current.toString());
             for (Node<T> child : current.getChildren()) {
                 queue.add(child);
-                System.out.println(child);
+                System.out.println(child.getProfileData());
             }
             result.add(current);
         }
