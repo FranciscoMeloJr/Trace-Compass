@@ -90,4 +90,5 @@ public class Node<T extends IProfileData> {
         newNode.setParent(getParent());
         return newNode;
     }
+
 }

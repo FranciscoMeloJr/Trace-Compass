@@ -166,7 +166,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     data = aux.fProfileData;
                     Long end = event.getTimestamp().getValue();
                     data.setEndTime(end);
-                    data.setDuration(data.getEndTime() - data.getStartTime());
+                    long duration = data.getEndTime() - data.getStartTime();
+                    data.setDuration(duration);
                     //cout << duration
                     System.out.print(" endTime " + data.getEndTime());
                     System.out.println(" duration " + data.getDuration());
@@ -176,6 +177,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     // put as a children
                     if (parent != null) {
                         parent = parent.getParent();
+                        upPropagation(duration,parent);//parent.getProfileData().addDuration(duration);
                     }
 
                 }
@@ -185,6 +187,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         @Override
         public void handleCompleted() {
+            //Total for root:
+
+
+            // In case using tracepoint:
             System.out.println("Size " + ArrayECCTs.size());
             for (int i = 0; i < ArrayECCTs.size(); i++) {
                 Node<ProfileData> root = ArrayECCTs.get(i);
@@ -204,6 +210,30 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         public Node<ProfileData> getTree() {
             return fRoot;
+        }
+
+        /**
+         * This function does the upPropagation of a long, to a node parent
+         *
+         * @param root
+         *            a tree first node to be traversed
+         * @param duration
+         *            the duration that will be added
+         */
+        public void upPropagation(long duration, Node<ProfileData> root)
+        {
+            Node<ProfileData> tmp = root;
+            long totalDuration = duration;
+
+            while(tmp!=null)
+            {
+                tmp.getProfileData().addDuration(totalDuration);
+                tmp = tmp.getParent();
+                if(tmp!=null && tmp.getProfileData()!=null)
+                {
+                    totalDuration += tmp.getProfileData().getDuration();
+                } 
+            }
         }
     }
 

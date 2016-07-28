@@ -1,6 +1,7 @@
 package org.eclipse.tracecompass.tmf.ui.sampleview;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -181,10 +182,11 @@ public class SampleView extends AbstractTimeGraphView {
         if (monitor.isCanceled()) {
             return;
         }
-        long end = 3000000; //fRoot.getProfileData().getDuration();// fRoot.getProfileData().getEndTime();
+        long end = 3000000; // fRoot.getProfileData().getDuration();//
+                            // fRoot.getProfileData().getEndTime();
         long endTime = end + 1;
 
-        System.out.print(" EndTime "  + endTime);
+        System.out.print(" EndTime " + endTime);
 
         setEndTime(endTime);
 
@@ -208,7 +210,7 @@ public class SampleView extends AbstractTimeGraphView {
         levelEntryAux = new LevelEntry[1];
 
         // Creating the LevelEntry (key is the level)
-        levelEntryAux[0] = new LevelEntry("Tree", 0, 0, endTime+1);
+        levelEntryAux[0] = new LevelEntry("Tree", 0, 0, endTime + 1);
 
         // create the event entry:
         ArrayList<EventEntry> eventEntryAux = createEventEntry(Long.valueOf(1), endTime, levelEntryAux[0], eventEntryMap);
@@ -254,12 +256,12 @@ public class SampleView extends AbstractTimeGraphView {
         }
         // start = end;
 
-        /*Display.getDefault().asyncExec(new Runnable() {
-            @Override
-            public void run() {
-                getTimeGraphViewer().resetStartFinishTime();
-            }
-        });*/
+        /*
+         * Display.getDefault().asyncExec(new Runnable() {
+         *
+         * @Override public void run() {
+         * getTimeGraphViewer().resetStartFinishTime(); } });
+         */
 
     }
 
@@ -304,13 +306,14 @@ public class SampleView extends AbstractTimeGraphView {
         return action;
     }
 
-    // this function creates the level Entries - level 0, level 1, level 2, level 3:
+    // this function creates the level Entries - level 0, level 1, level 2,
+    // level 3:
     private ArrayList<EventEntry> createEventEntry(long entry, long exit, LevelEntry t, Map<LevelEntry, EventEntry> eventEntryMap) {
         System.out.println("create Event Entry size " + fMap.size());
         // Go through the tree and creates the entries:
         // eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
 
-        int counter = numberLevels; //fMap.size();
+        int counter = numberLevels; // fMap.size();
         // arrayEventEntries = new EventEntry[counter];
         ArrayList<EventEntry> arrayEntries = new ArrayList<>();
 
@@ -330,21 +333,47 @@ public class SampleView extends AbstractTimeGraphView {
     // The map is also used to correlate with the event nodes
     private ArrayList<EventNode> createEventNodes(ArrayList<EventEntry> arrayEventEntry) {
         System.out.println("create Event Nodes");
+
         // Go through the tree and creates the nodes:
         ArrayList<EventNode> arrayEvent = new ArrayList<>();
+        long[] durationArr = new long[numberLevels + 1];
+        Arrays.fill(durationArr, 0);
 
         int i = 0;
         for (KeyTree key : fMap.keySet()) {
             if (fMap.get(key) != null) {
-                EventNode temp = new EventNode(arrayEventEntry.get(key.getLevel()), key.getLabel(), fMap.get(key).getNodeId(), 0,  fMap.get(key).getProfileData().getDuration(), 1);
-                arrayEvent.add(temp);
+                int level = key.getLevel();
+                String label = key.getLabel();
+                int id = fMap.get(key).getNodeId();
+                long duration = fMap.get(key).getProfileData().getDuration();
+
+                EventNode tempNode = new EventNode(arrayEventEntry.get(level), label, id, durationArr[level], duration, 1);
+                arrayEvent.add(tempNode);
+                // array of durations
+                durationArr[level] += duration;
                 // put the events on the entry:
-                arrayEventEntry.get(key.getLevel()).addEvent(arrayEvent.get(i));
-                System.out.println("level  " + key.getLevel() + "label " + key.getLabel() + " duration " + fMap.get(key).getProfileData().getDuration()  + " id " + fMap.get(key).getNodeId());
+                arrayEventEntry.get(level).addEvent(tempNode);
+                System.out.println("level  " + key.getLevel() + "label " + key.getLabel() + " duration " + fMap.get(key).getProfileData().getDuration() + " id " + fMap.get(key).getNodeId());
                 i++;
             }
         }
+
+        // Iterating over all the Nodes:
+        ArrayList<EventNode> listNodes = new ArrayList<>();
+
+        for (KeyTree key : fMap.keySet()) {
+            if (fMap.get(key) != null) {
+                int level = key.getLevel();
+                String label = key.getLabel();
+                int id = fMap.get(key).getNodeId();
+                long duration = fMap.get(key).getProfileData().getDuration();
+
+                EventNode temp = new EventNode(arrayEventEntry.get(level), label, id, 0, duration, 1);
+                listNodes.add(temp);
+            }
+        }
         System.out.println(arrayEvent.size());
+
         return arrayEvent;
     }
     // This function put them together.
