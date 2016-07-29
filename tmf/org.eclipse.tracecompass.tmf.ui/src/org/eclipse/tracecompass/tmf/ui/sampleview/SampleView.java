@@ -336,10 +336,11 @@ public class SampleView extends AbstractTimeGraphView {
 
         // Go through the tree and creates the nodes:
         ArrayList<EventNode> arrayEvent = new ArrayList<>();
+        //duration and spacing:
         long[] durationArr = new long[numberLevels + 1];
         Arrays.fill(durationArr, 0);
+        long gap = 1000;
 
-        int i = 0;
         for (KeyTree key : fMap.keySet()) {
             if (fMap.get(key) != null) {
                 int level = key.getLevel();
@@ -349,30 +350,14 @@ public class SampleView extends AbstractTimeGraphView {
 
                 EventNode tempNode = new EventNode(arrayEventEntry.get(level), label, id, durationArr[level], duration, 1);
                 arrayEvent.add(tempNode);
-                // array of durations
-                durationArr[level] += duration;
+                // array of durations update
+                durationArr[level] += (duration + gap);
                 // put the events on the entry:
                 arrayEventEntry.get(level).addEvent(tempNode);
                 System.out.println("level  " + key.getLevel() + "label " + key.getLabel() + " duration " + fMap.get(key).getProfileData().getDuration() + " id " + fMap.get(key).getNodeId());
-                i++;
+
             }
         }
-
-        // Iterating over all the Nodes:
-        ArrayList<EventNode> listNodes = new ArrayList<>();
-
-        for (KeyTree key : fMap.keySet()) {
-            if (fMap.get(key) != null) {
-                int level = key.getLevel();
-                String label = key.getLabel();
-                int id = fMap.get(key).getNodeId();
-                long duration = fMap.get(key).getProfileData().getDuration();
-
-                EventNode temp = new EventNode(arrayEventEntry.get(level), label, id, 0, duration, 1);
-                listNodes.add(temp);
-            }
-        }
-        System.out.println(arrayEvent.size());
 
         return arrayEvent;
     }
