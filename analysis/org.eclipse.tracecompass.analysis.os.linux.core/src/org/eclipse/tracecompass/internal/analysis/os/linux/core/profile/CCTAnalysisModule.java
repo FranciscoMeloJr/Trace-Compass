@@ -40,7 +40,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     Node<ProfileData> aux = null;
     Node<ProfileData> fRoot = Node.create(new ProfileData(0, "root"));
     Node<ProfileData> parent = fRoot;
-
     /**
      * Default constructor
      */
@@ -121,23 +120,29 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             // Used just for test:
             Random rand = new Random();
 
-            // This is used for tracepoints:
-            /*
-             * if (eventName.equals("interval:tracepoint")) {
-             * System.out.println("Tracepoint"); // Fields: // my_string_field,
-             * my_integer_field, context._vpid, // context._vtid,
-             * context.procname = testF
-             *
-             * ITmfEventField content = event.getContent(); for (ITmfEventField
-             * field : content.getFields()) { if
-             * (field.getValue().equals("begin")) { System.out.println(
-             * "start the ecct");
-             *
-             * fNode = Node.create(new ProfileData(0, "root")); parent = fNode;
-             *
-             * } if (field.getValue().equals("end")) { System.out.println(
-             * "ends the ecct"); ArrayECCTs.add(fNode); parent = null; } } }
-             */
+            //This is used for tracepoints:
+            /*if (eventName.equals("interval:tracepoint")) {
+                System.out.println("Tracepoint");
+                // Fields:
+                // my_string_field, my_integer_field, context._vpid,
+                // context._vtid, context.procname = testF
+
+                ITmfEventField content = event.getContent();
+                for (ITmfEventField field : content.getFields()) {
+                    if (field.getValue().equals("begin")) {
+                        System.out.println("start the ecct");
+
+                        fNode = Node.create(new ProfileData(0, "root"));
+                        parent = fNode;
+
+                    }
+                    if (field.getValue().equals("end")) {
+                        System.out.println("ends the ecct");
+                        ArrayECCTs.add(fNode);
+                        parent = null;
+                    }
+                }
+            }*/
 
             if (eventName.equals("lttng_ust_cyg_profile:func_entry")) {
                 System.out.println("Event" + event.getType().getFieldNames());
@@ -146,12 +151,14 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 Long start = event.getTimestamp().getValue();
                 aux = Node.create(new ProfileData(0, label, start, null));
 
-                System.out.println(" start " + start);
+                System.out.println(" start " +  start);
 
-                /*
-                 * put as a children on a call graph: if (parent != null) {
-                 * parent.addChild(aux); parent = aux; }
-                 */
+                // put as a children on a call graph:
+                if (parent != null) {
+                    parent.addChild(aux);
+                    parent = aux;
+                }
+
             } else {
                 if (eventName.contains("lttng_ust_cyg_profile:func_exit")) {
                     System.out.print("func_exit");
@@ -161,19 +168,27 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     data.setEndTime(end);
                     long duration = data.getEndTime() - data.getStartTime();
                     data.setDuration(duration);
-                    // cout << duration
+                    //cout << duration
                     System.out.print(" endTime " + data.getEndTime());
                     System.out.println(" duration " + data.getDuration());
 
                     aux.setProfileData(data);
-                    parent = newaddSample(parent, aux, duration);
+                    aux = parent;
+                    // put as a children
+                    if (parent != null) {
+                        parent = parent.getParent();
+                        parent.getProfileData().addDuration(duration);
+                    }
+
                 }
             }
+            System.out.println("Current " + fCurrent.toString());
         }
 
         @Override
         public void handleCompleted() {
-            // Total for root:
+            //Total for root:
+
 
             // In case using tracepoint:
             System.out.println("Size " + ArrayECCTs.size());
@@ -211,13 +226,12 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     /**
      * This function add a sample in the calling context tree
      */
-    public Node<ProfileData> newaddSample(Node<ProfileData> root, Node<ProfileData> sample, long duration) {
-        Tree t = Tree.DCT;
+    public Node<ProfileData> newaddSample(Node<ProfileData> root, Node<ProfileData> sample, int value) {
+        Tree t = Tree.ECCT;
 
         Node<ProfileData> current = root;
         Node<ProfileData> match = null;
         if (t.equals(Tree.ECCT)) {
-            System.out.println("ECCT");
             for (Node<ProfileData> child : current.getChildren()) {
                 // Since it is a calling context tree, the same labels get
                 // merged, otherwise it would be a call tree:
@@ -231,16 +245,12 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     match = sample;
                     current.addChild(match);
                 }
-                // increase the duration
-                match.getProfileData().addDuration(duration);
+                // increase the weight
+                match.getProfileData().addWeight(value);
 
                 // update current node
                 current = match;
             }
-        } else { // So it is a Dynamic Tree:
-            current.addChild(sample);
-            current.getProfileData().addDuration(duration);
-            current = sample;
         }
         return current;
     }
@@ -270,9 +280,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     }
 
-    /**
-     * @author frank This is related with the type of tree
-     */
+
     // Which kind of tree:
     public enum Tree {
         ECCT, DCT, CG;
