@@ -13,6 +13,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileTraversal.KeyTree;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -41,7 +42,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     Node<ProfileData> aux = null;
     Node<ProfileData> fRoot = Node.create(new ProfileData(0, "root"));
     Node<ProfileData> parent = fRoot;
-    int numberLevels;
+    static int numberLevels;
 
     /**
      * Default constructor
@@ -168,6 +169,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         @Override
         public void handleCompleted() {
+
             System.out.println("Sucess");
             ProfileTraversal.levelOrderTraversal(fNode, dot);
 
@@ -213,8 +215,21 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     }
 
-    // This function creates a HashMap of <level x label> x Node
-    public Map<KeyTree, Node<ProfileData>> createHash(Node<ProfileData> root) {
+    public static void MargeTree(Node<ProfileData> root) {
+
+        Map<KeyTree, Node<ProfileData>> hash = createHash(root);
+
+    }
+
+    /**
+     * This function creates a HashMap of <level x label> x Node
+     *
+     * @param root
+     *            a tree first node to be traversed to create the hash
+     *
+     * @return the map of the tree using keyTree
+     */
+    public static Map<KeyTree, Node<ProfileData>> createHash(Node<ProfileData> root) {
 
         Map<KeyTree, Node<ProfileData>> hmap = new HashMap<>();
         Node<ProfileData> current = null;
@@ -238,7 +253,15 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             String label = current.getNodeLabel();
             KeyTree aux1 = new KeyTree(label, level);
 
-            hmap.put(aux1, current);
+            if (hmap.containsKey(aux1)) {
+                @Nullable
+                Node<ProfileData> temp = hmap.get(aux1);
+                temp.mergeNode(current);
+                hmap.put(aux1, temp);
+            } else {
+                hmap.put(aux1, current);
+
+            }
             for (Node<ProfileData> child : current.getChildren()) {
                 queue.add(child);
             }
@@ -253,7 +276,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         numberLevels = level;
         return hmap;
     }
-
 
     // Which kind of tree:
     public enum Tree {

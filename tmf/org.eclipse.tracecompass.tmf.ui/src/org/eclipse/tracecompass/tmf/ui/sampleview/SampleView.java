@@ -157,7 +157,7 @@ public class SampleView extends AbstractTimeGraphView {
         // Get the data from the module
         Node<ProfileData> root = module.getTree();
         Map<KeyTree, Node<ProfileData>> map;
-        map = module.createHash(root);
+        map = CCTAnalysisModule.createHash(root);
         numberLevels = module.getNumberLevels();
 
         fMap = map;
