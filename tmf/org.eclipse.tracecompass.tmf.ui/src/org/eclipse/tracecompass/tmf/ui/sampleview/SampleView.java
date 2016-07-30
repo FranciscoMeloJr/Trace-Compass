@@ -156,15 +156,17 @@ public class SampleView extends AbstractTimeGraphView {
 
         // Get the data from the module
         Node<ProfileData> root = module.getTree();
+        Map<KeyTree, Node<ProfileData>> map;
+        map = module.createHash(root);
+        numberLevels = module.getNumberLevels();
+
+        fMap = map;
         fRoot = root;
 
         TraceEntry traceEntry = null;
         Map<ITmfTrace, LevelEntry> levelEntryMap = new HashMap<>();
         Map<LevelEntry, EventEntry> eventEntryMap = new HashMap<>();
 
-        // Map of the nodes:
-        Map<KeyTree, Node<ProfileData>> map;
-        int numberLevels;
 
         // Symbols:
         ISymbolProvider provider = fSymbolProviders.get(trace);
@@ -194,10 +196,6 @@ public class SampleView extends AbstractTimeGraphView {
         addToEntryList(parentTrace, Collections.singletonList(traceEntry));
 
         System.out.println("Tree:");
-        map = createHash(root);
-
-        // Making it global:
-        fMap = map;
 
         // Used to populate the string:
         populateStringArray();
@@ -336,7 +334,7 @@ public class SampleView extends AbstractTimeGraphView {
 
         // Go through the tree and creates the nodes:
         ArrayList<EventNode> arrayEvent = new ArrayList<>();
-        //duration and spacing:
+        // duration and spacing:
         long[] durationArr = new long[numberLevels + 1];
         Arrays.fill(durationArr, 0);
         long gap = 1000;
@@ -663,47 +661,6 @@ public class SampleView extends AbstractTimeGraphView {
             return null;
         }
 
-    }
-
-    // This function creates a HashMap of <level x label> x Node
-    private static Map<KeyTree, Node<ProfileData>> createHash(Node<ProfileData> root) {
-
-        Map<KeyTree, Node<ProfileData>> hmap = new HashMap<>();
-        Node<ProfileData> current = null;
-        Node<ProfileData> pointerParent = null;
-
-        LinkedList<Node<ProfileData>> queue = new LinkedList<>();
-
-        int level = 0;
-
-        queue.add(root);
-        while (!queue.isEmpty()) {
-            current = queue.poll();
-            level = 0;
-            pointerParent = current.getParent();
-            if (pointerParent != null) {
-                while (pointerParent != null) {
-                    pointerParent = pointerParent.getParent();
-                    level++;
-                }
-            }
-            String label = current.getNodeLabel();
-            KeyTree aux = new KeyTree(label, level);
-
-            hmap.put(aux, current);
-            for (Node<ProfileData> child : current.getChildren()) {
-                queue.add(child);
-            }
-        }
-
-        System.out.println(hmap.size());
-
-        for (KeyTree key : hmap.keySet()) {
-            System.out.println(key);
-        }
-
-        numberLevels = level;
-        return hmap;
     }
 
     // getFunctionName:
