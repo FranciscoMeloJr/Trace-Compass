@@ -116,22 +116,23 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             ProfileData data;
 
             // This is used for tracepoints:
-            /*
-             * if (eventName.equals("interval:tracepoint")) {
-             * System.out.println("Tracepoint"); // Fields: // my_string_field,
-             * my_integer_field, context._vpid, // context._vtid,
-             * context.procname = testF
-             *
-             * ITmfEventField content = event.getContent(); for (ITmfEventField
-             * field : content.getFields()) { if
-             * (field.getValue().equals("begin")) { System.out.println(
-             * "start the ecct");
-             *
-             * fNode = Node.create(new ProfileData(0, "root")); parent = fNode;
-             *
-             * } if (field.getValue().equals("end")) { System.out.println(
-             * "ends the ecct"); ArrayECCTs.add(fNode); parent = null; } } }
-             */
+            if (eventName.equals("interval:tracepoint")) {
+                System.out.println("Tracepoint"); // Fields: // my_string_field,
+
+                ITmfEventField content = event.getContent();
+                for (ITmfEventField field : content.getFields()) {
+                    if (field.getValue().equals("begin")) {
+                        System.out.println("start the ecct");
+                        fNode = Node.create(new ProfileData(0, "root"));
+                        parent = fNode;
+                    }
+                    if (field.getValue().equals("end")) {
+                        System.out.println("ends the ecct");
+                        ArrayECCTs.add(fNode);
+                        parent = null;
+                    }
+                }
+            }
 
             if (eventName.equals("lttng_ust_cyg_profile:func_entry")) {
                 first = Iterables.get(event.getContent().getFields(), 0);
@@ -172,6 +173,13 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             System.out.println("Sucess");
             ProfileTraversal.levelOrderTraversal(fNode, dot);
 
+            //Array:
+            LinkedHashMap<KeyTree, Node<ProfileData>> map;
+            for(int i = 0; i < ArrayECCTs.size(); i++)
+            {
+                map = createHash(ArrayECCTs.get(i));
+                System.out.println("Tree " + i + map.size());
+            }
         }
 
         public Node<ProfileData> getTree() {
@@ -213,7 +221,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     }
 
-
     /**
      * This function creates a HashMap of <level x label> x Node
      *
@@ -228,7 +235,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         Node<ProfileData> current = null;
         Node<ProfileData> pointerParent = null;
 
-        //Linked list
+        // Linked list
         LinkedHashMap<KeyTree, Node<ProfileData>> hmapZ = new LinkedHashMap<>();
 
         LinkedList<Node<ProfileData>> queue = new LinkedList<>();
@@ -271,7 +278,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
         numberLevels = level;
-        return hmapZ;//hmap;
+        return hmapZ;// hmap;
     }
 
     // Which kind of tree:
@@ -291,8 +298,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     /**
-     * @author francisco This class implements IProfileData to be implemented on the
-     *         tests related with Profiling and ECCT
+     * @author francisco This class implements IProfileData to be implemented on
+     *         the tests related with Profiling and ECCT
      */
 
     public class GraphvizVisitor implements IProfileVisitor<ProfileData> {
