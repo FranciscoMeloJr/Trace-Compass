@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Random;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
@@ -114,6 +115,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             final String eventName = event.getType().getName();
             ProfileData data;
+            Random rand = new Random();
 
             // This is used for tracepoints:
             if (eventName.equals("interval:tracepoint")) {
@@ -138,7 +140,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 first = Iterables.get(event.getContent().getFields(), 0);
                 String label = first.toString();
                 Long start = event.getTimestamp().getValue();
-                aux = Node.create(new ProfileData(0, label, start, null));
+                //RandomNumber
+                int  n = rand.nextInt(100) + 1;
+                aux = Node.create(new ProfileData(0, label, start, null, n));
+
 
                 // put as a children on a call graph:
                 if (parent != null) {

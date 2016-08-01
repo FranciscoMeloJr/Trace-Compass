@@ -196,10 +196,11 @@ public class SampleView extends AbstractTimeGraphView {
         populateStringArray();
 
         LevelEntry levelEntryAux[];
-        levelEntryAux = new LevelEntry[1];
+        levelEntryAux = new LevelEntry[2];
 
         // Creating the LevelEntry (key is the level)
         levelEntryAux[0] = new LevelEntry("Tree", 0, 0, endTime + 1);
+        levelEntryAux[1] = new LevelEntry("Tree", 0, 0, endTime + 1);
 
         // create the event entry:
         ArrayList<EventEntry> eventEntryAux = createEventEntry(Long.valueOf(1), endTime, levelEntryAux[0], eventEntryMap);
@@ -229,9 +230,11 @@ public class SampleView extends AbstractTimeGraphView {
 
         // Put the level entries on the trace entry
         traceEntry.addChild(levelEntryAux[0]);
+        traceEntry.addChild(levelEntryAux[1]);
 
         // Put the trace and the level in a map
         levelEntryMap.put(trace, levelEntryAux[0]);
+        levelEntryMap.put(trace, levelEntryAux[1]);
 
         if (parentTrace == getTrace()) {
             synchronized (this) {
@@ -240,8 +243,6 @@ public class SampleView extends AbstractTimeGraphView {
             }
             synchingToTime(0);// getTimeGraphViewer().getSelectionBegin());
             refresh();
-            // getTimeGraphViewer().refresh();
-            // getTimeGraphViewer().resetStartFinishTime();
         }
         // start = end;
 
