@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -133,7 +134,7 @@ public class SampleView extends AbstractTimeGraphView {
     // Override this method:
     @Override
     protected void buildEntryList(final ITmfTrace trace, final ITmfTrace parentTrace, final IProgressMonitor monitor) {
-        System.out.println("buildEntryList " + trace.getName());
+        System.out.println("buildEntryList ");
 
         Iterable<CCTAnalysisModule> iter = TmfTraceUtils.getAnalysisModulesOfClass(trace, CCTAnalysisModule.class);
         CCTAnalysisModule module = null;
@@ -156,7 +157,7 @@ public class SampleView extends AbstractTimeGraphView {
 
         // Get the data from the module
         Node<ProfileData> root = module.getTree();
-        Map<KeyTree, Node<ProfileData>> map;
+        LinkedHashMap<KeyTree, Node<ProfileData>> map;
         map = CCTAnalysisModule.createHash(root);
         numberLevels = module.getNumberLevels();
 
@@ -166,7 +167,6 @@ public class SampleView extends AbstractTimeGraphView {
         TraceEntry traceEntry = null;
         Map<ITmfTrace, LevelEntry> levelEntryMap = new HashMap<>();
         Map<LevelEntry, EventEntry> eventEntryMap = new HashMap<>();
-
 
         // Symbols:
         ISymbolProvider provider = fSymbolProviders.get(trace);
@@ -184,25 +184,17 @@ public class SampleView extends AbstractTimeGraphView {
         if (monitor.isCanceled()) {
             return;
         }
-        long end = 3000000; // fRoot.getProfileData().getDuration();//
-                            // fRoot.getProfileData().getEndTime();
-        long endTime = end + 1;
+        long end = 4000000; // fRoot.getProfileData().getDuration();// change
 
-        System.out.print(" EndTime " + endTime);
+        long endTime = end + 1;
 
         setEndTime(endTime);
 
         traceEntry = new TraceEntry(trace.getName(), startTime, endTime);
         addToEntryList(parentTrace, Collections.singletonList(traceEntry));
 
-        System.out.println("Tree:");
-
         // Used to populate the string:
         populateStringArray();
-
-        for (KeyTree key : fMap.keySet()) {
-            System.out.println("Label " + key.getLabel() + " level " + key.getLevel());
-        }
 
         LevelEntry levelEntryAux[];
         levelEntryAux = new LevelEntry[1];
@@ -336,6 +328,10 @@ public class SampleView extends AbstractTimeGraphView {
         ArrayList<EventNode> arrayEvent = new ArrayList<>();
         // duration and spacing:
         long[] durationArr = new long[numberLevels + 1];
+        Map<KeyTree, Long> newMap = new HashMap<>();// duration vs the key;
+        EventNode tempNode = null;
+        KeyTree xis = null;
+
         Arrays.fill(durationArr, 0);
         long gap = 1000;
 
@@ -343,13 +339,29 @@ public class SampleView extends AbstractTimeGraphView {
             if (fMap.get(key) != null) {
                 int level = key.getLevel();
                 String label = key.getLabel();
-                int id = fMap.get(key).getNodeId();
-                long duration = fMap.get(key).getProfileData().getDuration();
+                Node node = fMap.get(key);
+                int id = node.getNodeId();
+                long duration = ((ProfileData) node.getProfileData()).getDuration();
+                if (node.getParent() != null) {
+                    xis = new KeyTree(node.getParent().getNodeLabel(), level - 1);
+                    System.out.print("Parent " + node.getParent().getNodeLabel() + " level " + " duration " + newMap.get(xis));
+                }
+                if (newMap.get(xis) != null) {
+                    Long begin = newMap.get(xis);
+                    tempNode = new EventNode(arrayEventEntry.get(level), label, id, begin.longValue(), duration, 1);
+                    begin += duration;
+                    newMap.put(xis, begin);
 
-                EventNode tempNode = new EventNode(arrayEventEntry.get(level), label, id, durationArr[level], duration, 1);
+                } else {
+                    tempNode = new EventNode(arrayEventEntry.get(level), label, id, durationArr[level], duration, 1);
+                }
+
                 arrayEvent.add(tempNode);
+                // put on the hash for durations:
+                newMap.put(key, durationArr[level]); System.out.println("Key and duration " + key + " " + newMap.get(key));
                 // array of durations update
                 durationArr[level] += (duration + gap);
+
                 // put the events on the entry:
                 arrayEventEntry.get(level).addEvent(tempNode);
                 System.out.println("level  " + key.getLevel() + "label " + key.getLabel() + " duration " + fMap.get(key).getProfileData().getDuration() + " id " + fMap.get(key).getNodeId());
@@ -358,12 +370,12 @@ public class SampleView extends AbstractTimeGraphView {
         }
 
         return arrayEvent;
+
     }
     // This function put them together.
 
     // This function populates the Array of Strings:
     private void populateStringArray() {
-        System.out.println("Populate the String array");
         for (KeyTree key : fMap.keySet()) {
             // key.getLabel();
             FUNCTION_NAMES.add(key.getLabel());
@@ -451,7 +463,6 @@ public class SampleView extends AbstractTimeGraphView {
                 queue.add(child);
             }
             visitor.visit(current);
-            System.out.println(current);
         }
 
     }
@@ -495,7 +506,6 @@ public class SampleView extends AbstractTimeGraphView {
                     Object o = ((TimeGraphSelection) selection).getFirstElement();
                     if (o instanceof EventEntry) {
                         EventEntry event = (EventEntry) o;
-                        System.out.println(event);
                     }
                 }
             }

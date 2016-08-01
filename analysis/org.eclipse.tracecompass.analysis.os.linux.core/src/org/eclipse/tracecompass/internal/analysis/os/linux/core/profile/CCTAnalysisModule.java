@@ -8,12 +8,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileTraversal.KeyTree;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -111,7 +111,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         @Override
         public void handleData(final ITmfEvent event) {
             // Just for test, print on the console and add to the stack:
-            System.out.println(event.getName());
 
             final String eventName = event.getType().getName();
             ProfileData data;
@@ -182,7 +181,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     @Override
     public boolean canExecute(ITmfTrace trace) {
-        System.out.println("CCTAnalysisModule.canExecute()");
+        System.out.println("CCTAnalysisModule is ready");
         return true;
     }
 
@@ -210,16 +209,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 queue.add(child);
             }
             visitor.visit(current);
-            System.out.println(current);
         }
 
     }
 
-    public static void MargeTree(Node<ProfileData> root) {
-
-        Map<KeyTree, Node<ProfileData>> hash = createHash(root);
-
-    }
 
     /**
      * This function creates a HashMap of <level x label> x Node
@@ -229,11 +222,14 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
      *
      * @return the map of the tree using keyTree
      */
-    public static Map<KeyTree, Node<ProfileData>> createHash(Node<ProfileData> root) {
+    public static LinkedHashMap<KeyTree, Node<ProfileData>> createHash(Node<ProfileData> root) {
 
         Map<KeyTree, Node<ProfileData>> hmap = new HashMap<>();
         Node<ProfileData> current = null;
         Node<ProfileData> pointerParent = null;
+
+        //Linked list
+        LinkedHashMap<KeyTree, Node<ProfileData>> hmapZ = new LinkedHashMap<>();
 
         LinkedList<Node<ProfileData>> queue = new LinkedList<>();
 
@@ -254,12 +250,13 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             KeyTree aux1 = new KeyTree(label, level);
 
             if (hmap.containsKey(aux1)) {
-                @Nullable
                 Node<ProfileData> temp = hmap.get(aux1);
                 temp.mergeNode(current);
                 hmap.put(aux1, temp);
+                hmapZ.put(aux1, temp);
             } else {
                 hmap.put(aux1, current);
+                hmapZ.put(aux1, current);
 
             }
             for (Node<ProfileData> child : current.getChildren()) {
@@ -267,14 +264,14 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
         }
 
-        System.out.println(hmap.size());
+        System.out.println("Size " + hmap.size());
 
-        for (KeyTree key : hmap.keySet()) {
+        for (KeyTree key : hmapZ.keySet()) {
             System.out.println(key);
         }
 
         numberLevels = level;
-        return hmap;
+        return hmapZ;//hmap;
     }
 
     // Which kind of tree:
@@ -322,7 +319,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
          * @throws Exception
          */
         public void print(String name, Mode mode) throws Exception {
-            System.out.println("Print tree:");
+
             String content = new String("digraph G { \n");
             if (mode != Mode.COLOR_) {
                 if (mode != Mode.ID_) {
@@ -394,7 +391,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     try (BufferedWriter bw = new BufferedWriter(fw)) {
                         bw.write(content);
                         bw.close();
-                        System.out.println("Done printing");
                     }
                 }
 
