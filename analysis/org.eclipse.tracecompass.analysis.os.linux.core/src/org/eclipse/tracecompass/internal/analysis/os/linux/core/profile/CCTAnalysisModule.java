@@ -27,7 +27,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import com.google.common.collect.Iterables;
 
 /**
- * @author frank
+ * @author francisco
  *
  */
 public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
@@ -291,7 +291,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     /**
-     * @author frank This class implements IProfileData to be implemented on the
+     * @author francisco This class implements IProfileData to be implemented on the
      *         tests related with Profiling and ECCT
      */
 

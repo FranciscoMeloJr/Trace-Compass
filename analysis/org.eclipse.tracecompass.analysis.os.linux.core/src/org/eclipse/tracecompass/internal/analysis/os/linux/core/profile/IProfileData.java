@@ -1,5 +1,8 @@
 package org.eclipse.tracecompass.internal.analysis.os.linux.core.profile;
 
+/*
+ * This interface is related with an interface for profiling data
+ */
 public interface IProfileData {
 
     public IProfileData minus(IProfileData other);

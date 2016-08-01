@@ -93,8 +93,7 @@ public class SampleView extends AbstractTimeGraphView {
     private static final String[] COLUMN_NAMES1 = new String[] {
             Messages.SampleView_FunctionColumn,
             Messages.SampleView_DepthColumn,
-            Messages.SampleView_EntryTimeColumn,
-            Messages.SampleView_ExitTimeColumn,
+            Messages.SampleView_RepetitionTimesColumn,
             Messages.SampleView_A
     };
 
@@ -348,12 +347,12 @@ public class SampleView extends AbstractTimeGraphView {
                 }
                 if (newMap.get(xis) != null) {
                     Long begin = newMap.get(xis);
-                    tempNode = new EventNode(arrayEventEntry.get(level), label, id, begin.longValue(), duration, 1);
+                    tempNode = new EventNode(arrayEventEntry.get(level), label, id, begin.longValue(), duration, 1, level);
                     begin += duration;
                     newMap.put(xis, begin);
 
                 } else {
-                    tempNode = new EventNode(arrayEventEntry.get(level), label, id, durationArr[level], duration, 1);
+                    tempNode = new EventNode(arrayEventEntry.get(level), label, id, durationArr[level], duration, 1, level);
                 }
 
                 arrayEvent.add(tempNode);
@@ -485,7 +484,7 @@ public class SampleView extends AbstractTimeGraphView {
 
         TmfTimeRange range = new TmfTimeRange(TmfTimestamp.fromNanos(0), TmfTimestamp.fromNanos(15));
         broadcast(new TmfWindowRangeUpdatedSignal(SampleView.this, range));
-        getTimeGraphViewer().setStartFinishTime(0, 15);
+//        getTimeGraphViewer().setStartFinishTime(0, 15);
 
         // Changes on the fTimeGraphWrapper
         // getTimeGraphViewer().
@@ -607,7 +606,7 @@ public class SampleView extends AbstractTimeGraphView {
 
         int fNodeId;
         String fLabel;
-        int fValue;
+        int fValue,fLevel;
 
         /** TimeGraphEntry matching this time event */
         protected ITimeGraphEntry fEntry;
@@ -615,13 +614,14 @@ public class SampleView extends AbstractTimeGraphView {
         // Control variable is novalue:
         private static final int NOVALUE = Integer.MIN_VALUE;
 
-        public EventNode(ITimeGraphEntry entry, String label, int nodeId, long time, long duration, int value) {
+        public EventNode(ITimeGraphEntry entry, String label, int nodeId, long time, long duration, int value, int level) {
             fEntry = entry;
             fNodeId = nodeId;
             fTime = time;
             fDuration = duration;
             fLabel = label;
             fValue = value;
+            fLevel = level;
         }
 
         public boolean hasValue() {
@@ -642,7 +642,7 @@ public class SampleView extends AbstractTimeGraphView {
         }
 
         public int getDepth() {
-            return 3;
+            return fLevel;
         }
 
         @Override

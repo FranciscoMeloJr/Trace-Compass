@@ -348,8 +348,7 @@ public class Messages extends NLS {
     public static String SampleView_NameColumn;
     public static String SampleView_FunctionColumn;
     public static String SampleView_DepthColumn;
-    public static String SampleView_EntryTimeColumn;
-    public static String SampleView_ExitTimeColumn;
+    public static String SampleView_RepetitionTimesColumn;
 
     //Provider:
     public static String SampleViewPresentationProvider_NodeColumn;
@@ -361,6 +360,9 @@ public class Messages extends NLS {
     public static String ExportToTextJob_Export_to;
     public static String ExportToTextJob_Export_trace_to;
     public static String ExportToTextJob_Unable_to_export_trace;
+
+
+
 
     static {
         // initialize resource bundle

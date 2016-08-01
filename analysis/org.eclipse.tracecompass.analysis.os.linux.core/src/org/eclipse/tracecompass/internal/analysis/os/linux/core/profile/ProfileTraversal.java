@@ -10,7 +10,7 @@ import java.util.Queue;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
 
 /**
- * @author frank
+ * @author francisco
  * This class is related with the Profile traversal of the Enhanced Calling Context tree
  *
  */
