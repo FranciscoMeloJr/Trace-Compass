@@ -39,11 +39,14 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     // ArrayList of ECCTs, which are delimited by static implementation
     private ArrayList<Node<ProfileData>> ArrayECCTs = new ArrayList<>();
+    LinkedHashMap<KeyTree, Node<ProfileData>> mapECCTs[];
 
     Node<ProfileData> aux = null;
     Node<ProfileData> fRoot = Node.create(new ProfileData(0, "root"));
+    ArrayList<Node<ProfileData>> fRoots = new ArrayList<>();
     Node<ProfileData> parent = fRoot;
-    static int numberLevels;
+
+    static ArrayList<Integer> numberLevels = new ArrayList<>();
 
     /**
      * Default constructor
@@ -57,14 +60,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         System.out.println("Execute");
         ITmfTrace trace = checkNotNull(getTrace());
 
-        // Node<ProfileData> root = Node.create(new ProfileData(0, "root"));
-        RequestTest request = new RequestTest(); // with the active
-                                                 // trace
-        trace.sendRequest(request); // the method handleData is called for
-                                    // each event
+        RequestTest request = new RequestTest();
+        trace.sendRequest(request);
         try {
             request.waitForCompletion();
-            fRoot = request.getTree();
+            request.getArrayTree();
         } catch (InterruptedException e) {
             e.printStackTrace();
             return false;
@@ -178,15 +178,21 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             ProfileTraversal.levelOrderTraversal(fNode, dot);
 
             // Array:
-            LinkedHashMap<KeyTree, Node<ProfileData>> map;
+            mapECCTs = new LinkedHashMap[ArrayECCTs.size()];
             for (int i = 0; i < ArrayECCTs.size(); i++) {
-                map = createHash(ArrayECCTs.get(i));
-                System.out.println("Tree " + i + map.size());
+                mapECCTs[i] = createHash(ArrayECCTs.get(i));
+                System.out.println("Tree " + i + " " + mapECCTs[i].size());
             }
         }
 
+        // This function returns the fRoot
         public Node<ProfileData> getTree() {
             return fRoot;
+        }
+
+        // This function returns the fRoots - ArrayList of fRoots;
+        public ArrayList<Node<ProfileData>> getArrayTree() {
+            return ArrayECCTs;
         }
     }
 
@@ -261,9 +267,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             if (hmap.containsKey(aux1)) {
                 Node<ProfileData> temp = hmap.get(aux1);
-                temp.mergeNode(current);
-                hmap.put(aux1, temp);
-                hmapZ.put(aux1, temp);
+                if (temp != null) {
+                    temp.mergeNode(current);
+                    hmap.put(aux1, temp);
+                    hmapZ.put(aux1, temp);
+                }
             } else {
                 hmap.put(aux1, current);
                 hmapZ.put(aux1, current);
@@ -280,15 +288,18 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             System.out.println(key);
         }
 
-        numberLevels = level;
+        numberLevels.add(level);
         return hmapZ;// hmap;
     }
 
     /**
-     * This function makes the difference of two trees by the differences of their hashMaps, by using the operation
-     * minus
-     * @param root1: tree for comparison 1
-     * @param root2: tree for comparison 2
+     * This function makes the difference of two trees by the differences of
+     * their hashMaps, by using the operation minus
+     *
+     * @param root1:
+     *            tree for comparison 1
+     * @param root2:
+     *            tree for comparison 2
      *
      * @return the resulting is the hash of the difference
      */
@@ -298,8 +309,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         for (KeyTree key : root1.keySet()) {
             Node<ProfileData> value = root1.get(key);
-            if((root2.get(key)!=null) && (value!=null))
-            {
+            if ((root2.get(key) != null) && (value != null)) {
                 Node<ProfileData> compare = root2.get(key);
                 value.diff(compare);
             }
@@ -435,76 +445,53 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
     }
 
-    protected class TestData implements IProfileData {
-
-        private String fLabel;
-        private int fWeight;
-
-        // Constructor:
-        public TestData(int weight, String label) {
-            if (weight == 0) {
-                fWeight = 0;
-            } else {
-                fWeight = weight;
-            }
-            fLabel = label;
-        }
-
-        // Constructor:
-        public TestData(long weight, String label) {
-            fWeight = (int) weight;
-            fLabel = label;
-        }
-
-        // Add to the weight:
-        public void addWeight(int value) {
-            fWeight += value;
-        }
-
-        @Override
-        public void merge(IProfileData other) {
-            // TODO Auto-generated method stub
-
-        }
-
-        @Override
-        public IProfileData minus(IProfileData other) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public boolean equals(IProfileData other) {
-            if (!(other instanceof TestData)) {
-                throw new IllegalArgumentException("wrong type for minus operation");
-            }
-            TestData data = (TestData) other;
-            if (fLabel.equals(data.getLabel())) {
-                if (fWeight == data.getWeight()) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        @Override
-        public String getLabel() {
-            return fLabel;
-        }
-
-        @Override
-        public int getWeight() {
-            return fWeight;
-        }
-
-        @Override
-        public String toString() {
-            return new String(fWeight + " " + fLabel);
-        }
-    }
+    /*
+     * protected class TestData implements IProfileData {
+     *
+     * private String fLabel; private int fWeight;
+     *
+     * // Constructor: public TestData(int weight, String label) { if (weight ==
+     * 0) { fWeight = 0; } else { fWeight = weight; } fLabel = label; }
+     *
+     * // Constructor: public TestData(long weight, String label) { fWeight =
+     * (int) weight; fLabel = label; }
+     *
+     * // Add to the weight: public void addWeight(int value) { fWeight +=
+     * value; }
+     *
+     * @Override public void merge(IProfileData other) { // TODO Auto-generated
+     * method stub
+     *
+     * }
+     *
+     * @Override public IProfileData minus(IProfileData other) { // TODO
+     * Auto-generated method stub return null; }
+     *
+     * @Override public boolean equals(IProfileData other) { if (!(other
+     * instanceof TestData)) { throw new IllegalArgumentException(
+     * "wrong type for minus operation"); } TestData data = (TestData) other; if
+     * (fLabel.equals(data.getLabel())) { if (fWeight == data.getWeight()) {
+     * return true; } } return false; }
+     *
+     * @Override public String getLabel() { return fLabel; }
+     *
+     * @Override public int getWeight() { return fWeight; }
+     *
+     * @Override public String toString() { return new String(fWeight + " " +
+     * fLabel); } }
+     */
 
     public int getNumberLevels() {
-        return numberLevels;
+        return numberLevels.get(0);
     }
 
+    public ArrayList<Integer> getNumberLevelsEach() {
+        return numberLevels;
+
+    }
+
+    // This function returns the fRoots - ArrayList of fRoots;
+    public LinkedHashMap<KeyTree, Node<ProfileData>>[] getMapECCTs() {
+        return mapECCTs;
+    }
 }
