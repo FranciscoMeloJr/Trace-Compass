@@ -91,4 +91,9 @@ public class Node<T extends IProfileData> {
         return newNode;
     }
 
+    public T diff(Node<T> compare) {
+        getProfileData().minus(compare.getProfileData());
+        return getProfileData();
+    }
+
 }

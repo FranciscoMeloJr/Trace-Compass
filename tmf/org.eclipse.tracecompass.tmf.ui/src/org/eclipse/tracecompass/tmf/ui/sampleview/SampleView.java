@@ -176,7 +176,6 @@ public class SampleView extends AbstractTimeGraphView {
         }
 
         long startTime = 0; // fRoot.getProfileData().getStartTime();
-        long start = startTime;
 
         setStartTime(0);
 

@@ -225,28 +225,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     /**
-     * This function makes the difference of two trees by the differences of their hashMaps
-     *
-     * @param root1: tree for comparison 1
-     * @param root2: tree for comparison 2
-     *
-     * @return the resulting hash of the difference
-     */
-    public static LinkedHashMap<KeyTree, Node<ProfileData>> diffTrees(LinkedHashMap<KeyTree, Node<ProfileData>> root1, LinkedHashMap<KeyTree, Node<ProfileData>> root2) {
-
-        LinkedHashMap<KeyTree, Node<ProfileData>> result;
-
-        while(KeyTree key: root1.keySet())
-        {
-            Node<ProfileData> node = root1.get(key);
-            node.differential
-            result.put(key, value);
-        }
-
-        return result;
-    }
-
-    /**
      * This function creates a HashMap of <level x label> x Node
      *
      * @param root
@@ -304,6 +282,31 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         numberLevels = level;
         return hmapZ;// hmap;
+    }
+
+    /**
+     * This function makes the difference of two trees by the differences of their hashMaps, by using the operation
+     * minus
+     * @param root1: tree for comparison 1
+     * @param root2: tree for comparison 2
+     *
+     * @return the resulting is the hash of the difference
+     */
+    public static LinkedHashMap<KeyTree, Node<ProfileData>> diffTrees(LinkedHashMap<KeyTree, Node<ProfileData>> root1, LinkedHashMap<KeyTree, Node<ProfileData>> root2) {
+
+        LinkedHashMap<KeyTree, Node<ProfileData>> result = new LinkedHashMap<>();
+
+        for (KeyTree key : root1.keySet()) {
+            Node<ProfileData> value = root1.get(key);
+            if((root2.get(key)!=null) && (value!=null))
+            {
+                Node<ProfileData> compare = root2.get(key);
+                value.diff(compare);
+            }
+            result.put(key, value);
+        }
+
+        return result;
     }
 
     // Which kind of tree:
