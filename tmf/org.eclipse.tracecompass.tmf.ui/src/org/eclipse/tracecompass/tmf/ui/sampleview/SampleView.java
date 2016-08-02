@@ -195,19 +195,17 @@ public class SampleView extends AbstractTimeGraphView {
         // Used to populate the string:
         populateStringArray();
 
-        LevelEntry levelEntryAux[];
-        levelEntryAux = new LevelEntry[2];
+        LevelEntry[] levelEntryAux = createLevelEntry(endTime);
 
-        // Creating the LevelEntry (key is the level)
-        levelEntryAux[0] = new LevelEntry("Tree", 0, 0, endTime + 1);
-        levelEntryAux[1] = new LevelEntry("Tree", 0, 0, endTime + 1);
 
         // create the event entry:
         ArrayList<EventEntry> eventEntryAux = createEventEntry(Long.valueOf(1), endTime, levelEntryAux[0], eventEntryMap);
+        ArrayList<EventEntry> eventEntryAux1 = createEventEntry(Long.valueOf(1), endTime, levelEntryAux[0], eventEntryMap);
         // Creating a eventEntry
 
         // create the node entries:
         ArrayList<EventNode> eventAux = createEventNodes(eventEntryAux);
+        ArrayList<EventNode> eventAux1 = createEventNodes(eventEntryAux1);
 
         // Put as child
         List<ITimeEvent> eventList = new ArrayList<>(4);
@@ -228,13 +226,17 @@ public class SampleView extends AbstractTimeGraphView {
             levelEntryAux[0].addChild(eventEntryAux.get(i));
         }
 
-        // Put the level entries on the trace entry
-        traceEntry.addChild(levelEntryAux[0]);
-        traceEntry.addChild(levelEntryAux[1]);
+        // Put the level entries on the level
+        for (int i = 0; i < eventEntryAux.size(); i++) {
+            levelEntryAux[1].addChild(eventEntryAux.get(i));
+        }
 
-        // Put the trace and the level in a map
-        levelEntryMap.put(trace, levelEntryAux[0]);
-        levelEntryMap.put(trace, levelEntryAux[1]);
+        for (int i = 0; i < levelEntryAux.length; i++) {
+            // Put the level entries on the trace entry
+            traceEntry.addChild(levelEntryAux[i]);
+            // Put the trace and the level in a map
+            levelEntryMap.put(trace, levelEntryAux[0]);
+        }
 
         if (parentTrace == getTrace()) {
             synchronized (this) {
@@ -294,6 +296,17 @@ public class SampleView extends AbstractTimeGraphView {
         };
         action.setToolTipText("Tip1");
         return action;
+    }
+
+    // this function creates the trees
+    private LevelEntry[] createLevelEntry(Long endTime) {
+
+        LevelEntry[] levelEntry = new LevelEntry[fMap.size()];
+
+        levelEntry[0] = new LevelEntry("Tree 1", 0, 0, endTime + 1);
+        levelEntry[1] = new LevelEntry("Tree 2", 0, 0, endTime + 1);
+
+        return levelEntry;
     }
 
     // this function creates the level Entries - level 0, level 1, level 2,
@@ -358,7 +371,8 @@ public class SampleView extends AbstractTimeGraphView {
 
                 arrayEvent.add(tempNode);
                 // put on the hash for durations:
-                newMap.put(key, durationArr[level]); System.out.println("Key and duration " + key + " " + newMap.get(key));
+                newMap.put(key, durationArr[level]);
+                System.out.println("Key and duration " + key + " " + newMap.get(key));
                 // array of durations update
                 durationArr[level] += (duration + gap);
 
@@ -485,7 +499,7 @@ public class SampleView extends AbstractTimeGraphView {
 
         TmfTimeRange range = new TmfTimeRange(TmfTimestamp.fromNanos(0), TmfTimestamp.fromNanos(15));
         broadcast(new TmfWindowRangeUpdatedSignal(SampleView.this, range));
-//        getTimeGraphViewer().setStartFinishTime(0, 15);
+        // getTimeGraphViewer().setStartFinishTime(0, 15);
 
         // Changes on the fTimeGraphWrapper
         // getTimeGraphViewer().
@@ -607,7 +621,7 @@ public class SampleView extends AbstractTimeGraphView {
 
         int fNodeId;
         String fLabel;
-        int fValue,fLevel;
+        int fValue, fLevel;
 
         /** TimeGraphEntry matching this time event */
         protected ITimeGraphEntry fEntry;

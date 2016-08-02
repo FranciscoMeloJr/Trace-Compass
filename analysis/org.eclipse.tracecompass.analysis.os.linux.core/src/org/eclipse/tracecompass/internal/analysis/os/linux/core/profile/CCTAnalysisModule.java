@@ -140,10 +140,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 first = Iterables.get(event.getContent().getFields(), 0);
                 String label = first.toString();
                 Long start = event.getTimestamp().getValue();
-                //RandomNumber
-                int  n = rand.nextInt(100) + 1;
+                // RandomNumber
+                int n = rand.nextInt(100) + 1;
                 aux = Node.create(new ProfileData(0, label, start, null, n));
-
 
                 // put as a children on a call graph:
                 if (parent != null) {
@@ -178,10 +177,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             System.out.println("Sucess");
             ProfileTraversal.levelOrderTraversal(fNode, dot);
 
-            //Array:
+            // Array:
             LinkedHashMap<KeyTree, Node<ProfileData>> map;
-            for(int i = 0; i < ArrayECCTs.size(); i++)
-            {
+            for (int i = 0; i < ArrayECCTs.size(); i++) {
                 map = createHash(ArrayECCTs.get(i));
                 System.out.println("Tree " + i + map.size());
             }
@@ -224,6 +222,28 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             visitor.visit(current);
         }
 
+    }
+
+    /**
+     * This function makes the difference of two trees by the differences of their hashMaps
+     *
+     * @param root1: tree for comparison 1
+     * @param root2: tree for comparison 2
+     *
+     * @return the resulting hash of the difference
+     */
+    public static LinkedHashMap<KeyTree, Node<ProfileData>> diffTrees(LinkedHashMap<KeyTree, Node<ProfileData>> root1, LinkedHashMap<KeyTree, Node<ProfileData>> root2) {
+
+        LinkedHashMap<KeyTree, Node<ProfileData>> result;
+
+        while(KeyTree key: root1.keySet())
+        {
+            Node<ProfileData> node = root1.get(key);
+            node.differential
+            result.put(key, value);
+        }
+
+        return result;
     }
 
     /**

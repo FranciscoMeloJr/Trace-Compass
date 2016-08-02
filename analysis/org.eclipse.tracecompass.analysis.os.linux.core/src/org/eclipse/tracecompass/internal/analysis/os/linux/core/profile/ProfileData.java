@@ -114,11 +114,11 @@ public class ProfileData implements IProfileData {
     }
 
     public void setMetric(int nextInt) {
-        X = nextInt;
+        fX = nextInt;
     }
 
     public int getX() {
-        return X;
+        return fX;
     }
     public void setDuration(long l) {
         fDuration = l;
