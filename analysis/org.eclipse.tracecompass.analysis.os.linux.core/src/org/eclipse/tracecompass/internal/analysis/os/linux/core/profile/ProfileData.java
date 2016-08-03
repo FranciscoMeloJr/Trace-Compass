@@ -14,7 +14,7 @@ public class ProfileData implements IProfileData {
     int fX;
     long fstartTime;
     long fendTime;
-    long fDuration = 0; //endTime - startTime
+    long fDuration = 0; // endTime - startTime
 
     // Constructor:
     public ProfileData(int weight, String label) {
@@ -26,6 +26,7 @@ public class ProfileData implements IProfileData {
         fLabel = label;
         fDuration = 0;
     }
+
     // Constructor:
     public ProfileData(int weight, String label, Long start, Long end, int x) {
         if (weight == 0) {
@@ -34,16 +35,17 @@ public class ProfileData implements IProfileData {
             fWeight = weight;
         }
         fLabel = label;
-        if(start!=null) {
+        if (start != null) {
             fstartTime = start;
         }
-        if(end!=null) {
+        if (end != null) {
             fendTime = end;
         }
         fDuration = 0;
-        //test:
+        // test:
         fX = x;
     }
+
     // Constructor:
     public ProfileData(long weight, String label) {
         fWeight = (int) weight;
@@ -58,13 +60,28 @@ public class ProfileData implements IProfileData {
 
     @Override
     public void merge(IProfileData other) {
-        // TODO Auto-generated method stub
+        if (!(other instanceof ProfileData)) {
+            throw new IllegalArgumentException("wrong type for minus operation");
+        }
+        ProfileData data = (ProfileData) other;
+        if (fLabel.equals(data.getLabel())) {
+            this.fDuration += data.getDuration();
+            this.fWeight += data.getDuration();
+        }
 
     }
 
     @Override
     public IProfileData minus(IProfileData other) {
-        // TODO Auto-generated method stub
+        if (!(other instanceof ProfileData)) {
+            throw new IllegalArgumentException("wrong type for minus operation");
+        }
+        ProfileData data = (ProfileData) other;
+        if (fLabel.equals(data.getLabel())) {
+            this.fDuration -= data.getDuration();
+            this.fWeight -= data.getDuration();
+            return this;
+        }
         return null;
     }
 
@@ -82,7 +99,7 @@ public class ProfileData implements IProfileData {
         return false;
     }
 
-    //Change for StackCall
+    // Change for StackCall
     public void setStartTime(long start) {
         fstartTime = start;
     }
@@ -90,6 +107,7 @@ public class ProfileData implements IProfileData {
     public void setEndTime(long end) {
         fendTime = end;
     }
+
     public long getStartTime() {
         return fstartTime;
     }
@@ -120,14 +138,17 @@ public class ProfileData implements IProfileData {
     public int getX() {
         return fX;
     }
+
     public void setDuration(long l) {
         fDuration = l;
 
     }
+
     public long getDuration() {
         return fDuration;
 
     }
+
     public void addDuration(long duration) {
         fDuration += duration;
 

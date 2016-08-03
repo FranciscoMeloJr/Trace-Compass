@@ -191,8 +191,6 @@ public class SampleView extends AbstractTimeGraphView {
         traceEntry = new TraceEntry(trace.getName(), startTime, endTime);
         addToEntryList(parentTrace, Collections.singletonList(traceEntry));
 
-        // Used to populate the string:
-        populateStringArray();
 
         LevelEntry[] levelEntryAux = createLevelEntry(endTime);
 
@@ -256,6 +254,7 @@ public class SampleView extends AbstractTimeGraphView {
 
     }
 
+    //This function is for a small selection menu:
     @Override
     protected void fillLocalMenu(IMenuManager manager) {
         super.fillLocalMenu(manager);
@@ -264,7 +263,6 @@ public class SampleView extends AbstractTimeGraphView {
         // fFlatAction = createFlatAction();
         // fFlatAction = createFlatAction();
         for (int i = 0; i < FUNCTION_NAMES.size(); i++) {
-            System.out.println(FUNCTION_NAMES.get(i));
             item.add(createFunctionSelection(FUNCTION_NAMES.get(i)));
         }
 
@@ -289,7 +287,7 @@ public class SampleView extends AbstractTimeGraphView {
         IAction action = new Action(name, IAction.AS_RADIO_BUTTON) {
             @Override
             public void run() {
-                System.out.println("Action 1");
+                System.out.println("Action " + name);
                 //Call the differential function
             }
 
@@ -402,7 +400,6 @@ public class SampleView extends AbstractTimeGraphView {
         for (KeyTree key : fMap[Tree].keySet()) {
             // key.getLabel();
             FUNCTION_NAMES.add(key.getLabel());
-            System.out.println(key.getLabel());
         }
 
         System.out.println(FUNCTION_NAMES.size());
