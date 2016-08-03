@@ -361,6 +361,7 @@ public class SampleView extends AbstractTimeGraphView {
                 String label = key.getLabel();
                 Node node = fMap[Tree].get(key);
                 int id = node.getNodeId();
+                int color = node.getColor();
                 long duration = ((ProfileData) node.getProfileData()).getDuration();
                 if (node.getParent() != null) {
                     xis = new KeyTree(node.getParent().getNodeLabel(), level - 1);
@@ -368,12 +369,12 @@ public class SampleView extends AbstractTimeGraphView {
                 }
                 if (newMap.get(xis) != null) {
                     Long begin = newMap.get(xis);
-                    tempNode = new EventNode(arrayEventEntry.get(level), label, id, begin.longValue(), duration, 1, level);
+                    tempNode = new EventNode(arrayEventEntry.get(level), label, id, begin.longValue(), duration, 1, level, color);
                     begin += duration;
                     newMap.put(xis, begin);
 
                 } else {
-                    tempNode = new EventNode(arrayEventEntry.get(level), label, id, durationArr[level], duration, 1, level);
+                    tempNode = new EventNode(arrayEventEntry.get(level), label, id, durationArr[level], duration, 1, level, color);
                 }
 
                 arrayEvent.add(tempNode);
@@ -628,6 +629,7 @@ public class SampleView extends AbstractTimeGraphView {
         int fNodeId;
         String fLabel;
         int fValue, fLevel;
+        int fColor; //change to enum Color; grey, green and red
 
         /** TimeGraphEntry matching this time event */
         protected ITimeGraphEntry fEntry;
@@ -635,7 +637,7 @@ public class SampleView extends AbstractTimeGraphView {
         // Control variable is novalue:
         private static final int NOVALUE = Integer.MIN_VALUE;
 
-        public EventNode(ITimeGraphEntry entry, String label, int nodeId, long time, long duration, int value, int level) {
+        public EventNode(ITimeGraphEntry entry, String label, int nodeId, long time, long duration, int value, int level, int color) {
             fEntry = entry;
             fNodeId = nodeId;
             fTime = time;
@@ -643,6 +645,7 @@ public class SampleView extends AbstractTimeGraphView {
             fLabel = label;
             fValue = value;
             fLevel = level;
+            fColor = color;
         }
 
         public boolean hasValue() {
@@ -691,7 +694,15 @@ public class SampleView extends AbstractTimeGraphView {
             // TODO Auto-generated method stub
             return null;
         }
+        @Override
+        public String toString()
+        {
+            return fLabel + "["+ Long.toString(fDuration) + "]";
+        }
 
+        public int getColor() {
+            return fColor;
+        }
     }
 
     // getFunctionName:

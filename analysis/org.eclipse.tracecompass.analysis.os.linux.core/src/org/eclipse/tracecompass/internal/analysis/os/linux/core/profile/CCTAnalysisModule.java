@@ -178,15 +178,15 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             ProfileTraversal.levelOrderTraversal(fNode, dot);
 
             // Array:
-            arrayECCTs = new LinkedHashMap[ArrayECCTs.size()+1];
+            arrayECCTs = new LinkedHashMap[ArrayECCTs.size() + 1];
             int i;
             for (i = 0; i < ArrayECCTs.size(); i++) {
                 arrayECCTs[i] = createHash(ArrayECCTs.get(i));
                 System.out.println("Tree " + i + " " + arrayECCTs[i].size());
             }
 
-            //Make the differential:
-            arrayECCTs[i] = diffTrees(arrayECCTs[i-1],arrayECCTs[i-2]);
+            // Make the differential:
+            arrayECCTs[i] = diffTrees(arrayECCTs[i - 1], arrayECCTs[i - 2]);
         }
 
         // This function returns the fRoot
@@ -312,20 +312,24 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         LinkedHashMap<KeyTree, Node<ProfileData>> result = new LinkedHashMap<>();
 
         int max = 0;
+        Node<ProfileData> value, copy = null;
         for (KeyTree key : root1.keySet()) {
-            Node<ProfileData> value = root1.get(key);
-            if ((root2.get(key) != null) && (value != null)) {
-                Node<ProfileData> compare = root2.get(key);
-                value.diff(compare);
-            }
-            if(key.getLevel() > max) {
-                max = key.getLevel();
-            }
+            value = root1.get(key);
+            if (value != null) {
+                copy = Node.create(value.getProfileData());
+                if ((root2.get(key) != null) && (copy != null)) {
+                    Node<ProfileData> compare = root2.get(key);
+                    copy.diff(compare);
+                }
+                if (key.getLevel() > max) {
+                    max = key.getLevel();
+                }
 
-            result.put(key, value);
+                result.put(key, copy);
+            }
         }
 
-        //necessary to show the difference, as the last tree:
+        // necessary to show the difference, as the last tree:
         numberLevels.add(max);
         return result;
     }

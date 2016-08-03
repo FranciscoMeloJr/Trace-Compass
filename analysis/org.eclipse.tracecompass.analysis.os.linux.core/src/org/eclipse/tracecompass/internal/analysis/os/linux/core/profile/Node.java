@@ -10,6 +10,7 @@ public class Node<T extends IProfileData> {
     private Node fParent;
     private final int fId;
     T fProfileData;
+    private int fColor = 0;
 
     public Node() {
         fChildren = new ArrayList<>();
@@ -91,9 +92,20 @@ public class Node<T extends IProfileData> {
         return newNode;
     }
 
-    public T diff(Node<T> compare) {
+    public int diff(Node<T> compare) {
         getProfileData().minus(compare.getProfileData());
-        return getProfileData();
+        //zero is the same:
+        fColor = getProfileData().minus(compare.getProfileData());
+        return fColor;
     }
 
+    //Color properties:
+    public int getColor() {
+        return fColor;
+    }
+
+    public void setColor(int newColor)
+    {
+        fColor = newColor;
+    }
 }

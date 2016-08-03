@@ -32,7 +32,12 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
     private Integer fAverageCharWidth;
 
     private enum State {
-        MULTIPLE(new RGB(100, 100, 100)), EXEC(new RGB(0, 200, 0));
+        //Gray:
+        MULTIPLE(new RGB(100, 100, 100)), EXEC(new RGB(0, 200, 0)),
+        //Red:
+        RED(new RGB(100, 0, 0)),
+        //Green:
+        GREEN(new RGB(0, 100,0));
 
         private final RGB rgb;
 
@@ -87,6 +92,7 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
 
     @Override
     public int getStateTableIndex(ITimeEvent event) {
+
         if (event instanceof EventEntry) {
             EventEntry EventEntry = (EventEntry) event;
             return EventEntry.getNodeId();
@@ -94,9 +100,20 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
         if (event instanceof NullTimeEvent) {
             return INVISIBLE;
         }
-        if (event instanceof TimeEvent) {
-            TimeEvent timeEvent = (TimeEvent) event;
-            return 57;
+
+        // Change:
+        if (event instanceof EventNode) {
+            EventNode eventNode = (EventNode) event;
+            int color = eventNode.getColor();
+            if (color == 0) {
+                return State.MULTIPLE.ordinal();
+            }
+            if (color == 1) {
+                return State.RED.ordinal();
+            }
+            if (color == -1) {
+                return State.GREEN.ordinal();
+            }
         }
         return State.MULTIPLE.ordinal();
     }
@@ -108,13 +125,7 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
             EventEntry entry = (EventEntry) event.getEntry();
             // ITmfStateSystem ss = entry.getStateSystem();
             try {
-                // ITmfStateValue value = ss.querySingleState(event.getTime(),
-                // entry.getQuark()).getStateValue();
-                // if (!value.isNull()) {
-                ret = new String(entry.getName() + " function 1");
-                // return fView.getFunctionName(entry, entry.getProcessId(),
-                // event.getTime(), value);
-                // }
+                ret = new String(entry.getName() + " function");
             } catch (TimeRangeException e) {
                 Activator.getDefault().logError("Error querying state system", e); //$NON-NLS-1$
             }
@@ -134,10 +145,9 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
         if (bounds.width <= fAverageCharWidth) {
             return;
         }
-        if(event instanceof EventNode)
-        {
+        if (event instanceof EventNode) {
             EventNode entry = (EventNode) event;
-            String label = entry.getLabel();
+            String label = entry.toString();
 
             gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
             Utils.drawText(gc, label, bounds.x, bounds.y, bounds.width, bounds.height, true, true);
@@ -151,10 +161,7 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
             // ITmfStateValue value = ss.querySingleState(event.getTime(),
             // entry.getQuark()).getStateValue();
             // if (!value.isNull()) {
-            String name = fSampleView.getFunctionName(); // entry.getTrace(),
-                                                         // entry.getProcessId(),
-                                                         // event.getTime(),
-                                                         // value);
+            String name = fSampleView.getFunctionName();
             gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
             Utils.drawText(gc, name, bounds.x, bounds.y, bounds.width, bounds.height, true, true);
             // }

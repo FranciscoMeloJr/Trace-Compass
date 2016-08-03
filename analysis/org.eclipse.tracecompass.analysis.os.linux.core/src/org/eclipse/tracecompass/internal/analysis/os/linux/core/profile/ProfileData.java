@@ -61,7 +61,7 @@ public class ProfileData implements IProfileData {
     @Override
     public void merge(IProfileData other) {
         if (!(other instanceof ProfileData)) {
-            throw new IllegalArgumentException("wrong type for minus operation");
+            throw new IllegalArgumentException("wrong type for merge operation");
         }
         ProfileData data = (ProfileData) other;
         if (fLabel.equals(data.getLabel())) {
@@ -72,17 +72,30 @@ public class ProfileData implements IProfileData {
     }
 
     @Override
-    public IProfileData minus(IProfileData other) {
+    public int minus(IProfileData other) {
         if (!(other instanceof ProfileData)) {
             throw new IllegalArgumentException("wrong type for minus operation");
         }
         ProfileData data = (ProfileData) other;
         if (fLabel.equals(data.getLabel())) {
-            this.fDuration -= data.getDuration();
-            this.fWeight -= data.getDuration();
-            return this;
+            //gray:
+            if(this.fDuration == data.getDuration()) {
+                return 0;
+            }
+           //red:
+            if(this.fDuration > data.getDuration()) {
+                return 1;
+            }
+            //green:
+            if(this.fDuration < data.getDuration()) {
+                return -1;
+            }
+        //To see the colors:
+            //this.fDuration -= data.getDuration();
+            //this.fWeight -= data.getDuration();
         }
-        return null;
+        //gray:
+        return 0;
     }
 
     @Override
