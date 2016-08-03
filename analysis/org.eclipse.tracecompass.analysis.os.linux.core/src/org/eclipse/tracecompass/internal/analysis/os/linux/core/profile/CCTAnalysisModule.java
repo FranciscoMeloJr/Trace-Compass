@@ -39,7 +39,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     // ArrayList of ECCTs, which are delimited by static implementation
     private ArrayList<Node<ProfileData>> ArrayECCTs = new ArrayList<>();
-    LinkedHashMap<KeyTree, Node<ProfileData>> mapECCTs[];
+    LinkedHashMap<KeyTree, Node<ProfileData>> arrayECCTs[];
 
     Node<ProfileData> aux = null;
     Node<ProfileData> fRoot = Node.create(new ProfileData(0, "root"));
@@ -178,11 +178,15 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             ProfileTraversal.levelOrderTraversal(fNode, dot);
 
             // Array:
-            mapECCTs = new LinkedHashMap[ArrayECCTs.size()];
-            for (int i = 0; i < ArrayECCTs.size(); i++) {
-                mapECCTs[i] = createHash(ArrayECCTs.get(i));
-                System.out.println("Tree " + i + " " + mapECCTs[i].size());
+            arrayECCTs = new LinkedHashMap[ArrayECCTs.size()+1];
+            int i;
+            for (i = 0; i < ArrayECCTs.size(); i++) {
+                arrayECCTs[i] = createHash(ArrayECCTs.get(i));
+                System.out.println("Tree " + i + " " + arrayECCTs[i].size());
             }
+
+            //Make the differential:
+            arrayECCTs[i] = diffTrees(arrayECCTs[i-1],arrayECCTs[i-2]);
         }
 
         // This function returns the fRoot
@@ -307,15 +311,22 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         LinkedHashMap<KeyTree, Node<ProfileData>> result = new LinkedHashMap<>();
 
+        int max = 0;
         for (KeyTree key : root1.keySet()) {
             Node<ProfileData> value = root1.get(key);
             if ((root2.get(key) != null) && (value != null)) {
                 Node<ProfileData> compare = root2.get(key);
                 value.diff(compare);
             }
+            if(key.getLevel() > max) {
+                max = key.getLevel();
+            }
+
             result.put(key, value);
         }
 
+        //necessary to show the difference, as the last tree:
+        numberLevels.add(max);
         return result;
     }
 
@@ -491,7 +502,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     // This function returns the fRoots - ArrayList of fRoots;
-    public LinkedHashMap<KeyTree, Node<ProfileData>>[] getMapECCTs() {
-        return mapECCTs;
+    public LinkedHashMap<KeyTree, Node<ProfileData>>[] getArrayECCTs() {
+        return arrayECCTs;
     }
 }

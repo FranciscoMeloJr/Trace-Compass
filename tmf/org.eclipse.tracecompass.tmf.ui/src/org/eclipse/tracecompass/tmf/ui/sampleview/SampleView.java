@@ -81,7 +81,8 @@ public class SampleView extends AbstractTimeGraphView {
      */
     public static final String ID1 = "org.eclipse.tracecompass.tmf.ui.views.SampleView";
     private ArrayList<Node<ProfileData>> fRoots; // Array of roots
-    private static ArrayList<Integer> numberLevels; // there are several trees, therefore,
+    private static ArrayList<Integer> numberLevels; // there are several trees,
+                                                    // therefore,
     private static int Tree = 0;// several levels
 
     // Map of the tree:
@@ -151,12 +152,11 @@ public class SampleView extends AbstractTimeGraphView {
         module.schedule();
         module.waitForCompletion();
 
-        System.out.println("wait");
         // Get the data from the module
         ArrayList<Node<ProfileData>> roots = module.getArrayTree();
 
-        LinkedHashMap<KeyTree, Node<ProfileData>> map[] = new LinkedHashMap[roots.size()];
-        map = module.getMapECCTs();
+        LinkedHashMap<KeyTree, Node<ProfileData>> map[] = new LinkedHashMap[roots.size() + 1];
+        map = module.getArrayECCTs();
         numberLevels = module.getNumberLevelsEach();
 
         // put the maps and the roots as properties:
@@ -200,7 +200,6 @@ public class SampleView extends AbstractTimeGraphView {
         ArrayList<EventNode> eventAux;
         List<ITimeEvent> eventList;
 
-
         for (int t = 0; t < map.length; t++) {
             // This was necessary to keep the methods declaration:
             Tree = t;
@@ -228,7 +227,6 @@ public class SampleView extends AbstractTimeGraphView {
             for (int i = 0; i < eventEntryAux.size(); i++) {
                 levelEntryAux[Tree].addChild(eventEntryAux.get(i));
             }
-
 
         }
 
@@ -262,7 +260,7 @@ public class SampleView extends AbstractTimeGraphView {
     protected void fillLocalMenu(IMenuManager manager) {
         super.fillLocalMenu(manager);
 
-        MenuManager item = new MenuManager("Functions");
+        MenuManager item = new MenuManager("Select Tree:");
         // fFlatAction = createFlatAction();
         // fFlatAction = createFlatAction();
         for (int i = 0; i < FUNCTION_NAMES.size(); i++) {
@@ -292,6 +290,7 @@ public class SampleView extends AbstractTimeGraphView {
             @Override
             public void run() {
                 System.out.println("Action 1");
+                //Call the differential function
             }
 
         };
@@ -301,14 +300,22 @@ public class SampleView extends AbstractTimeGraphView {
 
     // this function creates the trees
     private LevelEntry[] createLevelEntry(Long endTime) {
+        // each level is a tree:
+        LevelEntry[] levelEntry = new LevelEntry[fMap.length];
+        String name = null;
 
-        LevelEntry[] levelEntry = new LevelEntry[fMap.length]; // each level is
-                                                               // a tree
-
+        // The last one is the differential:
         for (int i = 0; i < fMap.length; i++) {
-            levelEntry[i] = new LevelEntry("Tree" + (Integer.toString(i)+1), 0, 0, endTime + 1);
+            if (i == (fMap.length - 1)) {
+                name = new String("Differential");
+            } else {
+                int number = i + 1;
+                name = new String("Tree" + Integer.toString(number));
+            }
+            levelEntry[i] = new LevelEntry(name, 0, 0, endTime + 1);
         }
 
+        FUNCTION_NAMES.add(name);
         return levelEntry;
     }
 
