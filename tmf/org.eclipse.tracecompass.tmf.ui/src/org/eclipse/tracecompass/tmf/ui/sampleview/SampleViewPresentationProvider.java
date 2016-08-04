@@ -32,12 +32,8 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
     private Integer fAverageCharWidth;
 
     private enum State {
-        //Gray:
-        MULTIPLE(new RGB(100, 100, 100)), EXEC(new RGB(0, 200, 0)),
-        //Red:
-        RED(new RGB(100, 0, 0)),
-        //Green:
-        GREEN(new RGB(0, 100,0));
+        // Gray:
+        GRAY(new RGB(100, 100, 100)), GREEN(new RGB(0, 200, 0)), RED(new RGB(100, 0, 0));
 
         private final RGB rgb;
 
@@ -82,10 +78,12 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
         final float saturation = 0.6f;
         final float brightness = 0.6f;
         StateItem[] stateTable = new StateItem[NUM_COLORS + 1];
-        stateTable[0] = new StateItem(State.MULTIPLE.rgb, State.MULTIPLE.toString());
+        stateTable[0] = new StateItem(State.GRAY.rgb, State.GRAY.toString());
+        stateTable[1] = new StateItem(State.GREEN.rgb, State.GREEN.toString());
+        stateTable[2] = new StateItem(State.RED.rgb, State.RED.toString());
         for (int i = 0; i < NUM_COLORS; i++) {
             RGB rgb = new RGB(i, saturation, brightness);
-            stateTable[i + 1] = new StateItem(rgb, State.EXEC.toString());
+            stateTable[i + 1] = new StateItem(rgb, State.GREEN.toString());
         }
         return stateTable;
     }
@@ -93,10 +91,6 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
     @Override
     public int getStateTableIndex(ITimeEvent event) {
 
-        if (event instanceof EventEntry) {
-            EventEntry EventEntry = (EventEntry) event;
-            return EventEntry.getNodeId();
-        }
         if (event instanceof NullTimeEvent) {
             return INVISIBLE;
         }
@@ -105,17 +99,17 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
         if (event instanceof EventNode) {
             EventNode eventNode = (EventNode) event;
             int color = eventNode.getColor();
-            if (color == 0) {
-                return State.MULTIPLE.ordinal();
-            }
             if (color == 1) {
                 return State.RED.ordinal();
             }
             if (color == -1) {
                 return State.GREEN.ordinal();
             }
+            if (color == 0) {
+                return State.GRAY.ordinal();
+            }
         }
-        return State.MULTIPLE.ordinal();
+        return State.GRAY.ordinal();
     }
 
     @Override
