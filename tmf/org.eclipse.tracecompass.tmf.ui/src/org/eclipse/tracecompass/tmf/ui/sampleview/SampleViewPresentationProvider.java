@@ -75,16 +75,12 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
 
     @Override
     public StateItem[] getStateTable() {
-        //final float saturation = 0.6f;
-        //final float brightness = 0.6f;
+
         StateItem[] stateTable = new StateItem[NUM_COLORS];
         stateTable[0] = new StateItem(State.GRAY.rgb, State.GRAY.toString());
         stateTable[1] = new StateItem(State.GREEN.rgb, State.GREEN.toString());
         stateTable[2] = new StateItem(State.RED.rgb, State.RED.toString());
-        /*for (int i = 0; i < NUM_COLORS; i++) {
-            RGB rgb = new RGB(i, saturation, brightness);
-            stateTable[i + 1] = new StateItem(rgb, State.GREEN.toString());
-        }*/
+
         return stateTable;
     }
 

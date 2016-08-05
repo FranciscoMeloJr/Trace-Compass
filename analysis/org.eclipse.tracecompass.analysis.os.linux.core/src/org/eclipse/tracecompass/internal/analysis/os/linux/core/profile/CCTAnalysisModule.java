@@ -46,6 +46,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     ArrayList<Node<ProfileData>> fRoots = new ArrayList<>();
     Node<ProfileData> parent = fRoot;
 
+    //This tree is the differential part:
+    static LinkedHashMap<KeyTree, Node<ProfileData>> treeDif;
+
     static ArrayList<Integer> numberLevels = new ArrayList<>();
 
     /**
@@ -57,7 +60,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     @Override
     protected boolean executeAnalysis(IProgressMonitor monitor) throws TmfAnalysisException {
-        System.out.println("Execute");
         ITmfTrace trace = checkNotNull(getTrace());
 
         RequestTest request = new RequestTest();
@@ -119,17 +121,14 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             // This is used for tracepoints:
             if (eventName.equals("interval:tracepoint")) {
-                System.out.println("Tracepoint"); // Fields: // my_string_field,
 
                 ITmfEventField content = event.getContent();
                 for (ITmfEventField field : content.getFields()) {
                     if (field.getValue().equals("begin")) {
-                        System.out.println("start the ecct");
                         fNode = Node.create(new ProfileData(0, "root"));
                         parent = fNode;
                     }
                     if (field.getValue().equals("end")) {
-                        System.out.println("ends the ecct");
                         ArrayECCTs.add(fNode);
                         parent = null;
                     }
@@ -182,11 +181,16 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             int i;
             for (i = 0; i < ArrayECCTs.size(); i++) {
                 arrayECCTs[i] = createHash(ArrayECCTs.get(i));
-                System.out.println("Tree " + i + " " + arrayECCTs[i].size());
             }
 
-            // Make the differential:
-            arrayECCTs[i] = diffTrees(arrayECCTs[i - 1], arrayECCTs[i - 2]);
+            // Make the differential with a random tree:
+            if (treeDif == null) {
+                Random rn = new Random();
+                int a = rn.nextInt(9);
+                int b = rn.nextInt(9);
+                diffTrees(arrayECCTs[a], arrayECCTs[b]);
+                arrayECCTs[ArrayECCTs.size()] = treeDif; //put the tree on the last size
+            }
         }
 
         // This function returns the fRoot
@@ -286,12 +290,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
         }
 
-        System.out.println("Size " + hmap.size());
-
-        for (KeyTree key : hmapZ.keySet()) {
-            System.out.println(key);
-        }
-
         numberLevels.add(level);
         return hmapZ;// hmap;
     }
@@ -331,6 +329,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         // necessary to show the difference, as the last tree:
         numberLevels.add(max);
+        treeDif = result;
         return result;
     }
 
@@ -472,5 +471,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     // This function returns the fRoots - ArrayList of fRoots;
     public LinkedHashMap<KeyTree, Node<ProfileData>>[] getArrayECCTs() {
         return arrayECCTs;
+    }
+
+    public static void calculateDiff() {
+
     }
 }
