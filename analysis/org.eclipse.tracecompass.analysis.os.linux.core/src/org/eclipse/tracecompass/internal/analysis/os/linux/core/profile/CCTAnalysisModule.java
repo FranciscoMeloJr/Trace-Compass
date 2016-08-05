@@ -38,8 +38,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     public static final @NonNull String ID = "org.eclipse.tracecompass.analysis.os.linux.core.profile.cctanalysis.module"; //$NON-NLS-1$
 
     // ArrayList of ECCTs, which are delimited by static implementation
-    private ArrayList<Node<ProfileData>> ArrayECCTs = new ArrayList<>();
-    LinkedHashMap<KeyTree, Node<ProfileData>> arrayECCTs[];
+    private static ArrayList<Node<ProfileData>> ArrayECCTs = new ArrayList<>();
+    static LinkedHashMap<KeyTree, Node<ProfileData>> arrayECCTs[];
 
     Node<ProfileData> aux = null;
     Node<ProfileData> fRoot = Node.create(new ProfileData(0, "root"));
@@ -330,6 +330,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         // necessary to show the difference, as the last tree:
         numberLevels.add(max);
         treeDif = result;
+        arrayECCTs[ArrayECCTs.size()] = treeDif;
         return result;
     }
 

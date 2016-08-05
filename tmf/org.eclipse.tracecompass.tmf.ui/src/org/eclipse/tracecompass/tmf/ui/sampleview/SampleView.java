@@ -297,7 +297,7 @@ public class SampleView extends AbstractTimeGraphView {
         manager.add(fTimeGraphWrapper.getTimeGraphViewer().getSelectAction());
     }
 
-    private static IAction createTreeSelection(String name, int i) {
+    private IAction createTreeSelection(String name, int i) {
         IAction action = new Action(name, IAction.AS_RADIO_BUTTON) {
             @Override
             public void run() {
@@ -312,8 +312,8 @@ public class SampleView extends AbstractTimeGraphView {
                     System.out.println("Taking the tree B:" + name );
                     //Call the differential function
                     Dif[1] = Integer.parseInt(name);
-                    LinkedHashMap<KeyTree, Node<ProfileData>> result = CCTAnalysisModule.diffTrees(fMap[Dif[0]], fMap[Dif[1]]);
-
+                    CCTAnalysisModule.diffTrees(fMap[Dif[0]], fMap[Dif[1]]);
+                    refresh();
                 }
             }
 
