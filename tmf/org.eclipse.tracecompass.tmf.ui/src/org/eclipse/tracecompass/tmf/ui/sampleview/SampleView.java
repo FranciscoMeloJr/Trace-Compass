@@ -309,11 +309,15 @@ public class SampleView extends AbstractTimeGraphView {
                 }
                 else
                 {
-                    System.out.println("Taking the tree B:" + name );
+                    System.out.println("Taking the tree B:" + name + " " + "(" + Dif[0] +" " + Dif[1]+") ");
                     //Call the differential function
                     Dif[1] = Integer.parseInt(name);
                     CCTAnalysisModule.diffTrees(fMap[Dif[0]], fMap[Dif[1]]);
+                    //refresh();
+                    rebuild(); //update(); //rebuild();//
                     refresh();
+                    redraw();
+
                 }
             }
 

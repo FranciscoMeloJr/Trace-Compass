@@ -96,6 +96,7 @@ public class Node<T extends IProfileData> {
         getProfileData().minus(compare.getProfileData());
         //zero is the same:
         fColor = getProfileData().minus(compare.getProfileData());
+        System.out.println("Color " + fColor);
         return fColor;
     }
 
