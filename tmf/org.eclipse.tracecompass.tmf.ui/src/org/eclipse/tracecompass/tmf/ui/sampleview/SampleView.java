@@ -294,7 +294,7 @@ public class SampleView extends AbstractTimeGraphView {
         super.fillLocalToolBar(manager);
 
         // New implementation
-        manager.add(fTimeGraphWrapper.getTimeGraphViewer().getSelectAction());
+        //manager.add(fTimeGraphWrapper.getTimeGraphViewer().getSelectAction());
     }
 
     private IAction createTreeSelection(String name, int i) {
