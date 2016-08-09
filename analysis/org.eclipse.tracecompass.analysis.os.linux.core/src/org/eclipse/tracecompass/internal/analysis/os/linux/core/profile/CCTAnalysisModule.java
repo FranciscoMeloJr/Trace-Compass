@@ -15,6 +15,7 @@ import java.util.Random;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileTraversal.KeyTree;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
@@ -293,7 +294,54 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         numberLevels.add(level);
         return hmapZ;// hmap;
     }
+    /**
+     * This function creates a meanTree with the array of Trees
+     *
+     * @param root1:
+     *            tree for comparison 1
+     *
+     * @return the resulting is the mean of all them
+     */
+    public static LinkedHashMap<KeyTree, Node<ProfileData>> meanTree() {
 
+        int size = arrayECCTs.length;
+        LinkedHashMap<KeyTree, Node<ProfileData>> temp = arrayECCTs[0];
+        LinkedHashMap<KeyTree, Node<ProfileData>> result = new LinkedHashMap<>();
+        ProfileData data;
+
+        Node<ProfileData> initial, mean = null;
+        int max = 0;
+        Node<ProfileData> value, copy = null;
+        for (KeyTree key : temp.keySet()) {
+            value = temp.get(key);
+            if (value != null) {
+                Long duration = value.getProfileData().getDuration();
+                duration /= size;
+                copy = Node.create(value.getProfileData());
+                copy.getProfileData().setDuration(duration);
+                result.put(key, copy);
+            }
+        }
+
+        for(int i=1; i<size; i++)
+        {
+            temp = arrayECCTs[i];
+            for (KeyTree key : temp.keySet()) {
+                value = temp.get(key);
+                if (value != null) {
+                    initial = result.get(key);
+                    if(initial!=null)
+                    {
+                        Long duration = value.getProfileData().getDuration();
+                        duration /= size; //little math
+                        initial.getProfileData().addDuration(duration);
+                        result.put(key, initial);
+                    }
+                }
+            }
+        }
+
+    }
     /**
      * This function makes the difference of two trees by the differences of
      * their hashMaps, by using the operation minus
