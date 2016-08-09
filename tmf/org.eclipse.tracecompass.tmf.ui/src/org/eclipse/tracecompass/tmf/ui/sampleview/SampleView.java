@@ -254,7 +254,7 @@ public class SampleView extends AbstractTimeGraphView {
 
     }
 
-    //This function is for a small selection menu:
+    //This function is for a small selection menu - size is hard coded:
     @Override
     protected void fillLocalMenu(IMenuManager manager) {
         super.fillLocalMenu(manager);
@@ -338,7 +338,7 @@ public class SampleView extends AbstractTimeGraphView {
                 name = new String("Differential");
             } else {
                 int number = i + 1;
-                name = new String("Tree" + Integer.toString(number));
+                name = new String("Tree " + Integer.toString(number));
             }
             levelEntry[i] = new LevelEntry(name, 0, 0, endTime + 1);
         }
