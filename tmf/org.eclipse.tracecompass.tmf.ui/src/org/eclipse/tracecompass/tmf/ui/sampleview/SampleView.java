@@ -349,6 +349,7 @@ public class SampleView extends AbstractTimeGraphView {
 
     // this function creates the level Entries i.e level 0, level 1, level 2:
     private static ArrayList<EventEntry> createEventEntry(long entry, long exit, LevelEntry t, Map<LevelEntry, EventEntry> eventEntryMap) {
+        System.out.println("create Event Entry size ");
         System.out.println("create Event Entry size " + fMap[Tree].size());
         // Go through the tree and creates the entries:
         // eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
@@ -392,7 +393,7 @@ public class SampleView extends AbstractTimeGraphView {
                 long duration = ((ProfileData) node.getProfileData()).getDuration();
                 if (node.getParent() != null) {
                     xis = new KeyTree(node.getParent().getNodeLabel(), level - 1);
-                    System.out.print("Parent " + node.getParent().getNodeLabel() + " level " + " duration " + newMap.get(xis));
+                    //System.out.print("Parent " + node.getParent().getNodeLabel() + " level " + " duration " + newMap.get(xis));
                 }
                 if (newMap.get(xis) != null) {
                     Long begin = newMap.get(xis);

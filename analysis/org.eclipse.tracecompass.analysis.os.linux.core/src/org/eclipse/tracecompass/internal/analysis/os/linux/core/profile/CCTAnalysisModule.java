@@ -46,7 +46,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     ArrayList<Node<ProfileData>> fRoots = new ArrayList<>();
     Node<ProfileData> parent = fRoot;
 
-    //This tree is the differential part:
+    // This tree is the differential part:
     static LinkedHashMap<KeyTree, Node<ProfileData>> treeDif;
 
     static ArrayList<Integer> numberLevels = new ArrayList<>();
@@ -175,21 +175,29 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             System.out.println("Sucess");
             ProfileTraversal.levelOrderTraversal(fNode, dot);
-
-            // Array:
-            arrayECCTs = new LinkedHashMap[ArrayECCTs.size() + 1];
+            // Tracepoint mechanism:
+            if (ArrayECCTs.size() == 0) {
+                ArrayECCTs.add(fRoot);
+                arrayECCTs = new LinkedHashMap[ArrayECCTs.size()];
+            } else {
+                // Array:
+                arrayECCTs = new LinkedHashMap[ArrayECCTs.size() + 1];
+            }
             int i;
             for (i = 0; i < ArrayECCTs.size(); i++) {
                 arrayECCTs[i] = createHash(ArrayECCTs.get(i));
             }
 
             // Make the differential with a random tree:
-            if (treeDif == null) {
-                Random rn = new Random();
-                int a = rn.nextInt(9);
-                int b = rn.nextInt(9);
-                diffTrees(arrayECCTs[a], arrayECCTs[b]);
-                arrayECCTs[ArrayECCTs.size()] = treeDif; //put the tree on the last size
+            if (ArrayECCTs.size() > 1) {
+                if (treeDif == null) {
+                    Random rn = new Random();
+                    int a = rn.nextInt(9);
+                    int b = rn.nextInt(9);
+                    diffTrees(arrayECCTs[a], arrayECCTs[b]);
+                    arrayECCTs[ArrayECCTs.size()] = treeDif; // put the tree on
+                                                             // the last size
+                }
             }
         }
 
@@ -293,6 +301,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         numberLevels.add(level);
         return hmapZ;// hmap;
     }
+
     /**
      * This function creates a meanTree with the array of Trees
      *
@@ -322,17 +331,15 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
         }
 
-        for(int i=1; i<size; i++)
-        {
+        for (int i = 1; i < size; i++) {
             temp = arrayECCTs[i];
             for (KeyTree key : temp.keySet()) {
                 value = temp.get(key);
                 if (value != null) {
                     initial = result.get(key);
-                    if(initial!=null)
-                    {
+                    if (initial != null) {
                         Long duration = value.getProfileData().getDuration();
-                        duration /= size; //little math
+                        duration /= size; // little math
                         initial.getProfileData().addDuration(duration);
                         result.put(key, initial);
                     }
@@ -341,6 +348,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
     }
+
     /**
      * This function makes the difference of two trees by the differences of
      * their hashMaps, by using the operation minus
