@@ -141,7 +141,7 @@ public class ProfileData implements IProfileData {
 
     @Override
     public String toString() {
-        return new String(fWeight + " " + fLabel);
+        return new String(fDuration + " " + fLabel);
     }
 
     public void setMetric(int nextInt) {

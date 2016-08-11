@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
@@ -202,6 +203,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                                                              // the last size
                 }
             }
+
+            organizeRoot();
+            organizeStartEnd();
         }
 
         // This function returns the fRoot
@@ -212,6 +216,76 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         // This function returns the fRoots - ArrayList of fRoots;
         public ArrayList<Node<ProfileData>> getArrayTree() {
             return ArrayECCTs;
+        }
+
+        // This function method runs through the nodes of the root and calculate
+        // the duration
+        public <T extends IProfileData> void organizeRoot() {
+
+            int size = ArrayECCTs.size();
+            Node<ProfileData> tempRoot = null;
+
+            ProfileData profileData;
+            long duration;
+
+            for (int i = 0; i < size; i++) {
+                tempRoot = ArrayECCTs.get(i);
+                duration = 0;
+                for (Node<T> node : tempRoot.getChildren()) {
+                    profileData = (ProfileData) node.fProfileData;
+                    duration += profileData.getDuration();
+                }
+                profileData = tempRoot.getProfileData();
+                profileData.setDuration(duration);
+                tempRoot.setProfileData(profileData);
+            }
+            return;
+        }
+
+        // This function method runs through the nodes of the root and calculate
+        // the duration
+        public void organizeStartEnd() {
+            try {
+                System.out.println("organizeStartEnd");
+                int length = arrayECCTs.length;
+                LinkedHashMap<KeyTree, Node<ProfileData>> temp = null;
+
+                ArrayList<Long> listInit;
+
+                for (int i = 0; i < length; i++) {
+                    temp = arrayECCTs[i];
+                    System.out.println("levels " + numberLevels.get(i));
+                    listInit = new ArrayList<>();
+
+                    for (int j = 0; j <= numberLevels.get(i); j++) {
+                        listInit.add(new Long(0));
+                    }
+                    for (KeyTree key : temp.keySet()) {
+                        // the start of a
+                        Node eachNode = temp.get(key);
+                        ProfileData pd = (ProfileData) eachNode.getProfileData();
+                        // duration:
+                        int level = key.getLevel();
+                        long start = listInit.get(level);
+                        long end = start + pd.getDuration();
+                        long gap = 100;
+
+                        // updates:
+                        pd.setStartTime(start);
+                        pd.setEndTime(end);
+
+                        // updates:
+                        listInit.set(level, end + gap);
+                        eachNode.setProfileData(pd);
+
+                        // printf:
+                        System.out.println("Node: " + eachNode.toString() + " duration " + pd.getDuration() + " level " + level + " start: " + pd.getStartTime() + " end: " + pd.getEndTime());
+                    }
+
+                }
+            } catch (Exception ex) {
+                System.out.println("Exception in organizeStartEnd");
+            }
         }
     }
 
