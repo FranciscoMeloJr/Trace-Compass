@@ -133,128 +133,132 @@ public class SampleView extends AbstractTimeGraphView {
     @Override
     protected void buildEntryList(final ITmfTrace trace, final ITmfTrace parentTrace, final IProgressMonitor monitor) {
 
-        Iterable<CCTAnalysisModule> iter = TmfTraceUtils.getAnalysisModulesOfClass(trace, CCTAnalysisModule.class);
-        CCTAnalysisModule module = null;
+        try {
+            Iterable<CCTAnalysisModule> iter = TmfTraceUtils.getAnalysisModulesOfClass(trace, CCTAnalysisModule.class);
+            CCTAnalysisModule module = null;
 
-        // Selects only the CCTAnalysis module
-        for (IAnalysisModule mod : iter) {
-            if (mod instanceof CCTAnalysisModule) {
-                module = (CCTAnalysisModule) mod;
-                System.out.println("Module" + module);
-                break;
+            // Selects only the CCTAnalysis module
+            for (IAnalysisModule mod : iter) {
+                if (mod instanceof CCTAnalysisModule) {
+                    module = (CCTAnalysisModule) mod;
+                    System.out.println("Module" + module);
+                    break;
+                }
             }
-        }
 
-        if (module == null) {
+            if (module == null) {
+                return;
+            }
+            // Modules:
+            module.schedule();
+            module.waitForCompletion();
+
+            // Get the data from the module
+            ArrayList<Node<ProfileData>> roots = module.getArrayTree();
+
+            LinkedHashMap<KeyTree, Node<ProfileData>> map[] = new LinkedHashMap[roots.size() + 1];
+            map = module.getArrayECCTs();
+            numberLevels = module.getNumberLevelsEach();
+
+            // put the maps and the roots as properties:
+            fMap = map;
+            fRoots = roots;
+
+            TraceEntry traceEntry = null;
+            Map<ITmfTrace, LevelEntry> levelEntryMap = new HashMap<>();
+            Map<LevelEntry, EventEntry> eventEntryMap = new HashMap<>();
+
+            // Symbols:
+            ISymbolProvider provider = fSymbolProviders.get(trace);
+            if (provider == null) {
+                provider = SymbolProviderManager.getInstance().getSymbolProvider(trace);
+                provider.loadConfiguration(monitor);
+                fSymbolProviders.put(trace, provider);
+            }
+
+            long startTime = 0; // fRoot.getProfileData().getStartTime();
+
+            setStartTime(0);
+
+            if (monitor.isCanceled()) {
+                return;
+            }
+            long end = 4000000; // fRoot.getProfileData().getDuration();//
+                                // change
+
+            long endTime = end + 1;
+
+            setEndTime(endTime);
+
+            traceEntry = new TraceEntry(trace.getName(), startTime, endTime);
+            addToEntryList(parentTrace, Collections.singletonList(traceEntry));
+
+            LevelEntry[] levelEntryAux = createLevelEntry(endTime);
+
+            ArrayList<EventEntry> eventEntryAux;
+            ArrayList<EventNode> eventAux;
+            List<ITimeEvent> eventList;
+
+            for (int t = 0; t < map.length; t++) {
+                // This was necessary to keep the methods declaration:
+                Tree = t;
+                // create the event entry:
+                eventEntryAux = createEventEntry(Long.valueOf(1), endTime, levelEntryAux[Tree], eventEntryMap);
+
+                // create the node entries for each tree:
+                eventAux = createEventNodes(eventEntryAux);
+
+                // Put as child
+                eventList = new ArrayList<>(4);
+
+                // run through the eventEntries (levels) and link with
+                // tree(levelEntryAux)
+                for (int i = 0; i < eventEntryAux.size(); i++) {
+                    eventEntryMap.put(levelEntryAux[Tree], eventEntryAux.get(i));
+                }
+
+                // put the event on the list:
+                for (int i = 0; i < eventAux.size(); i++) {
+                    eventList.add(eventAux.get(i));
+                }
+
+                // Put the level entries on the level
+                for (int i = 0; i < eventEntryAux.size(); i++) {
+                    levelEntryAux[Tree].addChild(eventEntryAux.get(i));
+                }
+
+            }
+
+            // put the level entry on the traceEntry and levelEntryMap:
+            for (int i = 0; i < levelEntryAux.length; i++) {
+                // Put the level entries on the trace entry
+                traceEntry.addChild(levelEntryAux[i]);
+                // Put the trace and the level in a map
+                levelEntryMap.put(trace, levelEntryAux[i]);
+            }
+            if (parentTrace == getTrace()) {
+                synchronized (this) {
+                    setStartTime(0);
+                    setEndTime(endTime);
+                }
+                synchingToTime(0);// getTimeGraphViewer().getSelectionBegin());
+                refresh();
+            }
+            // start = end;
+
+            /*
+             * Display.getDefault().asyncExec(new Runnable() {
+             *
+             * @Override public void run() {
+             * getTimeGraphViewer().resetStartFinishTime(); } });
+             */
+        } catch (Exception ex) {
+            System.out.println("Exeception in createEventEntry");
             return;
         }
-        // Modules:
-        module.schedule();
-        module.waitForCompletion();
-
-        // Get the data from the module
-        ArrayList<Node<ProfileData>> roots = module.getArrayTree();
-
-        LinkedHashMap<KeyTree, Node<ProfileData>> map[] = new LinkedHashMap[roots.size() + 1];
-        map = module.getArrayECCTs();
-        numberLevels = module.getNumberLevelsEach();
-
-        // put the maps and the roots as properties:
-        fMap = map;
-        fRoots = roots;
-
-        TraceEntry traceEntry = null;
-        Map<ITmfTrace, LevelEntry> levelEntryMap = new HashMap<>();
-        Map<LevelEntry, EventEntry> eventEntryMap = new HashMap<>();
-
-        // Symbols:
-        ISymbolProvider provider = fSymbolProviders.get(trace);
-        if (provider == null) {
-            provider = SymbolProviderManager.getInstance().getSymbolProvider(trace);
-            provider.loadConfiguration(monitor);
-            fSymbolProviders.put(trace, provider);
-        }
-
-        long startTime = 0; // fRoot.getProfileData().getStartTime();
-
-        setStartTime(0);
-
-        if (monitor.isCanceled()) {
-            return;
-        }
-        long end = 4000000; // fRoot.getProfileData().getDuration();// change
-
-        long endTime = end + 1;
-
-        setEndTime(endTime);
-
-        traceEntry = new TraceEntry(trace.getName(), startTime, endTime);
-        addToEntryList(parentTrace, Collections.singletonList(traceEntry));
-
-
-        LevelEntry[] levelEntryAux = createLevelEntry(endTime);
-
-        ArrayList<EventEntry> eventEntryAux;
-        ArrayList<EventNode> eventAux;
-        List<ITimeEvent> eventList;
-
-        for (int t = 0; t < map.length; t++) {
-            // This was necessary to keep the methods declaration:
-            Tree = t;
-            // create the event entry:
-            eventEntryAux = createEventEntry(Long.valueOf(1), endTime, levelEntryAux[Tree], eventEntryMap);
-
-            // create the node entries for each tree:
-            eventAux = createEventNodes(eventEntryAux);
-
-            // Put as child
-            eventList = new ArrayList<>(4);
-
-            // run through the eventEntries (levels) and link with
-            // tree(levelEntryAux)
-            for (int i = 0; i < eventEntryAux.size(); i++) {
-                eventEntryMap.put(levelEntryAux[Tree], eventEntryAux.get(i));
-            }
-
-            // put the event on the list:
-            for (int i = 0; i < eventAux.size(); i++) {
-                eventList.add(eventAux.get(i));
-            }
-
-            // Put the level entries on the level
-            for (int i = 0; i < eventEntryAux.size(); i++) {
-                levelEntryAux[Tree].addChild(eventEntryAux.get(i));
-            }
-
-        }
-
-        // put the level entry on the traceEntry and levelEntryMap:
-        for (int i = 0; i < levelEntryAux.length; i++) {
-            // Put the level entries on the trace entry
-            traceEntry.addChild(levelEntryAux[i]);
-            // Put the trace and the level in a map
-            levelEntryMap.put(trace, levelEntryAux[i]);
-        }
-        if (parentTrace == getTrace()) {
-            synchronized (this) {
-                setStartTime(0);
-                setEndTime(endTime);
-            }
-            synchingToTime(0);// getTimeGraphViewer().getSelectionBegin());
-            refresh();
-        }
-        // start = end;
-
-        /*
-         * Display.getDefault().asyncExec(new Runnable() {
-         *
-         * @Override public void run() {
-         * getTimeGraphViewer().resetStartFinishTime(); } });
-         */
-
     }
 
-    //This function is for a small selection menu - size is hard coded:
+    // This function is for a small selection menu - size is hard coded:
     @Override
     protected void fillLocalMenu(IMenuManager manager) {
         super.fillLocalMenu(manager);
@@ -266,23 +270,23 @@ public class SampleView extends AbstractTimeGraphView {
         // Test just to put information on the
         System.out.println(FUNCTION_NAMES.size());
         int size = 10;
-        if(fRoots != null ) {
+        if (fRoots != null) {
             size = fRoots.size();
         }
         for (int i = 0; i < size; i++) {
-            itemA.add(createTreeSelection(Integer.toString(i),1));
+            itemA.add(createTreeSelection(Integer.toString(i), 1));
         }
         manager.add(new Separator());
         manager.add(itemA);
 
-        //ItemB
+        // ItemB
         MenuManager itemB = new MenuManager("Select Tree B: ");
         // fFlatAction = createFlatAction();
         // fFlatAction = createFlatAction();
 
         // Test just to put information on the
-        for (int i = 0; i < size ; i++) {
-            itemB.add(createTreeSelection(Integer.toString(i),2));
+        for (int i = 0; i < size; i++) {
+            itemB.add(createTreeSelection(Integer.toString(i), 2));
         }
 
         manager.add(new Separator());
@@ -294,27 +298,24 @@ public class SampleView extends AbstractTimeGraphView {
         super.fillLocalToolBar(manager);
 
         // New implementation
-        //manager.add(fTimeGraphWrapper.getTimeGraphViewer().getSelectAction());
+        // manager.add(fTimeGraphWrapper.getTimeGraphViewer().getSelectAction());
     }
 
     private IAction createTreeSelection(String name, int i) {
         IAction action = new Action(name, IAction.AS_RADIO_BUTTON) {
             @Override
             public void run() {
-                if(i == 1)
-                {
-                    System.out.println("Taking the tree A:" + name );
-                    //Call the differential function
+                if (i == 1) {
+                    System.out.println("Taking the tree A:" + name);
+                    // Call the differential function
                     Dif[0] = Integer.parseInt(name);
-                }
-                else
-                {
-                    System.out.println("Taking the tree B:" + name + " " + "(" + Dif[0] +" " + Dif[1]+") ");
-                    //Call the differential function
+                } else {
+                    System.out.println("Taking the tree B:" + name + " " + "(" + Dif[0] + " " + Dif[1] + ") ");
+                    // Call the differential function
                     Dif[1] = Integer.parseInt(name);
                     CCTAnalysisModule.diffTrees(fMap[Dif[0]], fMap[Dif[1]]);
-                    //refresh();
-                    rebuild(); //update(); //rebuild();//
+                    // refresh();
+                    rebuild(); // update(); //rebuild();//
                     refresh();
                     redraw();
                 }
@@ -392,7 +393,9 @@ public class SampleView extends AbstractTimeGraphView {
                 long duration = ((ProfileData) node.getProfileData()).getDuration();
                 if (node.getParent() != null) {
                     xis = new KeyTree(node.getParent().getNodeLabel(), level - 1);
-                    //System.out.print("Parent " + node.getParent().getNodeLabel() + " level " + " duration " + newMap.get(xis));
+                    // System.out.print("Parent " +
+                    // node.getParent().getNodeLabel() + " level " + " duration
+                    // " + newMap.get(xis));
                 }
                 if (newMap.get(xis) != null) {
                     Long begin = newMap.get(xis);
@@ -412,7 +415,10 @@ public class SampleView extends AbstractTimeGraphView {
 
                 // put the events on the entry:
                 arrayEventEntry.get(level).addEvent(tempNode);
-                //System.out.println("level  " + key.getLevel() + "label " + key.getLabel() + " duration " + fMap[Tree].get(key).getProfileData().getDuration() + " id " + fMap[Tree].get(key).getNodeId());
+                // System.out.println("level " + key.getLevel() + "label " +
+                // key.getLabel() + " duration " +
+                // fMap[Tree].get(key).getProfileData().getDuration() + " id " +
+                // fMap[Tree].get(key).getNodeId());
 
             }
         }
@@ -654,7 +660,7 @@ public class SampleView extends AbstractTimeGraphView {
         int fNodeId;
         String fLabel;
         int fValue, fLevel;
-        int fColor; //change to enum Color; grey, green and red
+        int fColor; // change to enum Color; grey, green and red
 
         /** TimeGraphEntry matching this time event */
         protected ITimeGraphEntry fEntry;
@@ -719,10 +725,10 @@ public class SampleView extends AbstractTimeGraphView {
             // TODO Auto-generated method stub
             return null;
         }
+
         @Override
-        public String toString()
-        {
-            return fLabel + "["+ Long.toString(fDuration) + "]";
+        public String toString() {
+            return fLabel + "[" + Long.toString(fDuration) + "]";
         }
 
         public int getColor() {
