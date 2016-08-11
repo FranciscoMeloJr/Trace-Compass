@@ -45,6 +45,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     Node<ProfileData> fRoot = Node.create(new ProfileData(0, "root"));
     ArrayList<Node<ProfileData>> fRoots = new ArrayList<>();
     Node<ProfileData> parent = fRoot;
+    String Sdelimiter = new String("interval:tracepoint");
+    String fEntry = new String("lttng_ust_cyg_profile:func_entry");
+    String fExit = new String("lttng_ust_cyg_profile:func_exit");
 
     // This tree is the differential part:
     static LinkedHashMap<KeyTree, Node<ProfileData>> treeDif;
@@ -119,8 +122,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             ProfileData data;
             Random rand = new Random();
 
-            // This is used for tracepoints:
-            if (eventName.equals("interval:tracepoint")) {
+            // This is used for delimiting the tree:
+            if (eventName.equals(Sdelimiter)) {
 
                 ITmfEventField content = event.getContent();
                 for (ITmfEventField field : content.getFields()) {
@@ -135,7 +138,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 }
             }
 
-            if (eventName.equals("lttng_ust_cyg_profile:func_entry")) {
+            if (eventName.equals(fEntry)) {
                 first = Iterables.get(event.getContent().getFields(), 0);
                 String label = first.toString();
                 Long start = event.getTimestamp().getValue();
@@ -150,7 +153,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 }
 
             } else {
-                if (eventName.contains("lttng_ust_cyg_profile:func_exit")) {
+                if (eventName.contains(fExit)) {
 
                     data = aux.fProfileData;
                     Long end = event.getTimestamp().getValue();
@@ -346,6 +349,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 }
             }
         }
+        return result;
 
     }
 

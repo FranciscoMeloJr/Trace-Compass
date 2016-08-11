@@ -317,7 +317,6 @@ public class SampleView extends AbstractTimeGraphView {
                     rebuild(); //update(); //rebuild();//
                     refresh();
                     redraw();
-
                 }
             }
 
