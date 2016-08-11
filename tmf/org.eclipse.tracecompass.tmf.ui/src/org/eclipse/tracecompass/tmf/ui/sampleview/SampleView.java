@@ -183,8 +183,7 @@ public class SampleView extends AbstractTimeGraphView {
             if (monitor.isCanceled()) {
                 return;
             }
-            long end = 4000000; // fRoot.getProfileData().getDuration();//
-                                // change
+            long end = fRoots.get(0).getProfileData().getDuration();
 
             long endTime = end + 1;
 
@@ -374,14 +373,8 @@ public class SampleView extends AbstractTimeGraphView {
 
         // Go through the tree and creates the nodes:
         ArrayList<EventNode> arrayEvent = new ArrayList<>();
-        // duration and spacing:
-        long[] durationArr = new long[numberLevels.get(Tree) + 1];
-        Map<KeyTree, Long> newMap = new HashMap<>();// duration vs the key;
         EventNode tempNode = null;
-        KeyTree xis = null;
 
-        Arrays.fill(durationArr, 0);
-        long gap = 1000;
 
         for (KeyTree key : fMap[Tree].keySet()) {
             if (fMap[Tree].get(key) != null) {
@@ -390,35 +383,15 @@ public class SampleView extends AbstractTimeGraphView {
                 Node node = fMap[Tree].get(key);
                 int id = node.getNodeId();
                 int color = node.getColor();
-                long duration = ((ProfileData) node.getProfileData()).getDuration();
-                if (node.getParent() != null) {
-                    xis = new KeyTree(node.getParent().getNodeLabel(), level - 1);
-                    // System.out.print("Parent " +
-                    // node.getParent().getNodeLabel() + " level " + " duration
-                    // " + newMap.get(xis));
-                }
-                if (newMap.get(xis) != null) {
-                    Long begin = newMap.get(xis);
-                    tempNode = new EventNode(arrayEventEntry.get(level), label, id, begin.longValue(), duration, 1, level, color);
-                    begin += duration;
-                    newMap.put(xis, begin);
+                long start = ((ProfileData) node.getProfileData()).getStartTime();
+                long end = ((ProfileData) node.getProfileData()).getEndTime();
 
-                } else {
-                    tempNode = new EventNode(arrayEventEntry.get(level), label, id, durationArr[level], duration, 1, level, color);
-                }
+                tempNode = new EventNode(arrayEventEntry.get(level), label, id, start, end, 1, level, color);
 
                 arrayEvent.add(tempNode);
-                // put on the hash for durations:
-                newMap.put(key, durationArr[level]);
-                // array of durations update
-                durationArr[level] += (duration + gap);
 
                 // put the events on the entry:
                 arrayEventEntry.get(level).addEvent(tempNode);
-                // System.out.println("level " + key.getLevel() + "label " +
-                // key.getLabel() + " duration " +
-                // fMap[Tree].get(key).getProfileData().getDuration() + " id " +
-                // fMap[Tree].get(key).getNodeId());
 
             }
         }
