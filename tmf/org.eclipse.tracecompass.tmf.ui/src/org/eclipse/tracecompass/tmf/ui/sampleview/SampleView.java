@@ -140,7 +140,7 @@ public class SampleView extends AbstractTimeGraphView {
             for (IAnalysisModule mod : iter) {
                 if (mod instanceof CCTAnalysisModule) {
                     module = (CCTAnalysisModule) mod;
-                    System.out.println("Module" + module);
+                    //System.out.println("Module" + module);
                     break;
                 }
             }
@@ -183,7 +183,7 @@ public class SampleView extends AbstractTimeGraphView {
                 return;
             }
             long end =  fRoots.get(0).getProfileData().getDuration(); //250523855; //fRoots.get(0).getProfileData().getDuration(); //foo = 3238436; // foo2 = 50000000;//
-            System.out.println("End " + end);
+            //System.out.println("End " + end);
             long endTime = end + 1;
 
             setEndTime(endTime);
@@ -266,7 +266,7 @@ public class SampleView extends AbstractTimeGraphView {
         // fFlatAction = createFlatAction();
 
         // Test just to put information on the
-        System.out.println(FUNCTION_NAMES.size());
+        //System.out.println(FUNCTION_NAMES.size());
         int size = 10;
         if (fRoots != null) {
             size = fRoots.size();
@@ -304,7 +304,7 @@ public class SampleView extends AbstractTimeGraphView {
             @Override
             public void run() {
                 if (i == 1) {
-                    System.out.println("Taking the tree A:" + name);
+                    //System.out.println("Taking the tree A:" + name);
                     // Call the differential function
                     Dif[0] = Integer.parseInt(name);
                 } else {
@@ -347,7 +347,7 @@ public class SampleView extends AbstractTimeGraphView {
 
     // this function creates the level Entries i.e level 0, level 1, level 2:
     private static ArrayList<EventEntry> createEventEntry(long entry, long exit, LevelEntry t, Map<LevelEntry, EventEntry> eventEntryMap) {
-        System.out.println("create Event Entry size ");
+        //System.out.println("create Event Entry size ");
         System.out.println("create Event Entry size " + fMap[Tree].size());
         // Go through the tree and creates the entries:
         // eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
@@ -369,7 +369,7 @@ public class SampleView extends AbstractTimeGraphView {
     // This function create the entries, it takes as argument the array of Event
     // The map is also used to correlate with the event nodes
     private static ArrayList<EventNode> createEventNodes(ArrayList<EventEntry> arrayEventEntry) {
-        System.out.println("create event node");
+        //System.out.println("create event node");
         // Go through the tree and creates the nodes:
         ArrayList<EventNode> arrayEvent = new ArrayList<>();
         EventNode tempNode = null;
@@ -384,7 +384,7 @@ public class SampleView extends AbstractTimeGraphView {
                 int color = node.getColor();
                 long start = ((ProfileData) node.getProfileData()).getStartTime();
                 long end = ((ProfileData) node.getProfileData()).getEndTime();
-                long duration = ((ProfileData) node.getProfileData()).getDuration(); //node.getPointer();//
+                long duration = ((ProfileData) node.getProfileData()).getDuration(); //node.getDur();//((ProfileData) node.getProfileData()).getDuration(); //node.getPointer();//
                 System.out.println("Node: " + label + " start " + start + " duration " + duration + " level " + level );
                 tempNode = new EventNode(arrayEventEntry.get(level), label, id, start, duration, 1, level, color);
 
@@ -408,7 +408,7 @@ public class SampleView extends AbstractTimeGraphView {
             FUNCTION_NAMES.add(key.getLabel());
         }
 
-        System.out.println(FUNCTION_NAMES.size());
+        //System.out.println(FUNCTION_NAMES.size());
     }
 
     /**

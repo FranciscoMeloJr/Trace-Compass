@@ -12,6 +12,7 @@ public class Node<T extends IProfileData> {
     T fProfileData;
     private int fColor = 0;
     private long fPointer = 0;
+    private long fDur = 0;
 
     public Node() {
         fChildren = new ArrayList<>();
@@ -111,7 +112,7 @@ public class Node<T extends IProfileData> {
         fColor = newColor;
     }
 
-    //Displaying:
+    //Displaying children:
     public void setPointer(long l) {
         fPointer += l;
 
@@ -119,6 +120,17 @@ public class Node<T extends IProfileData> {
 
     public long getPointer() {
         return fPointer;
+
+    }
+
+    //Displaying self:
+    public void setDur(long l) {
+        fDur += l;
+
+    }
+
+    public long getDur() {
+        return fDur;
 
     }
 }

@@ -162,7 +162,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     Long end = event.getTimestamp().getValue();
                     data.setEndTime(end);
                     long duration = data.getEndTime() - data.getStartTime();
-                    System.out.println(label + " duration" + duration);
+                    //System.out.println(label + " duration" + duration);
                     data.setDuration(duration);
                     parent.setProfileData(data);
 
@@ -246,28 +246,29 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
         // This function will organize the tree with gaps
-        public void organizeGaps() {
+        public int childrenGaps(Node<ProfileData> root) {
 
             // for each node, count the number of children and put the gaps
             // accordingly:
 
             LinkedList<Node<ProfileData>> queue = new LinkedList<>();
-
+            long duration;
             int i = 0;
-            int numberChildren;
-            queue.add(ArrayECCTs.get(i));
+            int numberChildren = 0;
+            queue.add(root);
 
             while (!queue.isEmpty()) {
                 Node<ProfileData> current = queue.poll();
                 numberChildren = 0;
+                duration = 0;
                 for (Node<ProfileData> child : current.getChildren()) {
                     // for each children, put on the queue and
                     queue.add(child);
                     numberChildren++;
                 }
-                current.getProfileData().addDuration(fGap * numberChildren);
+                return numberChildren;
             }
-
+            return numberChildren;
         }
 
         // This function method runs through the nodes of the root and calculate
@@ -281,15 +282,14 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 // by level
                 ArrayList<Long> listInit;
                 Node<ProfileData> parent = null;
-                // by node:
-                LinkedHashMap<Long, Node<ProfileData>> nodeList = null;
 
+                long newDuration;
                 int level;
                 long start, duration, end;
 
                 for (int i = 0; i < length; i++) {
                     temp = arrayECCTs[i];
-                    System.out.println("levels " + numberLevels.get(i));
+                    //System.out.println("levels " + numberLevels.get(i));
 
                     for (KeyTree key : temp.keySet()) {
                         // the start of a
@@ -305,6 +305,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                             start = 0;
                         }
                         end = start + pd.getDuration();
+                        newDuration = pd.getDuration() + (fGap* childrenGaps(eachNode));
 
                         // updates:
                         pd.setStartTime(start);
@@ -315,7 +316,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                             parent.setPointer(end + fGap);
                         }
                         eachNode.setProfileData(pd);
-
+                        eachNode.setDur(newDuration);
                         // printf:
                         if (eachNode.getParent() != null) {
                             System.out.println("Node: " + eachNode.toString() + " duration " + pd.getDuration() + " level " + level + " start: " + pd.getStartTime() + " end: " + pd.getEndTime() + " Parent: " + eachNode.getParent());
@@ -561,10 +562,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     // Edges and nodes:
                     for (Node<ProfileData> n : result) {
                         if (n.getParent() != null) {
-                            System.out.print(n.getNodeLabel() + " -> " + n.getParent().getNodeLabel() + "; \n");
+                            //System.out.print(n.getNodeLabel() + " -> " + n.getParent().getNodeLabel() + "; \n");
                             content = content.concat(n.getParent().getNodeLabel() + " -> " + n.getNodeLabel() + "; \n");
                         } else {
-                            System.out.print(n.getNodeLabel() + "; \n");
+                            //System.out.print(n.getNodeLabel() + "; \n");
                             content = content.concat(n.getNodeLabel() + "; \n");
                         }
                     }
@@ -575,7 +576,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     // Edges and nodes:
                     for (Node<ProfileData> n : result) {
                         if (n.getParent() != null) {
-                            System.out.print(n.getNodeId() + " -> " + n.getParent().getNodeId() + "; \n");
+                            //System.out.print(n.getNodeId() + " -> " + n.getParent().getNodeId() + "; \n");
                             content = content.concat(n.getParent().getNodeId() + " -> " + n.getNodeId() + "; \n");
                         } else {
                             System.out.print(n.getNodeId() + "; \n");
@@ -589,10 +590,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             } else {
                 for (Node<ProfileData> n : result) {
                     if (n.getParent() != null) {
-                        System.out.print(n.getNodeLabel() + " -> " + n.getParent().getNodeLabel() + "; \n");
+                        //System.out.print(n.getNodeLabel() + " -> " + n.getParent().getNodeLabel() + "; \n");
                         content = content.concat(n.getParent().getNodeLabel() + " -> " + n.getNodeLabel() + "; \n");
                     } else {
-                        System.out.print(n.getNodeLabel() + "; \n");
+                        //System.out.print(n.getNodeLabel() + "; \n");
                         content = content.concat(n.getNodeLabel() + "; \n");
                     }
                 }
