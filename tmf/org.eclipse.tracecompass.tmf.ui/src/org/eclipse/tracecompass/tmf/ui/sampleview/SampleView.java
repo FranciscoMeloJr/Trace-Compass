@@ -183,7 +183,7 @@ public class SampleView extends AbstractTimeGraphView {
             if (monitor.isCanceled()) {
                 return;
             }
-            long end =  250523855; //fRoots.get(0).getProfileData().getDuration(); //foo = 3238436; // foo2 = 50000000;//
+            long end =  fRoots.get(0).getProfileData().getDuration(); //250523855; //fRoots.get(0).getProfileData().getDuration(); //foo = 3238436; // foo2 = 50000000;//
             System.out.println("End " + end);
             long endTime = end + 1;
 

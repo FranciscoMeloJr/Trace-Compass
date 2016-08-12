@@ -48,7 +48,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     String Sdelimiter = new String("interval:tracepoint");
     String fEntry = new String("lttng_ust_cyg_profile:func_entry");
     String fExit = new String("lttng_ust_cyg_profile:func_exit");
-    long fGap = 1000000; // 11578599;
+    long fGap; // 11578599;
 
     // This tree is the differential part:
     static LinkedHashMap<KeyTree, Node<ProfileData>> treeDif;
@@ -228,7 +228,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             Node<ProfileData> tempRoot = null;
 
             ProfileData profileData;
-            long duration;
+            long duration = 0;
 
             for (int i = 0; i < size; i++) {
                 tempRoot = ArrayECCTs.get(i);
@@ -241,7 +241,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 profileData.setDuration(duration);
                 tempRoot.setProfileData(profileData);
             }
-            return;
+            fGap = duration / 25;
         }
 
         // This function method runs through the nodes of the root and calculate
@@ -252,7 +252,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 int length = arrayECCTs.length;
                 LinkedHashMap<KeyTree, Node<ProfileData>> temp = null;
 
+                // by level
                 ArrayList<Long> listInit;
+                int level;
+                long start, duration, end;
 
                 for (int i = 0; i < length; i++) {
                     temp = arrayECCTs[i];
@@ -267,9 +270,14 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         Node eachNode = temp.get(key);
                         ProfileData pd = (ProfileData) eachNode.getProfileData();
                         // duration:
-                        int level = key.getLevel();
-                        long start = listInit.get(level);
-                        long end = start + pd.getDuration();
+                        level = key.getLevel();
+                        if (eachNode.getParent() != null) {
+                            ProfileData parentPD = (ProfileData) eachNode.getParent().getProfileData();
+                            start = parentPD.getStartTime();
+                        } else {
+                            start = listInit.get(level);
+                        }
+                        end = start + pd.getDuration();
 
                         // updates:
                         pd.setStartTime(start);
