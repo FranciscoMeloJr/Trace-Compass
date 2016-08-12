@@ -48,7 +48,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     String Sdelimiter = new String("interval:tracepoint");
     String fEntry = new String("lttng_ust_cyg_profile:func_entry");
     String fExit = new String("lttng_ust_cyg_profile:func_exit");
-    long fGap = 0; // 11578599;
+    long fGap = 1000000; // 11578599;
 
     // This tree is the differential part:
     static LinkedHashMap<KeyTree, Node<ProfileData>> treeDif;

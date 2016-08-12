@@ -183,8 +183,8 @@ public class SampleView extends AbstractTimeGraphView {
             if (monitor.isCanceled()) {
                 return;
             }
-            long end = 3238436; // foo2 = 50000000;//fRoots.get(0).getProfileData().getDuration();
-
+            long end =  250523855; //fRoots.get(0).getProfileData().getDuration(); //foo = 3238436; // foo2 = 50000000;//
+            System.out.println("End " + end);
             long endTime = end + 1;
 
             setEndTime(endTime);
@@ -208,7 +208,7 @@ public class SampleView extends AbstractTimeGraphView {
                 eventAux = createEventNodes(eventEntryAux);
 
                 // Put as child
-                eventList = new ArrayList<>(4);
+                eventList = new ArrayList<>();
 
                 // run through the eventEntries (levels) and link with
                 // tree(levelEntryAux)
@@ -370,7 +370,7 @@ public class SampleView extends AbstractTimeGraphView {
     // This function create the entries, it takes as argument the array of Event
     // The map is also used to correlate with the event nodes
     private static ArrayList<EventNode> createEventNodes(ArrayList<EventEntry> arrayEventEntry) {
-
+        System.out.println("create event node");
         // Go through the tree and creates the nodes:
         ArrayList<EventNode> arrayEvent = new ArrayList<>();
         EventNode tempNode = null;
@@ -385,8 +385,9 @@ public class SampleView extends AbstractTimeGraphView {
                 int color = node.getColor();
                 long start = ((ProfileData) node.getProfileData()).getStartTime();
                 long end = ((ProfileData) node.getProfileData()).getEndTime();
-
-                tempNode = new EventNode(arrayEventEntry.get(level), label, id, start, end, 1, level, color);
+                long duration = ((ProfileData) node.getProfileData()).getDuration();
+                System.out.println("Node: " + label + " start " + start + " duration " + duration + " level " + level );
+                tempNode = new EventNode(arrayEventEntry.get(level), label, id, start, duration, 1, level, color);
 
                 arrayEvent.add(tempNode);
 
