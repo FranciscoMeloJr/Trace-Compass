@@ -12,7 +12,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
@@ -49,6 +48,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     String Sdelimiter = new String("interval:tracepoint");
     String fEntry = new String("lttng_ust_cyg_profile:func_entry");
     String fExit = new String("lttng_ust_cyg_profile:func_exit");
+    long fGap = 0; // 11578599;
 
     // This tree is the differential part:
     static LinkedHashMap<KeyTree, Node<ProfileData>> treeDif;
@@ -155,18 +155,20 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             } else {
                 if (eventName.contains(fExit)) {
+                    first = Iterables.get(event.getContent().getFields(), 0);
+                    String label = first.toString();
 
-                    data = aux.fProfileData;
+                    data = parent.fProfileData;
                     Long end = event.getTimestamp().getValue();
                     data.setEndTime(end);
                     long duration = data.getEndTime() - data.getStartTime();
+                    System.out.println(label + " duration" + duration);
                     data.setDuration(duration);
-                    aux.setProfileData(data);
-                    aux = parent;
-                    // put as a children
-                    if (parent != null) {
+                    parent.setProfileData(data);
+
+                    if (parent.getParent() != null) {
                         parent = parent.getParent();
-                        parent.getProfileData().addDuration(duration);
+
                     }
 
                 }
@@ -178,7 +180,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         public void handleCompleted() {
 
             System.out.println("Sucess");
-            ProfileTraversal.levelOrderTraversal(fNode, dot);
+            ProfileTraversal.levelOrderTraversal(fRoot, dot);
             // Tracepoint mechanism:
             if (ArrayECCTs.size() == 0) {
                 ArrayECCTs.add(fRoot);
@@ -268,18 +270,21 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         int level = key.getLevel();
                         long start = listInit.get(level);
                         long end = start + pd.getDuration();
-                        long gap = 100;
 
                         // updates:
                         pd.setStartTime(start);
                         pd.setEndTime(end);
 
                         // updates:
-                        listInit.set(level, end + gap);
+                        listInit.set(level, end + fGap);
                         eachNode.setProfileData(pd);
 
                         // printf:
-                        System.out.println("Node: " + eachNode.toString() + " duration " + pd.getDuration() + " level " + level + " start: " + pd.getStartTime() + " end: " + pd.getEndTime());
+                        if (eachNode.getParent() != null) {
+                            System.out.println("Node: " + eachNode.toString() + " duration " + pd.getDuration() + " level " + level + " start: " + pd.getStartTime() + " end: " + pd.getEndTime() + " Parent: " + eachNode.getParent());
+                        } else {
+                            System.out.println("Node: " + eachNode.toString() + " duration " + pd.getDuration() + " level " + level + " start: " + pd.getStartTime() + " end: " + pd.getEndTime());
+                        }
                     }
 
                 }
@@ -394,7 +399,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         LinkedHashMap<KeyTree, Node<ProfileData>> result = new LinkedHashMap<>();
         ProfileData data;
 
-        Node<ProfileData> initial, mean = null;
+        Node<ProfileData> initial = null;
         int max = 0;
         Node<ProfileData> value, copy = null;
         for (KeyTree key : temp.keySet()) {

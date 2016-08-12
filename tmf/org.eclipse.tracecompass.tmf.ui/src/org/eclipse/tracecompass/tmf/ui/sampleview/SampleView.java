@@ -183,7 +183,7 @@ public class SampleView extends AbstractTimeGraphView {
             if (monitor.isCanceled()) {
                 return;
             }
-            long end = fRoots.get(0).getProfileData().getDuration();
+            long end = 3238436; // foo2 = 50000000;//fRoots.get(0).getProfileData().getDuration();
 
             long endTime = end + 1;
 
@@ -252,7 +252,7 @@ public class SampleView extends AbstractTimeGraphView {
              * getTimeGraphViewer().resetStartFinishTime(); } });
              */
         } catch (Exception ex) {
-            System.out.println("Exeception in createEventEntry");
+            System.out.println("Exception in createEventEntry");
             return;
         }
     }
