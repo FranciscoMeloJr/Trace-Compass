@@ -11,6 +11,7 @@ public class Node<T extends IProfileData> {
     private final int fId;
     T fProfileData;
     private int fColor = 0;
+    private long fPointer = 0;
 
     public Node() {
         fChildren = new ArrayList<>();
@@ -108,5 +109,16 @@ public class Node<T extends IProfileData> {
     public void setColor(int newColor)
     {
         fColor = newColor;
+    }
+
+    //Displaying:
+    public void setPointer(long l) {
+        fPointer += l;
+
+    }
+
+    public long getPointer() {
+        return fPointer;
+
     }
 }

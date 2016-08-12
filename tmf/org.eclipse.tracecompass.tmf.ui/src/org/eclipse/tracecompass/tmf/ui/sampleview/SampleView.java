@@ -1,7 +1,6 @@
 package org.eclipse.tracecompass.tmf.ui.sampleview;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -80,8 +79,8 @@ public class SampleView extends AbstractTimeGraphView {
      * The ID of the view as specified by the extension.
      */
     public static final String ID1 = "org.eclipse.tracecompass.tmf.ui.views.SampleView";
-    private ArrayList<Node<ProfileData>> fRoots; // Array of roots
-    private static ArrayList<Integer> numberLevels; // there are several trees,
+    private ArrayList<Node<ProfileData>> fRoots = null; // Array of roots
+    private static ArrayList<Integer> numberLevels = null; // there are several trees,
                                                     // therefore,
     private static int Tree = 0;// several levels
     private static int Dif[] = new int[2];
@@ -385,7 +384,7 @@ public class SampleView extends AbstractTimeGraphView {
                 int color = node.getColor();
                 long start = ((ProfileData) node.getProfileData()).getStartTime();
                 long end = ((ProfileData) node.getProfileData()).getEndTime();
-                long duration = ((ProfileData) node.getProfileData()).getDuration();
+                long duration = ((ProfileData) node.getProfileData()).getDuration(); //node.getPointer();//
                 System.out.println("Node: " + label + " start " + start + " duration " + duration + " level " + level );
                 tempNode = new EventNode(arrayEventEntry.get(level), label, id, start, duration, 1, level, color);
 
