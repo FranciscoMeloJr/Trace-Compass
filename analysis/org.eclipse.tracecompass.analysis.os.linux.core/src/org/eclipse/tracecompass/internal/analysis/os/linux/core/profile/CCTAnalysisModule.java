@@ -39,7 +39,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     // ArrayList of ECCTs, which are delimited by static implementation
     private static ArrayList<Node<ProfileData>> ArrayECCTs = new ArrayList<>();
-    static LinkedHashMap<KeyTree, Node<ProfileData>> arrayECCTs[];
+    private static LinkedHashMap<KeyTree, Node<ProfileData>> arrayECCTs[] = null;
 
     Node<ProfileData> aux = null;
     Node<ProfileData> fRoot = Node.create(new ProfileData(0, "root"));
@@ -49,6 +49,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     String fEntry = new String("lttng_ust_cyg_profile:func_entry");
     String fExit = new String("lttng_ust_cyg_profile:func_exit");
     long fGap; // 11578599;
+    static boolean diff = false;
 
     // This tree is the differential part:
     static LinkedHashMap<KeyTree, Node<ProfileData>> treeDif;
@@ -122,7 +123,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             final String eventName = event.getType().getName();
             ProfileData data;
             Random rand = new Random();
-
+            System.out.println(eventName);
             // This is used for delimiting the tree:
             if (eventName.equals(Sdelimiter)) {
 
@@ -157,20 +158,22 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 if (eventName.contains(fExit)) {
                     first = Iterables.get(event.getContent().getFields(), 0);
                     String label = first.toString();
-
-                    data = parent.fProfileData;
-                    Long end = event.getTimestamp().getValue();
-                    data.setEndTime(end);
-                    long duration = data.getEndTime() - data.getStartTime();
-                    //System.out.println(label + " duration" + duration);
-                    data.setDuration(duration);
-                    parent.setProfileData(data);
-
-                    if (parent.getParent() != null) {
-                        parent = parent.getParent();
-
+                    System.out.println(label);
+                    if(parent==null) {
+                        System.out.println("Parent null"); //$NON-NLS-1$
+                        fNode = Node.create(new ProfileData(0, "root"));
+                        parent = fNode;
                     }
-
+                        data = parent.fProfileData;
+                        Long end = event.getTimestamp().getValue();
+                        data.setEndTime(end);
+                        long duration = data.getEndTime() - data.getStartTime();
+                        //System.out.println(label + " duration" + duration);
+                        data.setDuration(duration);
+                        parent.setProfileData(data);
+                        if (parent.getParent() != null) {
+                            parent = parent.getParent();
+                        }
                 }
             }
 
@@ -187,7 +190,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 arrayECCTs = new LinkedHashMap[ArrayECCTs.size()];
             } else {
                 // Array:
-                arrayECCTs = new LinkedHashMap[ArrayECCTs.size() + 1];
+                if(diff) {
+                    arrayECCTs = new LinkedHashMap[ArrayECCTs.size() + 1];
+                } else {
+                    arrayECCTs = new LinkedHashMap[ArrayECCTs.size()];
+                }
             }
             int i;
             for (i = 0; i < ArrayECCTs.size(); i++) {
@@ -195,17 +202,19 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
 
             // Make the differential with a random tree:
-            if (ArrayECCTs.size() > 1) {
-                if (treeDif == null) {
-                    Random rn = new Random();
-                    int a = rn.nextInt(9);
-                    int b = rn.nextInt(9);
-                    diffTrees(arrayECCTs[a], arrayECCTs[b]);
-                    arrayECCTs[ArrayECCTs.size()] = treeDif; // put the tree on
-                                                             // the last size
+            if(diff == true)
+            {
+                if (ArrayECCTs.size() > 1) {
+                    if (treeDif == null) {
+                        Random rn = new Random();
+                        int a = rn.nextInt(9);
+                        int b = rn.nextInt(9);
+                        diffTrees(arrayECCTs[a], arrayECCTs[b]);
+                        arrayECCTs[ArrayECCTs.size()] = treeDif; // put the tree on
+                                                                 // the last size
+                    }
                 }
             }
-
             organizeRoot();
             organizeStartEnd();
             // organizeGaps();
@@ -241,8 +250,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 profileData = tempRoot.getProfileData();
                 profileData.setDuration(duration);
                 tempRoot.setProfileData(profileData);
-            }
-            fGap = duration / 25;
+                System.out.println("Duration root "+ duration);
+                }
+            fGap = duration / 10;
         }
 
         // This function will organize the tree with gaps
@@ -319,7 +329,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         eachNode.setDur(newDuration);
                         // printf:
                         if (eachNode.getParent() != null) {
-                            System.out.println("Node: " + eachNode.toString() + " duration " + pd.getDuration() + " level " + level + " start: " + pd.getStartTime() + " end: " + pd.getEndTime() + " Parent: " + eachNode.getParent());
+                            System.out.println("Node: " + eachNode.toString() + " new duration " + eachNode.getDur() + " duration " + pd.getDuration() + " level " + level + " start: " + pd.getStartTime() + " end: " + pd.getEndTime() + " Parent: " + eachNode.getParent());
                         } else {
                             System.out.println("Node: " + eachNode.toString() + " duration " + pd.getDuration() + " level " + level + " start: " + pd.getStartTime() + " end: " + pd.getEndTime());
                         }
@@ -486,6 +496,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         LinkedHashMap<KeyTree, Node<ProfileData>> result = new LinkedHashMap<>();
 
         int max = 0;
+        diff = true;
         Node<ProfileData> value, copy = null;
         for (KeyTree key : root1.keySet()) {
             value = root1.get(key);
