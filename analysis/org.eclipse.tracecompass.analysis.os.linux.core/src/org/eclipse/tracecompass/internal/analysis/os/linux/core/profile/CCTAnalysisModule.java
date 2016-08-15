@@ -262,17 +262,13 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             // accordingly:
 
             LinkedList<Node<ProfileData>> queue = new LinkedList<>();
-            long duration;
-            int i = 0;
             int numberChildren = 0;
             queue.add(root);
 
             while (!queue.isEmpty()) {
                 Node<ProfileData> current = queue.poll();
                 numberChildren = 0;
-                duration = 0;
                 for (Node<ProfileData> child : current.getChildren()) {
-                    // for each children, put on the queue and
                     queue.add(child);
                     numberChildren++;
                 }
@@ -299,13 +295,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
                 for (int i = 0; i < length; i++) {
                     temp = arrayECCTs[i];
-                    //System.out.println("levels " + numberLevels.get(i));
 
                     for (KeyTree key : temp.keySet()) {
-                        // the start of a
+
                         Node eachNode = temp.get(key);
                         ProfileData pd = (ProfileData) eachNode.getProfileData();
-                        // duration:
                         level = key.getLevel();
 
                         parent = eachNode.getParent();
@@ -314,24 +308,29 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         } else {
                             start = 0;
                         }
-                        end = start + pd.getDuration();
-                        newDuration = pd.getDuration() + (fGap* childrenGaps(eachNode));
 
+                        int nchildren = childrenGaps(eachNode);
+                        if(nchildren > 0) {
+                            newDuration = pd.getDuration() + (fGap *(nchildren - 1));
+                        } else {
+                            newDuration = pd.getDuration() + (fGap *(nchildren));
+                        }
+                        end = start + newDuration + fGap;
                         // updates:
                         pd.setStartTime(start);
                         pd.setEndTime(end);
 
                         // updates:
                         if (parent != null) {
-                            parent.setPointer(end + fGap);
+                            parent.setPointer(end);
                         }
                         eachNode.setProfileData(pd);
                         eachNode.setDur(newDuration);
                         // printf:
                         if (eachNode.getParent() != null) {
-                            System.out.println("Node: " + eachNode.toString() + " new duration " + eachNode.getDur() + " duration " + pd.getDuration() + " level " + level + " start: " + pd.getStartTime() + " end: " + pd.getEndTime() + " Parent: " + eachNode.getParent());
+                            System.out.println("Node: " + eachNode.toString() + " new duration " + eachNode.getDur() + " duration " + pd.getDuration() + " level " + level + " start: " + pd.getStartTime() + " end: " + pd.getEndTime() + " Parent: " + eachNode.getParent() + "number of children " + nchildren);
                         } else {
-                            System.out.println("Node: " + eachNode.toString() + " duration " + pd.getDuration() + " level " + level + " start: " + pd.getStartTime() + " end: " + pd.getEndTime());
+                            System.out.println("Node: " + eachNode.toString() + " duration " + pd.getDuration() + " level " + level + " start: " + pd.getStartTime() + " end: " + pd.getEndTime()+ "number of children" + nchildren);
                         }
                     }
 
