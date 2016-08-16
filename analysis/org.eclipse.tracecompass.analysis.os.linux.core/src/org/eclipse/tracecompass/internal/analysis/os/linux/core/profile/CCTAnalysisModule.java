@@ -332,7 +332,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         // printf:
                         if (eachNode.getParent() != null) {
                             System.out.println("Node: " + eachNode.toString() + " new duration " + eachNode.getDur() + " duration " + pd.getDuration() + " level " + level + " start: " + pd.getStartTime() + " end: " + pd.getEndTime() + " Parent: "
-                                    + eachNode.getParent().getNodeId() + " Pointer " + eachNode.getParent().getPointer()+ "number of children " + nchildren);
+                                    + eachNode.getParent().getNodeId() + " Pointer " + eachNode.getParent().getPointer() + "number of children " + nchildren);
                         } else {
                             System.out.println("Node: " + eachNode.toString() + " duration " + pd.getDuration() + " level " + level + " start: " + pd.getStartTime() + " end: " + pd.getEndTime() + " number of children" + nchildren);
                         }
@@ -440,7 +440,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         for (KeyTree key : hmapZ.keySet()) {
             @Nullable
             Node<ProfileData> nodex = hmapZ.get(key);
-            System.out.println("level " + key.getLevel()+ nodex);
+            System.out.println("level " + key.getLevel() + nodex);
         }
         numberLevels.add(level);
         return hmapZ;// hmap;
@@ -512,6 +512,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         int max = 0;
         diff = true;
         Node<ProfileData> value, copy = null;
+        //differential:
         for (KeyTree key : root1.keySet()) {
             value = root1.get(key);
             if (value != null) {
@@ -528,10 +529,18 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
         }
 
-        // necessary to show the difference, as the last tree:
+        // necessary to show the difference, adding as the last tree:
         numberLevels.add(max);
         treeDif = result;
-        hashECCTs[ArrayECCTs.size()] = treeDif;
+        if(diff)
+        {
+            LinkedHashMap[] temp = new LinkedHashMap[ArrayECCTs.size() + 1];
+            for(int i=0;i<ArrayECCTs.size();i++) {
+                temp[i] = hashECCTs[i];
+            }
+            temp[ArrayECCTs.size()] = treeDif;
+            hashECCTs = temp;
+        }
         return result;
     }
 
