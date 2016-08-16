@@ -208,14 +208,14 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         int a = rn.nextInt(9);
                         int b = rn.nextInt(9);
                         diffTrees(hashECCTs[a], hashECCTs[b]);
-                        hashECCTs[ArrayECCTs.size()] = treeDif; // put the tree
-                                                                // on
-                                                                // the last size
+                        // put the tree on the last size
+                        hashECCTs[ArrayECCTs.size()] = treeDif;
                     }
                 }
             }
-            organizeRoot();
+
             organizeStartEnd();
+            organizeRoot();
             // organizeGaps();
         }
 
@@ -238,17 +238,21 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             ProfileData profileData;
             long duration = 0;
+            long dur = 0;
 
             for (int i = 0; i < size; i++) {
                 tempRoot = ArrayECCTs.get(i);
                 duration = 0;
+                dur = 0;
                 for (Node<T> node : tempRoot.getChildren()) {
                     profileData = (ProfileData) node.fProfileData;
                     duration += profileData.getDuration();
+                    dur += node.getDur();
                 }
                 profileData = tempRoot.getProfileData();
                 profileData.setDuration(duration);
                 tempRoot.setProfileData(profileData);
+                tempRoot.setDur(dur);
                 System.out.println("Duration root " + duration);
             }
             fGap = duration / 10;
@@ -517,6 +521,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             value = root1.get(key);
             if (value != null) {
                 copy = Node.create(value.getProfileData());
+                copy.setDur(value.getDur());
                 if ((root2.get(key) != null) && (copy != null)) {
                     Node<ProfileData> compare = root2.get(key);
                     copy.diff(compare);
