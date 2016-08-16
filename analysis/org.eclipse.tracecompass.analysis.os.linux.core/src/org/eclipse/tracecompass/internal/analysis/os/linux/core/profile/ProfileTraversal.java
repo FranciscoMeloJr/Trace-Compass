@@ -55,11 +55,12 @@ public class ProfileTraversal {
         queue.add(root);
         while (!queue.isEmpty()) {
             Node<T> current = queue.poll();
+            System.out.print("\n");
             for (Node<T> child : current.getChildren()) {
                 queue.add(child);
             }
             visitor.visit(current);
-            System.out.println(current);
+            System.out.print(current);
         }
 
     }

@@ -384,7 +384,7 @@ public class SampleView extends AbstractTimeGraphView {
                 int color = node.getColor();
                 long start = ((ProfileData) node.getProfileData()).getStartTime();
                 long end = ((ProfileData) node.getProfileData()).getEndTime();
-                long duration = node.getDur(); //((ProfileData) node.getProfileData()).getDuration(); //((ProfileData) node.getProfileData()).getDuration(); //node.getPointer();// node.getDur(); //
+                long duration = ((ProfileData) node.getProfileData()).getDuration(); //node.getDur(); // //((ProfileData) node.getProfileData()).getDuration(); //node.getPointer();// node.getDur(); //
                 System.out.println("Node: " + label + " start " + start + " duration " + duration + " level " + level );
                 tempNode = new EventNode(arrayEventEntry.get(level), label, id, start, duration, 1, level, color);
 
