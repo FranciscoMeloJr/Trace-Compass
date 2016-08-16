@@ -37,8 +37,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     public static final @NonNull String ID = "org.eclipse.tracecompass.analysis.os.linux.core.profile.cctanalysis.module"; //$NON-NLS-1$
 
     // ArrayList of ECCTs, which are delimited by static implementation
-    private static ArrayList<Node<ProfileData>> ArrayECCTs = new ArrayList<>();
-    private static LinkedHashMap<KeyTree, Node<ProfileData>> hashECCTs[] = null;
+    private static ArrayList<Node<ProfileData>> ArrayECCTs;
+    private static LinkedHashMap<KeyTree, Node<ProfileData>> hashECCTs[];
 
     Node<ProfileData> aux = null;
     Node<ProfileData> fRoot = Node.create(new ProfileData(0, "root"));
@@ -47,8 +47,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     String Sdelimiter = new String("interval:tracepoint");
     String fEntry = new String("lttng_ust_cyg_profile:func_entry");
     String fExit = new String("lttng_ust_cyg_profile:func_exit");
-    long fGap; // 11578599;
-    static boolean diff = false;
+    long fGap;
+    static boolean diff;
 
     // This tree is the differential part:
     static LinkedHashMap<KeyTree, Node<ProfileData>> treeDif;
@@ -60,6 +60,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
      */
     public CCTAnalysisModule() {
         super();
+        ArrayECCTs = new ArrayList<>();
+        hashECCTs = null;
+        diff = false;
     }
 
     @Override
@@ -288,8 +291,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 System.out.println("organizeStartEnd");
                 int length = hashECCTs.length;
                 LinkedHashMap<KeyTree, Node<ProfileData>> temp = null;
-                // by level
-                ArrayList<Long> listInit;
+
                 Node<ProfileData> parent = null;
 
                 long newDuration;
@@ -315,9 +317,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
                         int nchildren = childrenGaps(eachNode);
                         if (nchildren > 0) {
-                            newDuration = pd.getDuration() + (fGap * (nchildren - 1));
+                            newDuration = pd.getDuration();// + (fGap * (nchildren - 1));
                         } else {
-                            newDuration = pd.getDuration() + (fGap * (nchildren));
+                            newDuration = pd.getDuration(); //+ (fGap * (nchildren));
                         }
                         end = pd.getDuration() + fGap;
                         // updates:

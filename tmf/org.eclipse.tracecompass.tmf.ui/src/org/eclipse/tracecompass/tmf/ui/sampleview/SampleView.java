@@ -187,10 +187,7 @@ public class SampleView extends AbstractTimeGraphView {
                 return;
             }
             long end = fRoots.get(0).getProfileData().getDuration();
-                                  // //250523855;
-                                  // //fRoots.get(0).getProfileData().getDuration();
-                                  // //foo = 3238436; // foo2 = 50000000;//
-            // System.out.println("End " + end);
+
             long endTime = end + 1;
 
             setEndTime(endTime);
@@ -391,12 +388,10 @@ public class SampleView extends AbstractTimeGraphView {
                 int color = node.getColor();
                 long start = ((ProfileData) node.getProfileData()).getStartTime();
                 long end = ((ProfileData) node.getProfileData()).getEndTime();
-                long duration = node.getDur(); // ((ProfileData)
-                                               // node.getProfileData()).getDuration();
-                                               // //((ProfileData)
-                                               // node.getProfileData()).getDuration();
-                                               // //node.getPointer();//
-                                               // node.getDur(); //
+                // ((ProfileData)node.getProfileData()).getDuration();//((ProfileData)
+                // node.getProfileData()).getDuration();//node.getPointer();
+                // node.getDur();
+                long duration = node.getDur();
                 System.out.println("Node: " + label + " start " + start + " duration " + duration + " level " + level);
                 tempNode = new EventNode(arrayEventEntry.get(level), label, id, start, duration, 1, level, color);
 
@@ -437,9 +432,10 @@ public class SampleView extends AbstractTimeGraphView {
      */
 
     // This method is called when you zoom - correct:
+    //Need to know the resolution:
     @Override
     protected List<ITimeEvent> getEventList(TimeGraphEntry entry, long startTime, long endTime, long resolution, IProgressMonitor monitor) {
-
+        System.out.println("resolution" + resolution);
         List<ITimeEvent> eventList = null;
         if (entry instanceof EventEntry) {
             // Event List:
