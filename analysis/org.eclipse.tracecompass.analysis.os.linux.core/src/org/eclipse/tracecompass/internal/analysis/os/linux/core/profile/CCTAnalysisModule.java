@@ -288,9 +288,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 System.out.println("organizeStartEnd");
                 int length = hashECCTs.length;
                 LinkedHashMap<KeyTree, Node<ProfileData>> temp = null;
-
-                LinkedHashMap<Long, Node<ProfileData>> tempH = null;
-
                 // by level
                 ArrayList<Long> listInit;
                 Node<ProfileData> parent = null;
@@ -322,7 +319,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         } else {
                             newDuration = pd.getDuration() + (fGap * (nchildren));
                         }
-                        end = start + newDuration + fGap;
+                        end = pd.getDuration() + fGap;
                         // updates:
                         pd.setStartTime(start);
                         pd.setEndTime(end);
@@ -522,7 +519,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             if (value != null) {
                 copy = Node.create(value.getProfileData());
                 copy.setDur(value.getDur());
-                if ((root2.get(key) != null) && (copy != null)) {
+                if ((root2.get(key) != null)) {
                     Node<ProfileData> compare = root2.get(key);
                     copy.diff(compare);
                 }
