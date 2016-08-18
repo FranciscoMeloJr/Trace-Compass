@@ -10,8 +10,8 @@ import java.util.Queue;
 import org.eclipse.tracecompass.common.core.NonNullUtils;
 
 /**
- * @author francisco
- * This class is related with the Profile traversal of the Enhanced Calling Context tree
+ * @author francisco This class is related with the Profile traversal of the
+ *         Enhanced Calling Context tree
  *
  */
 
@@ -408,10 +408,16 @@ public class ProfileTraversal {
     public static class KeyTree {
         final String label;
         final int level;
+        final String parentLabel;
 
         public KeyTree(String label, int level) {
+            this(label, level, null);
+        }
+
+        public KeyTree(String label, int level, String pLabel) {
             this.label = label;
             this.level = level;
+            this.parentLabel = pLabel;
         }
 
         public String getLabel() {
