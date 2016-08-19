@@ -160,7 +160,7 @@ public class SampleView extends AbstractTimeGraphView {
             ArrayList<Node<ProfileData>> roots = module.getArrayTree();
 
             LinkedHashMap<KeyTree, Node<ProfileData>> map[] = new LinkedHashMap[roots.size() + 1];
-            map = module.getArrayECCTs();
+            map = module.getHashECCTs();
             numberLevels = module.getNumberLevelsEach();
 
             // put the maps and the roots as properties:

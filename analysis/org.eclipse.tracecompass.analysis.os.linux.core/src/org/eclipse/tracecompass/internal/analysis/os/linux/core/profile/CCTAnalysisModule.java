@@ -217,9 +217,43 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 }
             }
 
+            //experimental inversion
+            //inversionProcedure();
+
             organizeStartEnd();
             organizeRoot();
             // organizeGaps();
+        }
+
+        // This function inverts the hash for displaying purposes
+        public void inversionProcedure() {
+
+            // map = module.getArrayECCTs();
+            // numberLevels = module.getNumberLevelsEach();
+            LinkedHashMap<KeyTree, Node<ProfileData>> inverted[] = hashECCTs;
+            int size = hashECCTs.length - 1;
+
+            for (int i = 0; i < size; i++) {
+                inverted[i] = hashECCTs[size - i];
+            }
+            hashECCTs = inverted;
+
+            ArrayList<Node<ProfileData>> invertedArray = ArrayECCTs;
+            size = ArrayECCTs.size()-1;
+            for(int j=size;j>=0 ;j--)
+            {
+                invertedArray.add(ArrayECCTs.get(j));
+            }
+            ArrayECCTs = invertedArray;
+
+            ArrayList<Integer> invertedNumberLevels = new ArrayList<>();
+            size = numberLevels.size()-1;
+            for(int k= size;k>=0 ;k--)
+            {
+                invertedNumberLevels.add(numberLevels.get(k));
+            }
+            numberLevels = invertedNumberLevels;
+
         }
 
         // This function returns the fRoot
@@ -296,7 +330,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
                 long newDuration;
                 int level;
-                long start, duration, end;
+                long start, duration = 0, end;
 
                 for (int i = 0; i < length; i++) {
                     temp = hashECCTs[i];
@@ -317,9 +351,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
                         int nchildren = childrenGaps(eachNode);
                         if (nchildren > 0) {
-                            newDuration = pd.getDuration();// + (fGap * (nchildren - 1));
+                            newDuration = pd.getDuration();// + (fGap *
+                                                           // (nchildren - 1));
                         } else {
-                            newDuration = pd.getDuration(); //+ (fGap * (nchildren));
+                            newDuration = pd.getDuration(); // + (fGap *
+                                                            // (nchildren));
                         }
                         end = pd.getDuration() + fGap;
                         // updates:
@@ -416,7 +452,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             System.out.println("current:" + current + " level " + level + " parent " + current.getParent());
             String label = current.getNodeLabel();
             KeyTree aux1 = new KeyTree(label, level);
-
+            if (current.getParent() != null) {
+                KeyTree aux2 = new KeyTree(label, level, current.getParent().getNodeLabel());
+            }
             // debug:
             nodes.add(current);
 
@@ -462,10 +500,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         int size = hashECCTs.length;
         LinkedHashMap<KeyTree, Node<ProfileData>> temp = hashECCTs[0];
         LinkedHashMap<KeyTree, Node<ProfileData>> result = new LinkedHashMap<>();
-        ProfileData data;
 
         Node<ProfileData> initial = null;
-        int max = 0;
         Node<ProfileData> value, copy = null;
         for (KeyTree key : temp.keySet()) {
             value = temp.get(key);
@@ -515,7 +551,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         int max = 0;
         diff = true;
         Node<ProfileData> value, copy = null;
-        //differential:
+        // differential:
         for (KeyTree key : root1.keySet()) {
             value = root1.get(key);
             if (value != null) {
@@ -536,10 +572,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         // necessary to show the difference, adding as the last tree:
         numberLevels.add(max);
         treeDif = result;
-        if(diff)
-        {
+        if (diff) {
             LinkedHashMap[] temp = new LinkedHashMap[ArrayECCTs.size() + 1];
-            for(int i=0;i<ArrayECCTs.size();i++) {
+            for (int i = 0; i < ArrayECCTs.size(); i++) {
                 temp[i] = hashECCTs[i];
             }
             temp[ArrayECCTs.size()] = treeDif;
@@ -687,7 +722,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     // This function returns the fRoots - ArrayList of fRoots;
-    public LinkedHashMap<KeyTree, Node<ProfileData>>[] getArrayECCTs() {
+    public LinkedHashMap<KeyTree, Node<ProfileData>>[] getHashECCTs() {
         return hashECCTs;
     }
 
