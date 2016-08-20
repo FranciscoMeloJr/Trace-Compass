@@ -220,7 +220,7 @@ public class SampleView extends AbstractTimeGraphView {
                 }
 
                 // put the event on the list:
-                for (int i = eventAux.size() - 1; i > 0; i--) {
+                for (int i = 0; i < eventAux.size(); i++) {
                     eventList.add(eventAux.get(i));
                 }
 
@@ -255,7 +255,7 @@ public class SampleView extends AbstractTimeGraphView {
              * getTimeGraphViewer().resetStartFinishTime(); } });
              */
         } catch (Exception ex) {
-            System.out.println("Exception in createEventEntry");
+            System.out.println("Exception in buildEntryList");
             return;
         }
     }
@@ -353,6 +353,7 @@ public class SampleView extends AbstractTimeGraphView {
     // this function creates the level Entries i.e level 0, level 1, level 2:
     private static ArrayList<EventEntry> createEventEntry(long entry, long exit, LevelEntry t, Map<LevelEntry, EventEntry> eventEntryMap, boolean inv) {
         System.out.println("create Event Entry size " + fMap[Tree].size());
+
         // eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
 
         int counter = numberLevels.get(Tree); // fMap.size();
@@ -360,23 +361,27 @@ public class SampleView extends AbstractTimeGraphView {
         // arrayEventEntries = new EventEntry[counter];
         ArrayList<EventEntry> arrayEntries = new ArrayList<>();
         ArrayList<EventEntry> tempArray = new ArrayList<>();
-
-        for (int i = 0; i <= counter; i++) {
-            EventEntry temp = new EventEntry("level " + String.valueOf(i), i, entry, exit, 0);
-            arrayEntries.add(temp);
-        }
-        if (inverted) {
-            for (int i = counter; i >= 0; i--) {
-                tempArray.add(arrayEntries.get(i));
+        try {
+            for (int i = 0; i <= counter; i++) {
+                EventEntry temp = new EventEntry("level " + String.valueOf(i), i, entry, exit, 0);
+                arrayEntries.add(temp);
             }
-        } else {
-            tempArray = arrayEntries;
-        }
-        for (int i = 0; i <= counter; i++) {
-            eventEntryMap.put(t, tempArray.get(i));
-        }
+            if (inverted) {
+                for (int i = counter; i >= 0; i--) {
+                    tempArray.add(arrayEntries.get(i));
+                }
+            } else {
+                tempArray = arrayEntries;
+            }
+            for (int i = 0; i <= counter; i++) {
+                eventEntryMap.put(t, tempArray.get(i));
+            }
 
-        return tempArray;
+            return tempArray;
+        } catch (Exception ex) {
+            System.out.println("Exception in createEventEntry");
+            return tempArray;
+        }
     }
 
     // This function create the entries, it takes as argument the array of Event
@@ -387,41 +392,44 @@ public class SampleView extends AbstractTimeGraphView {
         ArrayList<EventNode> arrayEvent = new ArrayList<>();
         EventNode tempNode = null;
         int max = 0;
-        for (KeyTree key : fMap[Tree].keySet()) {
-            if (fMap[Tree].get(key) != null) {
-                int level = key.getLevel();
-                String label = key.getLabel();
-                Node node = fMap[Tree].get(key);
-                int id = node.getNodeId();
-                int color = node.getColor();
-                long start = ((ProfileData) node.getProfileData()).getStartTime();
-                long end = ((ProfileData) node.getProfileData()).getEndTime();
-                // ((ProfileData)node.getProfileData()).getDuration();//((ProfileData)
-                // node.getProfileData()).getDuration();//node.getPointer();
-                // node.getDur();
-                long duration = node.getDur();
-                System.out.println("Node: " + label + " start " + start + " duration " + duration + " level " + level);
-                tempNode = new EventNode(arrayEventEntry.get(level), label, id, start, duration, 1, level, color);
+        try {
+            for (KeyTree key : fMap[Tree].keySet()) {
+                if (fMap[Tree].get(key) != null) {
+                    int level = key.getLevel();
+                    String label = key.getLabel();
+                    Node node = fMap[Tree].get(key);
+                    int id = node.getNodeId();
+                    int color = node.getColor();
+                    long start = ((ProfileData) node.getProfileData()).getStartTime();
+                    long end = ((ProfileData) node.getProfileData()).getEndTime();
+                    // ((ProfileData)node.getProfileData()).getDuration();//((ProfileData)
+                    // node.getProfileData()).getDuration();//node.getPointer();
+                    // node.getDur();
+                    long duration = node.getDur();
+                    System.out.println("Node: " + label + " start " + start + " duration " + duration + " level " + level);
+                    tempNode = new EventNode(arrayEventEntry.get(level), label, id, start, duration, 1, level, color);
 
-                arrayEvent.add(tempNode);
-                if (level > max) {
-                    max = level;
+                    arrayEvent.add(tempNode);
+                    if (level > max) {
+                        max = level;
+                    }
+                    // put the events on the entry:
+                    // arrayEventEntry.get(level).addEvent(tempNode);
                 }
-                // put the events on the entry:
-                // arrayEventEntry.get(level).addEvent(tempNode);
             }
+            if (inv) {
+                for (int i = 0; i < arrayEvent.size(); i++) {
+                    arrayEventEntry.get(max - arrayEvent.get(i).fLevel).addEvent(arrayEvent.get(i));
+                }
+            } else {
+                for (int i = 0; i < arrayEvent.size(); i++) {
+                    arrayEventEntry.get(arrayEvent.get(i).fLevel).addEvent(arrayEvent.get(i));
+                }
+            }
+        } catch (Exception ex) {
+            System.out.println("Exception in createEventNodes");
         }
-        if (inv) {
-            for (int i = 0; i < arrayEvent.size(); i++) {
-                arrayEventEntry.get(max - arrayEvent.get(i).fLevel).addEvent(arrayEvent.get(i));
-            }
-        } else
-        {
-            for (int i = 0; i < arrayEvent.size(); i++) {
-                arrayEventEntry.get(arrayEvent.get(i).fLevel).addEvent(arrayEvent.get(i));
-            }
-        }
-            return arrayEvent;
+        return arrayEvent;
 
     }
     // This function put them together.
