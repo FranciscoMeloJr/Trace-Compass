@@ -80,24 +80,24 @@ public class SampleView extends AbstractTimeGraphView {
      * The ID of the view as specified by the extension.
      */
     public static final String ID1 = "org.eclipse.tracecompass.tmf.ui.views.SampleView";
-    private ArrayList<Node<ProfileData>> fRoots = null; // Array of roots
-    private static ArrayList<Integer> numberLevels = null; // there are several
-                                                           // trees,
+    private ArrayList<Node<ProfileData>> fRoots; // Array of roots
+    private static ArrayList<Integer> numberLevels; // there are several trees
+
     // therefore,
-    private static int Tree = 0;// several levels
-    private static int Dif[] = new int[2];
+    private static int Tree;// several levels
+    private static int Dif[];
 
     // Map of the tree:
-    static LinkedHashMap<KeyTree, Node<ProfileData>> fMap[] = null;
+    static LinkedHashMap<KeyTree, Node<ProfileData>> fMap[];
 
     // Related with presentation provider:
-    private final Map<ITmfTrace, ISymbolProvider> fSymbolProviders = new HashMap<>();
+    private final Map<ITmfTrace, ISymbolProvider> fSymbolProviders;
 
     // To show differences:
-    boolean fDiff = false;
+    boolean fDiff;
 
-    //true for flamegraph
-    static boolean inv = true;
+    // true for flamegraph
+    static boolean inv;
 
     // Messages:
     private static final String[] COLUMN_NAMES1 = new String[] {
@@ -130,6 +130,16 @@ public class SampleView extends AbstractTimeGraphView {
 
         setHandleTimeSignals(false);
 
+        // Initialization of variables
+        fRoots = null;
+        numberLevels = null;
+        Tree = 0;
+
+        Dif = new int[2];
+        fMap = null;
+        fSymbolProviders = new HashMap<>();
+        fDiff = false;
+        inv = true;
     }
 
     /**
@@ -252,11 +262,12 @@ public class SampleView extends AbstractTimeGraphView {
             }
             // start = end;
 
-
-             Display.getDefault().asyncExec(new Runnable() {
-
-             @Override public void run() {
-             getTimeGraphViewer().resetStartFinishTime(); } });
+            Display.getDefault().asyncExec(new Runnable() {
+                @Override
+                public void run() {
+                    getTimeGraphViewer().resetStartFinishTime();
+                }
+            });
 
         } catch (Exception ex) {
             System.out.println("Exception in buildEntryList");
