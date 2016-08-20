@@ -57,6 +57,11 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphSelect
  * graph view on the right side
  */
 
+/**
+ * @author frank
+ * @since 2.0
+ *
+ */
 public class SampleView extends AbstractTimeGraphView {
 
     /**

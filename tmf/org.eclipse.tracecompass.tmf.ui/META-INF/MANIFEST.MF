@@ -109,11 +109,12 @@ Export-Package: org.eclipse.tracecompass.internal.tmf.ui;x-friends:="org.eclipse
  org.eclipse.tracecompass.tmf.ui.widgets.timegraph.dialogs,
  org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model,
  org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets,
- org.eclipse.tracecompass.tmf.ui.widgets.virtualtable
-Import-Package: com.google.common.annotations,
- com.google.common.base,
+ org.eclipse.tracecompass.tmf.ui.widgets.virtualtable,
+ org.eclipse.tracecompass.tmf.ui.sampleview,
+Import-Package: com.google.common.base,
  com.google.common.cache,
  com.google.common.collect,
  org.eclipse.emf.common.util,
  org.eclipse.emf.ecore,
+ com.google.common.annotations,
  org.eclipse.tracecompass.internal.analysis.os.linux.core.profile

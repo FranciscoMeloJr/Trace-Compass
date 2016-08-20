@@ -109,12 +109,13 @@
             icon="icons/sample.gif"
             id="org.eclipse.tracecompass.tmf.ui.views.SampleView"
             name="CCT View">
+      </view>
       <view
             allowMultiple="true"
             category="org.eclipse.tracecompass.tmf.ui"
             class="org.eclipse.tracecompass.tmf.ui.sampleview.DurationView"
             icon="icons/sample.gif"
-            id="org.eclipse.tracecompass.tmf.ui.view2"
+            id="org.eclipse.tracecompass.tmf.ui.views.DurationView"
             name="Duration View">
       </view>
    </extension>
