@@ -166,7 +166,7 @@ public class SampleView extends AbstractTimeGraphView {
             // put the maps and the roots as properties:
             fMap = map;
             fRoots = roots;
-
+            boolean inv = true;
             TraceEntry traceEntry = null;
             Map<ITmfTrace, LevelEntry> levelEntryMap = new HashMap<>();
             Map<LevelEntry, EventEntry> eventEntryMap = new HashMap<>();
@@ -205,10 +205,10 @@ public class SampleView extends AbstractTimeGraphView {
                 // This was necessary to keep the methods declaration:
                 Tree = t;
                 // create the event entry:
-                eventEntryAux = createEventEntry(Long.valueOf(1), endTime, levelEntryAux[Tree], eventEntryMap);
+                eventEntryAux = createEventEntry(Long.valueOf(1), endTime, levelEntryAux[Tree], eventEntryMap, inv);
 
                 // create the node entries for each tree:
-                eventAux = createEventNodes(eventEntryAux);
+                eventAux = createEventNodes(eventEntryAux, inv);
 
                 // Put as child
                 eventList = new ArrayList<>();
@@ -220,7 +220,7 @@ public class SampleView extends AbstractTimeGraphView {
                 }
 
                 // put the event on the list:
-                for (int i = 0; i < eventAux.size(); i++) {
+                for (int i = eventAux.size() - 1; i > 0; i--) {
                     eventList.add(eventAux.get(i));
                 }
 
@@ -351,34 +351,42 @@ public class SampleView extends AbstractTimeGraphView {
     }
 
     // this function creates the level Entries i.e level 0, level 1, level 2:
-    private static ArrayList<EventEntry> createEventEntry(long entry, long exit, LevelEntry t, Map<LevelEntry, EventEntry> eventEntryMap) {
-        // System.out.println("create Event Entry size ");
+    private static ArrayList<EventEntry> createEventEntry(long entry, long exit, LevelEntry t, Map<LevelEntry, EventEntry> eventEntryMap, boolean inv) {
         System.out.println("create Event Entry size " + fMap[Tree].size());
-        // Go through the tree and creates the entries:
         // eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
 
         int counter = numberLevels.get(Tree); // fMap.size();
+        boolean inverted = inv;
         // arrayEventEntries = new EventEntry[counter];
         ArrayList<EventEntry> arrayEntries = new ArrayList<>();
+        ArrayList<EventEntry> tempArray = new ArrayList<>();
 
         for (int i = 0; i <= counter; i++) {
             EventEntry temp = new EventEntry("level " + String.valueOf(i), i, entry, exit, 0);
             arrayEntries.add(temp);
-
-            eventEntryMap.put(t, arrayEntries.get(i));
+        }
+        if (inverted) {
+            for (int i = counter; i >= 0; i--) {
+                tempArray.add(arrayEntries.get(i));
+            }
+        } else {
+            tempArray = arrayEntries;
+        }
+        for (int i = 0; i <= counter; i++) {
+            eventEntryMap.put(t, tempArray.get(i));
         }
 
-        return arrayEntries;
+        return tempArray;
     }
 
     // This function create the entries, it takes as argument the array of Event
     // The map is also used to correlate with the event nodes
-    private static ArrayList<EventNode> createEventNodes(ArrayList<EventEntry> arrayEventEntry) {
+    private static ArrayList<EventNode> createEventNodes(ArrayList<EventEntry> arrayEventEntry, boolean inv) {
         System.out.println("create event node");
         // Go through the tree and creates the nodes:
         ArrayList<EventNode> arrayEvent = new ArrayList<>();
         EventNode tempNode = null;
-
+        int max = 0;
         for (KeyTree key : fMap[Tree].keySet()) {
             if (fMap[Tree].get(key) != null) {
                 int level = key.getLevel();
@@ -396,14 +404,24 @@ public class SampleView extends AbstractTimeGraphView {
                 tempNode = new EventNode(arrayEventEntry.get(level), label, id, start, duration, 1, level, color);
 
                 arrayEvent.add(tempNode);
-
+                if (level > max) {
+                    max = level;
+                }
                 // put the events on the entry:
-                arrayEventEntry.get(level).addEvent(tempNode);
-
+                // arrayEventEntry.get(level).addEvent(tempNode);
             }
         }
-
-        return arrayEvent;
+        if (inv) {
+            for (int i = 0; i < arrayEvent.size(); i++) {
+                arrayEventEntry.get(max - arrayEvent.get(i).fLevel).addEvent(arrayEvent.get(i));
+            }
+        } else
+        {
+            for (int i = 0; i < arrayEvent.size(); i++) {
+                arrayEventEntry.get(arrayEvent.get(i).fLevel).addEvent(arrayEvent.get(i));
+            }
+        }
+            return arrayEvent;
 
     }
     // This function put them together.
@@ -432,7 +450,7 @@ public class SampleView extends AbstractTimeGraphView {
      */
 
     // This method is called when you zoom - correct:
-    //Need to know the resolution:
+    // Need to know the resolution:
     @Override
     protected List<ITimeEvent> getEventList(TimeGraphEntry entry, long startTime, long endTime, long resolution, IProgressMonitor monitor) {
         System.out.println("resolution" + resolution);

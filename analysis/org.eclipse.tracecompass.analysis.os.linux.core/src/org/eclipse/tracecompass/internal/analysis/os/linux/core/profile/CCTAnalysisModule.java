@@ -227,7 +227,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         // This function inverts the hash for displaying purposes
         public void inversionProcedure() {
-
+            System.out.println("inversionProcedure");
             // map = module.getArrayECCTs();
             // numberLevels = module.getNumberLevelsEach();
             LinkedHashMap<KeyTree, Node<ProfileData>> inverted[] = hashECCTs;
