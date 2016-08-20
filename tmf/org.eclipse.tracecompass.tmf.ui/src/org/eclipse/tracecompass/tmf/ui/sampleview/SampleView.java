@@ -21,6 +21,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.CCTAnalysisModule;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfileData;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfileVisitor;
@@ -95,6 +96,9 @@ public class SampleView extends AbstractTimeGraphView {
     // To show differences:
     boolean fDiff = false;
 
+    //true for flamegraph
+    static boolean inv = true;
+
     // Messages:
     private static final String[] COLUMN_NAMES1 = new String[] {
             Messages.SampleView_FunctionColumn,
@@ -166,7 +170,7 @@ public class SampleView extends AbstractTimeGraphView {
             // put the maps and the roots as properties:
             fMap = map;
             fRoots = roots;
-            boolean inv = true;
+
             TraceEntry traceEntry = null;
             Map<ITmfTrace, LevelEntry> levelEntryMap = new HashMap<>();
             Map<LevelEntry, EventEntry> eventEntryMap = new HashMap<>();
@@ -248,12 +252,12 @@ public class SampleView extends AbstractTimeGraphView {
             }
             // start = end;
 
-            /*
-             * Display.getDefault().asyncExec(new Runnable() {
-             *
-             * @Override public void run() {
-             * getTimeGraphViewer().resetStartFinishTime(); } });
-             */
+
+             Display.getDefault().asyncExec(new Runnable() {
+
+             @Override public void run() {
+             getTimeGraphViewer().resetStartFinishTime(); } });
+
         } catch (Exception ex) {
             System.out.println("Exception in buildEntryList");
             return;
