@@ -51,23 +51,6 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphControl;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphSelection;
 
-/**
- * This sample class demonstrates how to plug-in a new workbench view. The view
- * shows data obtained from the model. The sample creates a dummy model on the
- * fly, but a real implementation would connect to the model available either in
- * this or another plug-in (e.g. the workspace). The view is connected to the
- * model using a content provider.
- * <p>
- * The view uses a label provider to define how model objects should be
- * presented in the view. Each view can present the same model objects using
- * different labels and icons, if needed. Alternatively, a single label provider
- * can be shared between views in order to ensure that objects of the same type
- * are presented in the same way everywhere.
- * <p>
- *
- * @since 2.0
- */
-
 /*
  * TimeGraphEntry can have children: then they appear as child in the tree
  * viewer on the left ITimeEvent are the intervals that gets drawn in the time
@@ -219,10 +202,10 @@ public class SampleView extends AbstractTimeGraphView {
                 // This was necessary to keep the methods declaration:
                 Tree = t;
                 // create the event entry:
-                eventEntryAux = createEventEntry(Long.valueOf(1), endTime, levelEntryAux[Tree], eventEntryMap, inv);
+                eventEntryAux = createEventEntry(Long.valueOf(1), endTime, levelEntryAux[Tree], eventEntryMap);
 
                 // create the node entries for each tree:
-                eventAux = createEventNodes(eventEntryAux, inv);
+                eventAux = createEventNodes(eventEntryAux);
 
                 // Put as child
                 eventList = new ArrayList<>();
@@ -366,7 +349,7 @@ public class SampleView extends AbstractTimeGraphView {
     }
 
     // this function creates the level Entries i.e level 0, level 1, level 2:
-    private static ArrayList<EventEntry> createEventEntry(long entry, long exit, LevelEntry t, Map<LevelEntry, EventEntry> eventEntryMap, boolean inv) {
+    private static ArrayList<EventEntry> createEventEntry(long entry, long exit, LevelEntry t, Map<LevelEntry, EventEntry> eventEntryMap) {
         System.out.println("create Event Entry size " + fMap[Tree].size());
 
         // eventEntryAux1 = new EventEntry("level 0", 37, 1, 15, 0);
@@ -401,7 +384,7 @@ public class SampleView extends AbstractTimeGraphView {
 
     // This function create the entries, it takes as argument the array of Event
     // The map is also used to correlate with the event nodes
-    private static ArrayList<EventNode> createEventNodes(ArrayList<EventEntry> arrayEventEntry, boolean inv) {
+    private static ArrayList<EventNode> createEventNodes(ArrayList<EventEntry> arrayEventEntry) {
         System.out.println("create event node");
         // Go through the tree and creates the nodes:
         ArrayList<EventNode> arrayEvent = new ArrayList<>();

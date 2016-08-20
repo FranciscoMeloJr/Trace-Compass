@@ -100,7 +100,7 @@
       </view>
       <category
             id="org.eclipse.tracecompass.tmf.ui"
-            name="New Category">
+            name="Execution Comparison">
       </category>
       <view
             allowMultiple="true"
@@ -109,6 +109,13 @@
             icon="icons/sample.gif"
             id="org.eclipse.tracecompass.tmf.ui.views.SampleView"
             name="CCT View">
+      <view
+            allowMultiple="true"
+            category="org.eclipse.tracecompass.tmf.ui"
+            class="org.eclipse.tracecompass.tmf.ui.sampleview.DurationView"
+            icon="icons/sample.gif"
+            id="org.eclipse.tracecompass.tmf.ui.view2"
+            name="Duration View">
       </view>
    </extension>
    <extension
@@ -1994,6 +2001,12 @@
             targetID="org.eclipse.jdt.ui.JavaPerspective">
          <view
                id="org.eclipse.tracecompass.tmf.ui.views.SampleView"
+               ratio="0.5"
+               relationship="right"
+               relative="org.eclipse.ui.views.ProblemView">
+         </view>
+         <view
+               id="org.eclipse.tracecompass.tmf.ui.views.DurationView"
                ratio="0.5"
                relationship="right"
                relative="org.eclipse.ui.views.ProblemView">
