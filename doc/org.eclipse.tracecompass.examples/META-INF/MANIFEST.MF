@@ -16,4 +16,5 @@ Export-Package: org.eclipse.tracecompass.examples.ui;x-internal:=true,
  org.eclipse.tracecompass.examples.ui.viewers.histogram;x-internal:=true,
  org.eclipse.tracecompass.examples.ui.views.histogram;x-internal:=true
 Bundle-Vendor: %Bundle-Vendor
-Import-Package: org.swtchart
+Import-Package: org.eclipse.tracecompass.internal.analysis.os.linux.core.profile,
+ org.swtchart
