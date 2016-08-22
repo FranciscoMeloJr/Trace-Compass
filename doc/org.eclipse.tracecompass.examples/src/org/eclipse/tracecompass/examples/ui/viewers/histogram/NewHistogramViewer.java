@@ -100,10 +100,14 @@ public class NewHistogramViewer extends TmfBarChartViewer {
                         }
                     }
 
-                    for (int i = 0; i < nb; i++) {
-                        y[i] += yLong[i]; /* casting from long to double */
-                    }
+                    /*for (int i = 0; i < nb; i++) {
+                        y[i] += yLong[i]; /* casting from long to double }*/
 
+                    int nb = 10;
+                    for (int i = 0; i < nb; i++) {
+                        x[i] += i;
+                        y[i] += i; /* casting from long to double */
+                    }
                     /* Update the viewer */
                     drawChart(series, x, y);
                 }
