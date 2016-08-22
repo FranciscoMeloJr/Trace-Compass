@@ -92,8 +92,11 @@ public class NewHistogramViewer extends TmfBarChartViewer {
                         }
                         List<Long> values = stats.histogramQuery(start, end, nb);
 
+                        System.out.println("nb "+ nb);
                         for (int i = 0; i < nb; i++) {
-                            yLong[i] += values.get(i);
+                            long temp = values.get(i);
+                            yLong[i] += temp;
+                            System.out.println(temp);
                         }
                     }
 
