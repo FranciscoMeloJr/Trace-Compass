@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2013, 2014 Ericsson
+ *
+ * All rights reserved. This program and the accompanying materials are
+ * made available under the terms of the Eclipse Public License v1.0 which
+ * accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Alexandre Montplaisir - Initial API and implementation
+ *   Bernd Hufmann - Updated to new TMF chart framework
+ *******************************************************************************/
 package org.eclipse.tracecompass.examples.ui.viewers.histogram;
 
 import java.util.Arrays;
@@ -53,14 +65,16 @@ public class NewHistogramViewer extends TmfBarChartViewer {
     @Override
     protected void readData(final ISeries series, final long start, final long end, final int nb) {
         if (getTrace() != null) {
-            final double y[];
-            final long yLong[];
+            int number = 10;
+            final double y[] = new double[number];
 
             Thread thread = new Thread("Histogram viewer update") { //$NON-NLS-1$
                 @Override
                 public void run() {
-                    double x[];
- 
+                    double x[] = getXAxis(start, end, number);
+                    final long yLong[] = new long[number];
+                    Arrays.fill(y, 0.0);
+                    int size = 0;
                     /* Add the values for each trace */
                     for (ITmfTrace trace : TmfTraceManager.getTraceSet(getTrace())) {
                         /* Retrieve the statistics object */
@@ -71,26 +85,21 @@ public class NewHistogramViewer extends TmfBarChartViewer {
                             continue;
                         }
                         statsMod.waitForCompletion();
-
                         final ITmfStatistics stats = statsMod.getStatistics();
                         if (stats == null) {
-                            /*
-                             * Should not be null after waitForInitialization()
-                             * is called.
-                             */
                             throw new IllegalStateException();
                         }
                         if (stats instanceof testStatistics) {
                             testStatistics tS = (testStatistics) stats;
-                            nb = tS.getSize();
-                            yLong = new long[nb]; 
-                            List<Long> values = stats.histogramQuery(start, end, nb);
-                            System.out.println("nb " + nb);
-                            for (int i = 0; i < nb; i++) {
-                                long temp = values.get(i);
-                                yLong[i] += temp;
-                                System.out.println(temp);
-                            }
+                            size = tS.getSize();
+                        }
+                        List<Long> values = stats.histogramQuery(start, end, number);
+
+                        System.out.println("nb " + nb);
+                        for (int i = 0; i < size; i++) {
+                            long temp = values.get(i);
+                            yLong[i] += temp;
+                            System.out.println(temp);
                         }
                     }
 
@@ -98,15 +107,15 @@ public class NewHistogramViewer extends TmfBarChartViewer {
                      * for (int i = 0; i < nb; i++) { y[i] += yLong[i]; /*
                      * casting from long to double }
                      */
-                    x = getXAxis(0, nb, nb);
-                    Arrays.fill(y, 0.0);
+                    double xx[] = new double[size];
+                    double yy[] = new double[size];
 
-                    for (int i = 0; i < nb; i++) {
-                        x[i] += i;
-                        y[i] += yLong[i]; /* casting from long to double */
+                    for (int i = 0; i < size; i++) {
+                        xx[i] += i;
+                        yy[i] += yLong[i]; /* casting from long to double */
                     }
                     /* Update the viewer */
-                    drawChart(series, x, y);
+                    drawChart(series, xx, yy);
                 }
             };
             thread.start();

@@ -726,9 +726,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         @Override
         public List<Long> histogramQuery(long start, long end, int nb) {
 
-            ArrayList<Long> temp;
-            temp = arrayList;
-            return temp;
+            return arrayList;
         }
 
         @Override
