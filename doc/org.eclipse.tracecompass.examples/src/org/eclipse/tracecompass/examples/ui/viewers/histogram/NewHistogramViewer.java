@@ -27,6 +27,7 @@ import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.viewers.xycharts.barcharts.TmfBarChartViewer;
 import org.swtchart.Chart;
 import org.swtchart.IAxis;
+import org.swtchart.IAxisTick;
 import org.swtchart.ISeries;
 import org.swtchart.LineStyle;
 
@@ -59,7 +60,15 @@ public class NewHistogramViewer extends TmfBarChartViewer {
         /* Hide the legend */
         swtChart.getLegend().setVisible(false);
 
-        addSeries("Number of events", Display.getDefault().getSystemColor(SWT.COLOR_BLUE).getRGB()); //$NON-NLS-1$
+        addSeries("Duration", Display.getDefault().getSystemColor(SWT.COLOR_BLUE).getRGB()); //$NON-NLS-1$
+
+        if(parent.getMenu() != null) {
+            System.out.print("I do");
+        }
+        else
+        {
+            System.out.print("I dont");
+        }
     }
 
     @Override
@@ -107,19 +116,62 @@ public class NewHistogramViewer extends TmfBarChartViewer {
                      * for (int i = 0; i < nb; i++) { y[i] += yLong[i]; /*
                      * casting from long to double }
                      */
-                    double xx[] = new double[size];
+                    double xx[] = getXAxisMod(0, size, size+1); //new double[size];
                     double yy[] = new double[size];
-
+                    System.out.println("size " + size);
                     for (int i = 0; i < size; i++) {
-                        xx[i] += i;
+                        xx[i] += (i+1);
                         yy[i] += yLong[i]; /* casting from long to double */
                     }
                     /* Update the viewer */
+                    //chart.getAxisSet().getXAxis(0).setRange(new Range(0, x[x.length - 1]));
                     drawChart(series, xx, yy);
+                    //getSwtChart().getAxisSet().getXAxis(0).setRange(new Range(0,10));
                 }
             };
             thread.start();
         }
         return;
+    }
+
+    @Override
+    protected void drawChart(final ISeries series, final double[] x, final double[] y) {
+        // Run in GUI thread to make sure that chart is ready after restart
+        final Display display = getDisplay();
+        if (display.isDisposed()) {
+            return;
+        }
+
+        display.syncExec(new Runnable() {
+            @Override
+            public void run() {
+                if (display.isDisposed()) {
+                    return;
+                }
+                Chart swtChart = getSwtChart();
+                IAxisTick xTick = swtChart.getAxisSet().getXAxis(0).getTick();
+                //xTick.setFormat(new TmfChartTimeStampFormat(getTimeOffset()));
+                series.setXSeries(x);
+                series.setYSeries(y);
+                xTick.setTickMarkStepHint(10);
+
+                swtChart.getAxisSet().adjustRange();
+                swtChart.redraw();
+            }
+        });
+    }
+
+
+    protected static double[] getXAxisMod(long start, long end, int nb) {
+        double timestamps[] = new double[nb];
+        long steps = (end - start);
+        double step = nb;
+
+        double curTime = 1;
+        for (int i = 0; i < nb; i++) {
+            timestamps[i] = curTime;
+            curTime += step;
+        }
+        return timestamps;
     }
 }
