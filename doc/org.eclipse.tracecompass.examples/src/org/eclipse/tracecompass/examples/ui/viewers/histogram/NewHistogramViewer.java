@@ -30,6 +30,7 @@ import org.swtchart.IAxis;
 import org.swtchart.IAxisTick;
 import org.swtchart.ISeries;
 import org.swtchart.LineStyle;
+import org.swtchart.Range;
 
 /**
  * Histogram Viewer implementation based on TmfBarChartViewer.
@@ -104,7 +105,6 @@ public class NewHistogramViewer extends TmfBarChartViewer {
                         }
                         List<Long> values = stats.histogramQuery(start, end, number);
 
-                        System.out.println("nb " + nb);
                         for (int i = 0; i < size; i++) {
                             long temp = values.get(i);
                             yLong[i] += temp;
@@ -125,8 +125,15 @@ public class NewHistogramViewer extends TmfBarChartViewer {
                     }
                     /* Update the viewer */
                     //chart.getAxisSet().getXAxis(0).setRange(new Range(0, x[x.length - 1]));
+                    final int fixedSize = size;
                     drawChart(series, xx, yy);
-                    //getSwtChart().getAxisSet().getXAxis(0).setRange(new Range(0,10));
+                    /*Display.getDefault().asyncExec(new Runnable() {
+                        @Override
+                        public void run() {
+                            getSwtChart().getAxisSet().getXAxis(0).setRange(new Range(0,fixedSize));
+                        }
+                    });*/
+
                 }
             };
             thread.start();
