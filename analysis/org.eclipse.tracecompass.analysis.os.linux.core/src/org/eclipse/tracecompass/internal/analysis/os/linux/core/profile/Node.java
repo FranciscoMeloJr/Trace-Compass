@@ -94,10 +94,10 @@ public class Node<T extends IProfileData> {
         return newNode;
     }
 
-    public int diff(Node<T> compare) {
+    public int diff(Node<T> compare, int threshold) {
         getProfileData().minus(compare.getProfileData());
         //zero is the same:
-        fColor = getProfileData().minus(compare.getProfileData());
+        fColor = getProfileData().minus(compare.getProfileData(), threshold);
         System.out.println("Color " + fColor);
         return fColor;
     }

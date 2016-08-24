@@ -57,7 +57,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     static LinkedHashMap<KeyTree, Node<ProfileData>> treeDif;
     static ArrayList<Integer> numberLevels = new ArrayList<>();
     static testStatistics statistics;
-
+    static int threshold = 10;
     /**
      * Default constructor
      */
@@ -214,7 +214,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         Random rn = new Random();
                         int a = rn.nextInt(9);
                         int b = rn.nextInt(9);
-                        diffTrees(hashECCTs[a], hashECCTs[b]);
+                        diffTrees(hashECCTs[a], hashECCTs[b], threshold);
                         // put the tree on the last size
                         hashECCTs[ArrayECCTs.size()] = treeDif;
                     }
@@ -435,7 +435,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             String label = current.getNodeLabel();
             KeyTree aux1 = new KeyTree(label, level);
             if (current.getParent() != null) {
-                KeyTree aux2 = new KeyTree(label, level, current.getParent().getNodeLabel());
+                KeyTree auxP = new KeyTree(label, level, current.getParent().getNodeLabel());
             }
             // debug:
             nodes.add(current);
@@ -467,6 +467,30 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
         numberLevels.add(level);
         return hmapZ;// hmap;
+    }
+
+    /**
+     * This function merge similar trees
+     *
+     * @param root1:
+     *            tree for merging 1
+     *
+     * @param root2:
+     *            tree for merging 2
+     * @return the resulting tree
+     */
+    public static LinkedHashMap<KeyTree, Node<ProfileData>> mergeTree(LinkedHashMap<KeyTree, Node<ProfileData>> hmap1, LinkedHashMap<KeyTree, Node<ProfileData>> hmap2) {
+
+        LinkedHashMap<KeyTree, Node<ProfileData>> result = null;
+
+        for (KeyTree key : hmap1.keySet()) {
+            @Nullable
+            Node<ProfileData> nodex = hmap1.get(key);
+            Node<ProfileData> nodey = hmap2.get(key);
+
+        }
+
+        return result;
     }
 
     /**
@@ -526,7 +550,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
      *
      * @return the resulting is the hash of the difference
      */
-    public static LinkedHashMap<KeyTree, Node<ProfileData>> diffTrees(LinkedHashMap<KeyTree, Node<ProfileData>> root1, LinkedHashMap<KeyTree, Node<ProfileData>> root2) {
+    public static LinkedHashMap<KeyTree, Node<ProfileData>> diffTrees(LinkedHashMap<KeyTree, Node<ProfileData>> root1, LinkedHashMap<KeyTree, Node<ProfileData>> root2, int x) {
 
         LinkedHashMap<KeyTree, Node<ProfileData>> result = new LinkedHashMap<>();
 
@@ -541,7 +565,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 copy.setDur(value.getDur());
                 if ((root2.get(key) != null)) {
                     Node<ProfileData> compare = root2.get(key);
-                    copy.diff(compare);
+                    copy.diff(compare, x);
                 }
                 if (key.getLevel() > max) {
                     max = key.getLevel();
@@ -758,8 +782,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             // TODO Auto-generated method stub
 
         }
-        public int getSize()
-        {
+
+        public int getSize() {
             return arrayList.size();
         }
 

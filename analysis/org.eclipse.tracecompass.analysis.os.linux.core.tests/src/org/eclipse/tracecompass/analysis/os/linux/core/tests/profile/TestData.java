@@ -85,4 +85,16 @@ public class TestData implements IProfileData {
         fWeight = fWeight + value;
     }
 
+    @Override
+    public int minus(IProfileData other) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public int minus(IProfileData other, int th) {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
 }

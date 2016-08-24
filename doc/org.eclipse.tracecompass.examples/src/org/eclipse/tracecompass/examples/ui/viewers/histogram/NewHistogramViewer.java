@@ -81,7 +81,7 @@ public class NewHistogramViewer extends TmfBarChartViewer {
             Thread thread = new Thread("Histogram viewer update") { //$NON-NLS-1$
                 @Override
                 public void run() {
-                    double x[] = getXAxis(start, end, number);
+                    //double x[] = getXAxis(start, end, number);
                     final long yLong[] = new long[number];
                     Arrays.fill(y, 0.0);
                     int size = 0;
@@ -127,12 +127,12 @@ public class NewHistogramViewer extends TmfBarChartViewer {
                     //chart.getAxisSet().getXAxis(0).setRange(new Range(0, x[x.length - 1]));
                     final int fixedSize = size;
                     drawChart(series, xx, yy);
-                    /*Display.getDefault().asyncExec(new Runnable() {
+                    Display.getDefault().asyncExec(new Runnable() {
                         @Override
                         public void run() {
                             getSwtChart().getAxisSet().getXAxis(0).setRange(new Range(0,fixedSize));
                         }
-                    });*/
+                    });
 
                 }
             };

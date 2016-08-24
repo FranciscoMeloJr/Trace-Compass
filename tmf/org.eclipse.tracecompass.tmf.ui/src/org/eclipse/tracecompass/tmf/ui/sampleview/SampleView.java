@@ -286,8 +286,6 @@ public class SampleView extends AbstractTimeGraphView {
 
         // ItemB
         MenuManager itemB = new MenuManager("Select Tree B: ");
-        // fFlatAction = createFlatAction();
-        // fFlatAction = createFlatAction();
 
         // Test just to put information on the
         for (int i = 0; i < size; i++) {
@@ -296,6 +294,18 @@ public class SampleView extends AbstractTimeGraphView {
 
         manager.add(new Separator());
         manager.add(itemB);
+
+        MenuManager itemC = new MenuManager("Select threshold:");
+
+        // Test just to put information on the
+        int sizeT = 10;
+        for (int i = 1; i <= sizeT; i++) {
+            itemC.add(createTreeSelection(Integer.toString(i), 2));
+        }
+
+        manager.add(new Separator());
+        manager.add(itemC);
+
     }
 
     @Override
@@ -319,7 +329,8 @@ public class SampleView extends AbstractTimeGraphView {
                     // Call the differential function
                     Dif[1] = Integer.parseInt(name);
                     fDiff = true;
-                    CCTAnalysisModule.diffTrees(fMap[Dif[0]], fMap[Dif[1]]);
+                    int x = 5;
+                    CCTAnalysisModule.diffTrees(fMap[Dif[0]], fMap[Dif[1]], x);
                     rebuild(); // update(); //rebuild();//
                     refresh();
                     redraw();
@@ -401,13 +412,13 @@ public class SampleView extends AbstractTimeGraphView {
                     int level = key.getLevel();
                     String label = key.getLabel();
                     Node node = fMap[Tree].get(key);
-                    int id = node.getNodeId();
-                    int color = node.getColor();
+                    int id = 0;
+                    int color = 0;
+                    if (node != null) {
+                        id = node.getNodeId();
+                        color = node.getColor();
+                    }
                     long start = ((ProfileData) node.getProfileData()).getStartTime();
-                    long end = ((ProfileData) node.getProfileData()).getEndTime();
-                    // ((ProfileData)node.getProfileData()).getDuration();//((ProfileData)
-                    // node.getProfileData()).getDuration();//node.getPointer();
-                    // node.getDur();
                     long duration = node.getDur();
                     System.out.println("Node: " + label + " start " + start + " duration " + duration + " level " + level);
                     tempNode = new EventNode(arrayEventEntry.get(level), label, id, start, duration, 1, level, color);

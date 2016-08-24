@@ -72,7 +72,9 @@ public class ProfileData implements IProfileData {
     }
 
     @Override
-    public int minus(IProfileData other) {
+    public int minus(IProfileData other, int threshold) {
+        double mult = (100 + threshold)/100;
+
         if (!(other instanceof ProfileData)) {
             throw new IllegalArgumentException("wrong type for minus operation");
         }
@@ -83,12 +85,16 @@ public class ProfileData implements IProfileData {
                 return 0;
             }
            //red:
-            if(this.fDuration > data.getDuration()) {
-                return 1;
+            if(this.fDuration > (data.getDuration())) {
+                if(this.fDuration > data.getDuration()*mult) {
+                    return 1;
+                }
             }
             //green:
             if(this.fDuration < data.getDuration()) {
-                return -1;
+                if(this.fDuration*mult < data.getDuration()) {
+                    return -1;
+                }
             }
         //To see the colors:
             //this.fDuration -= data.getDuration();
@@ -165,5 +171,33 @@ public class ProfileData implements IProfileData {
     public void addDuration(long duration) {
         fDuration += duration;
 
+    }
+    @Override
+    public int minus(IProfileData other) {
+
+        if (!(other instanceof ProfileData)) {
+            throw new IllegalArgumentException("wrong type for minus operation");
+        }
+        ProfileData data = (ProfileData) other;
+        if (fLabel.equals(data.getLabel())) {
+            //gray:
+            if(this.fDuration == data.getDuration()) {
+                return 0;
+            }
+           //red:
+            if(this.fDuration > (data.getDuration())) {
+                    return 1;
+
+            }
+            //green:
+            if(this.fDuration < data.getDuration()) {
+                    return -1;
+            }
+        //To see the colors:
+            //this.fDuration -= data.getDuration();
+            //this.fWeight -= data.getDuration();
+        }
+        //gray:
+        return 0;
     }
 }

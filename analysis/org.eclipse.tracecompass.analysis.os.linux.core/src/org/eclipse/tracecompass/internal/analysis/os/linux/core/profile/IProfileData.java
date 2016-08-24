@@ -6,6 +6,7 @@ package org.eclipse.tracecompass.internal.analysis.os.linux.core.profile;
 public interface IProfileData {
 
     public int minus(IProfileData other);
+    public int minus(IProfileData other, int th);
     public void merge(IProfileData other);
     public boolean equals(IProfileData other);
     public String getLabel();
