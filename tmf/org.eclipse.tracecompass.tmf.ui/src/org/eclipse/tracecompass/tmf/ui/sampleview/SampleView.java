@@ -344,7 +344,9 @@ public class SampleView extends AbstractTimeGraphView {
     }
     //this function is related with the threshold comparison:
     private static IAction selectThreshold(int i) {
-        IAction action = new Action(Integer.toString(i), IAction.AS_RADIO_BUTTON) {
+        //IAction action1 = new Action(Integer.toString(i), IAction.AS_CHECK_BOX){ };
+        //IAction.AS_RADIO_BUTTON
+        IAction action = new Action(Integer.toString(i), IAction.AS_CHECK_BOX) {
             @Override
             public void run() {
                 threshold = i;
@@ -353,6 +355,7 @@ public class SampleView extends AbstractTimeGraphView {
         };
         action.setToolTipText("Tip");
         return action;
+
     }
     // this function creates the trees
     private LevelEntry[] createLevelEntry(Long endTime) {
