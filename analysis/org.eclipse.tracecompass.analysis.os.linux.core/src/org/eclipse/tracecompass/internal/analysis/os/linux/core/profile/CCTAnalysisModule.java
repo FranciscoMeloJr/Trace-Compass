@@ -58,6 +58,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     static ArrayList<Integer> numberLevels = new ArrayList<>();
     static testStatistics statistics;
     static int threshold = 10;
+
     /**
      * Default constructor
      */
@@ -479,7 +480,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
      *            tree for merging 2
      * @return the resulting tree
      */
-    public static LinkedHashMap<KeyTree, Node<ProfileData>> mergeTree(LinkedHashMap<KeyTree, Node<ProfileData>> hmap1, LinkedHashMap<KeyTree, Node<ProfileData>> hmap2) {
+    public static LinkedHashMap<KeyTree, Node<ProfileData>> mergeSimilarTree(LinkedHashMap<KeyTree, Node<ProfileData>> hmap1, LinkedHashMap<KeyTree, Node<ProfileData>> hmap2) {
 
         LinkedHashMap<KeyTree, Node<ProfileData>> result = null;
 
@@ -487,7 +488,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             @Nullable
             Node<ProfileData> nodex = hmap1.get(key);
             Node<ProfileData> nodey = hmap2.get(key);
-
+            if (nodex != null && nodex.getProfileData() != null) {
+                ProfileData data = nodex.fProfileData;
+                data.setDuration((data.getDuration() + nodey.getProfileData().getDuration()) / 2);
+                nodex.setProfileData(data);
+            }
         }
 
         return result;
