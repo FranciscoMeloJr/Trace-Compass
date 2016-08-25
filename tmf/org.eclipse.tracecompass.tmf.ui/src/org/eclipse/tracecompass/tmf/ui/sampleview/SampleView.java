@@ -74,7 +74,7 @@ public class SampleView extends AbstractTimeGraphView {
     // therefore,
     private static int Tree;// several levels
     private static int Dif[];
-
+    private static int threshold = 0;
     // Map of the tree:
     static LinkedHashMap<KeyTree, Node<ProfileData>> fMap[];
 
@@ -299,8 +299,8 @@ public class SampleView extends AbstractTimeGraphView {
 
         // Test just to put information on the
         int sizeT = 10;
-        for (int i = 1; i <= sizeT; i++) {
-            itemC.add(createTreeSelection(Integer.toString(i), 2));
+        for (int i = 0; i <= sizeT; i++) {
+            itemC.add(selectThreshold(i));
         }
 
         manager.add(new Separator());
@@ -329,7 +329,8 @@ public class SampleView extends AbstractTimeGraphView {
                     // Call the differential function
                     Dif[1] = Integer.parseInt(name);
                     fDiff = true;
-                    int x = 5;
+                    int x = threshold;
+                    System.out.println("threshold" + x);
                     CCTAnalysisModule.diffTrees(fMap[Dif[0]], fMap[Dif[1]], x);
                     rebuild(); // update(); //rebuild();//
                     refresh();
@@ -341,7 +342,18 @@ public class SampleView extends AbstractTimeGraphView {
         action.setToolTipText("Tip");
         return action;
     }
+    //this function is related with the threshold comparison:
+    private static IAction selectThreshold(int i) {
+        IAction action = new Action(Integer.toString(i), IAction.AS_RADIO_BUTTON) {
+            @Override
+            public void run() {
+                threshold = i;
+            }
 
+        };
+        action.setToolTipText("Tip");
+        return action;
+    }
     // this function creates the trees
     private LevelEntry[] createLevelEntry(Long endTime) {
         // each level is a tree:

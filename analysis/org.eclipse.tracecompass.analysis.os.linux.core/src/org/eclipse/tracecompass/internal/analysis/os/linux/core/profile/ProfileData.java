@@ -100,6 +100,7 @@ public class ProfileData implements IProfileData {
             //this.fDuration -= data.getDuration();
             //this.fWeight -= data.getDuration();
         }
+
         //gray:
         return 0;
     }

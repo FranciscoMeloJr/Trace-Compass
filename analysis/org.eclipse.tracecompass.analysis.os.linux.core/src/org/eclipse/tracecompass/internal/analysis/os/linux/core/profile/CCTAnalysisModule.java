@@ -550,7 +550,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
      *
      * @return the resulting is the hash of the difference
      */
-    public static LinkedHashMap<KeyTree, Node<ProfileData>> diffTrees(LinkedHashMap<KeyTree, Node<ProfileData>> root1, LinkedHashMap<KeyTree, Node<ProfileData>> root2, int x) {
+    public static LinkedHashMap<KeyTree, Node<ProfileData>> diffTrees(LinkedHashMap<KeyTree, Node<ProfileData>> root1, LinkedHashMap<KeyTree, Node<ProfileData>> root2, int newTh) {
 
         LinkedHashMap<KeyTree, Node<ProfileData>> result = new LinkedHashMap<>();
 
@@ -565,7 +565,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 copy.setDur(value.getDur());
                 if ((root2.get(key) != null)) {
                     Node<ProfileData> compare = root2.get(key);
-                    copy.diff(compare, x);
+                    System.out.println("newTh" + newTh);
+                    copy.diff(compare, newTh);
                 }
                 if (key.getLevel() > max) {
                     max = key.getLevel();
