@@ -29,6 +29,7 @@ import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.Node;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileData;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileTraversal.KeyTree;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
+import org.eclipse.tracecompass.internal.tmf.ui.ITmfImageConstants;
 import org.eclipse.tracecompass.internal.tmf.ui.Messages;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.signal.TmfWindowRangeUpdatedSignal;
@@ -305,6 +306,8 @@ public class SampleView extends AbstractTimeGraphView {
 
         manager.add(new Separator());
         manager.add(itemC);
+        manager.add(new Separator());
+        manager.add(getMergeAction());
 
     }
 
@@ -316,6 +319,31 @@ public class SampleView extends AbstractTimeGraphView {
         // manager.add(fTimeGraphWrapper.getTimeGraphViewer().getSelectAction());
     }
 
+    /**
+     * Get the reset scale action.
+     *
+     * @return The Action object
+     */
+    public Action getMergeAction() {
+        Action mergeButton = null;
+        mergeButton = new Action() {
+            @Override
+            public void run() {
+                System.out.println("Automatic merge");
+            }
+        };
+        mergeButton.setText("Merge");
+        mergeButton.setToolTipText("This button will automatically merge similiar executions");
+        mergeButton.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_CONFLICT));
+
+        return mergeButton;
+    }
+
+    /**
+     * Get the differential selection
+     *
+     * @return The Action object
+     */
     private IAction createTreeSelection(String name, int i) {
         IAction action = new Action(name, IAction.AS_RADIO_BUTTON) {
             @Override
@@ -342,10 +370,12 @@ public class SampleView extends AbstractTimeGraphView {
         action.setToolTipText("Tip");
         return action;
     }
-    //this function is related with the threshold comparison:
+
+    // this function is related with the threshold comparison:
     private static IAction selectThreshold(int i) {
-        //IAction action1 = new Action(Integer.toString(i), IAction.AS_CHECK_BOX){ };
-        //IAction.AS_RADIO_BUTTON
+        // IAction action1 = new Action(Integer.toString(i),
+        // IAction.AS_CHECK_BOX){ };
+        // IAction.AS_RADIO_BUTTON
         IAction action = new Action(Integer.toString(i), IAction.AS_CHECK_BOX) {
             @Override
             public void run() {
@@ -357,6 +387,7 @@ public class SampleView extends AbstractTimeGraphView {
         return action;
 
     }
+
     // this function creates the trees
     private LevelEntry[] createLevelEntry(Long endTime) {
         // each level is a tree:
