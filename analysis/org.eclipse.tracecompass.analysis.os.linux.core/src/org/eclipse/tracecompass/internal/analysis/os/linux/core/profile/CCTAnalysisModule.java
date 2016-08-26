@@ -304,7 +304,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             int length = hashECCTs.length;
             LinkedHashMap<KeyTree, Node<ProfileData>> temp = null;
             ArrayList<Long> durationSaved = new ArrayList<>();
-            Node<ProfileData> parent = null;
+            Node<ProfileData> parent1 = null;
 
             long newDuration;
             int level;
@@ -319,9 +319,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         ProfileData data = (ProfileData) eachNode.getProfileData();
                         level = key.getLevel();
 
-                        parent = eachNode.getParent();
-                        if (parent != null) {
-                            start = parent.getPointer();
+                        parent1 = eachNode.getParent();
+                        if (parent1 != null) {
+                            start = parent1.getPointer();
                             eachNode.setPointer(start);
                         } else {
                             start = 0;
@@ -342,8 +342,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         data.setEndTime(end);
 
                         // updates:
-                        if (parent != null) {
-                            parent.setPointer(end);
+                        if (parent1 != null) {
+                            parent1.setPointer(end);
                         }
                         eachNode.setProfileData(data);
                         eachNode.setDur(newDuration);
@@ -496,6 +496,32 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
         return result;
+    }
+
+    /**
+     * This function merge Similar trees on the hash, using mergeSimilarTrees
+     *
+     * @param: none:
+     *             because the parameter is the current hash of trees
+     *
+     * @return void: because the hash is updated
+     */
+    public static void mergeTrees() {
+        // run through the hashmap:
+        // private static LinkedHashMap<KeyTree, Node<ProfileData>> hashECCTs[];
+        int i = 0;
+        LinkedHashMap<KeyTree, Node<ProfileData>> result = hashECCTs[i];
+        LinkedHashMap<KeyTree, Node<ProfileData>> temp, finalResult;
+
+        for (int j = 1; j < hashECCTs.length; j++) {
+            temp = hashECCTs[j];
+            result = mergeSimilarTree(result, temp);
+        }
+        finalResult = result;
+
+        hashECCTs = null;
+        hashECCTs = new LinkedHashMap[1];
+        hashECCTs[0] = finalResult;
     }
 
     /**
@@ -794,4 +820,5 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
     }
+
 }

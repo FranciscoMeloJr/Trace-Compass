@@ -330,6 +330,11 @@ public class SampleView extends AbstractTimeGraphView {
             @Override
             public void run() {
                 System.out.println("Automatic merge");
+                CCTAnalysisModule.mergeTrees();
+                //default:
+                rebuild();
+                refresh();
+                redraw();
             }
         };
         mergeButton.setText("Merge");
@@ -345,7 +350,7 @@ public class SampleView extends AbstractTimeGraphView {
      * @return The Action object
      */
     private IAction createTreeSelection(String name, int i) {
-        IAction action = new Action(name, IAction.AS_RADIO_BUTTON) {
+        IAction action = new Action(name, IAction.AS_CHECK_BOX) {
             @Override
             public void run() {
                 if (i == 1) {
@@ -376,7 +381,7 @@ public class SampleView extends AbstractTimeGraphView {
         // IAction action1 = new Action(Integer.toString(i),
         // IAction.AS_CHECK_BOX){ };
         // IAction.AS_RADIO_BUTTON
-        IAction action = new Action(Integer.toString(i), IAction.AS_CHECK_BOX) {
+        IAction action = new Action(Integer.toString(i), IAction.AS_RADIO_BUTTON) {
             @Override
             public void run() {
                 threshold = i;
