@@ -267,9 +267,9 @@ public class SampleView extends AbstractTimeGraphView {
     // This function is for a small selection menu - size is hard coded:
     @Override
     protected void fillLocalMenu(IMenuManager manager) {
-        super.fillLocalMenu(manager);
+        //super.fillLocalMenu(manager);
 
-        MenuManager itemA = new MenuManager("Select Tree A: ");
+        MenuManager itemA = new MenuManager("Select Execution A: ");
         // fFlatAction = createFlatAction();
         // fFlatAction = createFlatAction();
 
@@ -286,7 +286,7 @@ public class SampleView extends AbstractTimeGraphView {
         manager.add(itemA);
 
         // ItemB
-        MenuManager itemB = new MenuManager("Select Tree B: ");
+        MenuManager itemB = new MenuManager("Select Execution B: ");
 
         // Test just to put information on the
         for (int i = 0; i < size; i++) {
@@ -296,16 +296,16 @@ public class SampleView extends AbstractTimeGraphView {
         manager.add(new Separator());
         manager.add(itemB);
 
-        MenuManager itemC = new MenuManager("Select threshold:");
+        MenuManager itemTh = new MenuManager("Select threshold:");
 
         // Test just to put information on the
         int sizeT = 10;
         for (int i = 0; i <= sizeT; i++) {
-            itemC.add(selectThreshold(i));
+            itemTh.add(selectThreshold(i));
         }
 
         manager.add(new Separator());
-        manager.add(itemC);
+        manager.add(itemTh);
         manager.add(new Separator());
         manager.add(getMergeAction());
 
@@ -337,7 +337,7 @@ public class SampleView extends AbstractTimeGraphView {
                 redraw();
             }
         };
-        mergeButton.setText("Merge");
+        mergeButton.setText("Grouping selection");
         mergeButton.setToolTipText("This button will automatically merge similiar executions");
         mergeButton.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_CONFLICT));
 
@@ -372,7 +372,7 @@ public class SampleView extends AbstractTimeGraphView {
             }
 
         };
-        action.setToolTipText("Tip");
+        action.setToolTipText("Selection of execution for comparison");
         return action;
     }
 
@@ -388,7 +388,7 @@ public class SampleView extends AbstractTimeGraphView {
             }
 
         };
-        action.setToolTipText("Tip");
+        action.setToolTipText("Select the threshold for comparison");
         return action;
 
     }

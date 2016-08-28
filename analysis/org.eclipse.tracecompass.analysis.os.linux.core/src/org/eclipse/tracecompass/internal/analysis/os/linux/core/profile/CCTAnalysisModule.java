@@ -482,19 +482,26 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
      */
     public static LinkedHashMap<KeyTree, Node<ProfileData>> mergeSimilarTree(LinkedHashMap<KeyTree, Node<ProfileData>> hmap1, LinkedHashMap<KeyTree, Node<ProfileData>> hmap2) {
 
-        LinkedHashMap<KeyTree, Node<ProfileData>> result = null;
+        LinkedHashMap<KeyTree, Node<ProfileData>> result = new LinkedHashMap<>();
 
-        for (KeyTree key : hmap1.keySet()) {
-            @Nullable
-            Node<ProfileData> nodex = hmap1.get(key);
-            Node<ProfileData> nodey = hmap2.get(key);
-            if (nodex != null && nodex.getProfileData() != null) {
-                ProfileData data = nodex.fProfileData;
-                data.setDuration((data.getDuration() + nodey.getProfileData().getDuration()) / 2);
-                nodex.setProfileData(data);
+        if (hmap1 != null && hmap2 != null) {
+            for (KeyTree key : hmap1.keySet()) {
+                @Nullable
+                Node<ProfileData> nodex = hmap1.get(key);
+                Node<ProfileData> nodey = hmap2.get(key);
+                if (nodex != null && nodex.getProfileData() != null) {
+                    ProfileData data = nodex.fProfileData;
+                    if(nodey.getProfileData()!=null) {
+                        data.setDuration((data.getDuration() + nodey.getProfileData().getDuration()) / 2);
+                    }
+                    nodex.setProfileData(data);
+                    Node<ProfileData>  copy = nodex.copy();
+                    copy.setProfileData(data);
+                    result.put(key, nodex);
+                }
+
             }
         }
-
         return result;
     }
 
@@ -514,8 +521,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         LinkedHashMap<KeyTree, Node<ProfileData>> temp, finalResult;
 
         for (int j = 1; j < hashECCTs.length; j++) {
-            temp = hashECCTs[j];
-            result = mergeSimilarTree(result, temp);
+            if (hashECCTs[j] != null) {
+                temp = hashECCTs[j];
+                result = mergeSimilarTree(result, temp);
+            }
         }
         finalResult = result;
 
