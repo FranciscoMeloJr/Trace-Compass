@@ -12,16 +12,20 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.RGBA;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.CCTAnalysisModule;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfileData;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfileVisitor;
@@ -31,6 +35,7 @@ import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileT
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.ITmfImageConstants;
 import org.eclipse.tracecompass.internal.tmf.ui.Messages;
+import org.eclipse.tracecompass.internal.tmf.ui.dialogs.AddBookmarkDialog;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.signal.TmfWindowRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
@@ -45,12 +50,15 @@ import org.eclipse.tracecompass.tmf.ui.views.timegraph.AbstractTimeGraphView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.ITimeGraphTimeListener;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphContentProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphTimeEvent;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.IMarkerEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
+import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.MarkerEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphControl;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphSelection;
+import org.eclipse.ui.PlatformUI;
 
 /*
  * TimeGraphEntry can have children: then they appear as child in the tree
@@ -315,9 +323,12 @@ public class SampleView extends AbstractTimeGraphView {
         MenuManager itemDel = new MenuManager("Select delimiters");
 
         // Test just to put information on the
-        for (int i = 0; i <= 3; i++) {
-            itemDel.add(getDelimiters());
-        }
+        String initialLabelEntry = new String("lttng_ust_cyg_profile:func_entry");
+        String initialLabelExit = new String("lttng_ust_cyg_profile:func_exit");
+
+        itemDel.add(getDelimitationActionDialog("Change entry",initialLabelEntry));//itemDel.add(getDelimiters());
+        itemDel.add(getDelimitationActionDialog("Change exit",initialLabelExit));//itemDel.add(getDelimiters());
+
         manager.add(itemDel);
     }
 
@@ -354,7 +365,34 @@ public class SampleView extends AbstractTimeGraphView {
 
         return delimiterButton;
     }
+    //test with bookmark:
+    public Action getDelimitationActionDialog(String labelText, String initialLabel) {
+        Action fToggleBookmarkAction = null;
+            fToggleBookmarkAction = new Action() {
+                private IMarkerEvent fBookmarks;
 
+                @Override
+                public void runWithEvent(Event event) {
+                    IMarkerEvent selectedBookmark = null;
+                    if (selectedBookmark == null) {
+                        final long time = 0;
+                        final long duration = 1000;
+                        final AddBookmarkDialog dialog = new AddBookmarkDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), initialLabel );
+                        if (dialog.open() == Window.OK) {
+                            final String label = dialog.getValue();
+                            System.out.println(label);
+                            final RGBA rgba = dialog.getColorValue();
+                            IMarkerEvent bookmark = new MarkerEvent(null, time, duration, IMarkerEvent.BOOKMARKS, rgba, label, true);
+                        }
+                    }
+                }
+            };
+            fToggleBookmarkAction.setText(labelText);
+            fToggleBookmarkAction.setToolTipText(Messages.TmfTimeGraphViewer_DelimitationText);
+            //fToggleBookmarkAction.setImageDescriptor(ADD_BOOKMARK);
+
+        return fToggleBookmarkAction;
+    }
     /**
      * Get the Merge Action
      *

@@ -20,9 +20,13 @@ public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.eclipse.tracecompass.internal.tmf.ui.messages"; //$NON-NLS-1$
 
 
+
+
+
     //New Actions bottom:
     public static String TmfTimeGraphViewer_SelectActionNameText;
     public static String TmfTimeGraphViewer_SelectActionToolTipText;
+    public static String TmfTimeGraphViewer_DelimitationText;
 
     public static String AddBookmarkDialog_Alpha;
     public static String AddBookmarkDialog_Color;
