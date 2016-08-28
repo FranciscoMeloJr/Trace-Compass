@@ -82,7 +82,7 @@ public class SampleView extends AbstractTimeGraphView {
     // Related with presentation provider:
     private final Map<ITmfTrace, ISymbolProvider> fSymbolProviders;
 
-    // To show differences:
+    static // To show differences:
     boolean fDiff;
 
     // true for flamegraph
@@ -284,7 +284,6 @@ public class SampleView extends AbstractTimeGraphView {
         }
         manager.add(new Separator());
         manager.add(itemA);
-
         // ItemB
         MenuManager itemB = new MenuManager("Select Execution B: ");
 
@@ -296,6 +295,7 @@ public class SampleView extends AbstractTimeGraphView {
         manager.add(new Separator());
         manager.add(itemB);
 
+        //Threshold:
         MenuManager itemTh = new MenuManager("Select threshold:");
 
         // Test just to put information on the
@@ -306,9 +306,19 @@ public class SampleView extends AbstractTimeGraphView {
 
         manager.add(new Separator());
         manager.add(itemTh);
+        //Merger:
         manager.add(new Separator());
         manager.add(getMergeAction());
 
+        //Delimiters
+        manager.add(new Separator());
+        MenuManager itemDel = new MenuManager("Select delimiters");
+
+        // Test just to put information on the
+        for (int i = 0; i <= 3; i++) {
+            itemDel.add(getDelimiters());
+        }
+        manager.add(itemDel);
     }
 
     @Override
@@ -321,6 +331,32 @@ public class SampleView extends AbstractTimeGraphView {
 
     /**
      * Get the reset scale action.
+     *
+     * @return The Action object
+     */
+    public Action getDelimiters() {
+        Action delimiterButton = null;
+        delimiterButton = new Action("xis", IAction.AS_DROP_DOWN_MENU) {
+            @Override
+            public void run() {
+                System.out.println("Automatic merge");
+                CCTAnalysisModule.mergeTrees();
+                //default:
+                rebuild();
+                refresh();
+                redraw();
+            }
+        };
+
+        delimiterButton.setText("Delimiters selection");
+        delimiterButton.setToolTipText("Select the delimiters");
+        delimiterButton.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_CONFLICT));
+
+        return delimiterButton;
+    }
+
+    /**
+     * Get the Merge Action
      *
      * @return The Action object
      */
@@ -350,7 +386,7 @@ public class SampleView extends AbstractTimeGraphView {
      * @return The Action object
      */
     private IAction createTreeSelection(String name, int i) {
-        IAction action = new Action(name, IAction.AS_CHECK_BOX) {
+        IAction action = new Action(name, IAction.AS_CHECK_BOX) { //AS_DROP_DOWN_MENU
             @Override
             public void run() {
                 if (i == 1) {
@@ -389,6 +425,9 @@ public class SampleView extends AbstractTimeGraphView {
 
         };
         action.setToolTipText("Select the threshold for comparison");
+        if((!fDiff) && (i == 0)) {
+            action.setChecked(true);
+        }
         return action;
 
     }
