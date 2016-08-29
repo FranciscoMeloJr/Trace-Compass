@@ -103,6 +103,9 @@ public class SampleView extends AbstractTimeGraphView {
     // true for flamegraph
     static boolean inv;
 
+    // Module:
+    CCTAnalysisModule module = null;
+
     // Messages:
     private static final String[] COLUMN_NAMES1 = new String[] {
             Messages.SampleView_FunctionColumn,
@@ -156,7 +159,7 @@ public class SampleView extends AbstractTimeGraphView {
 
         try {
             Iterable<CCTAnalysisModule> iter = TmfTraceUtils.getAnalysisModulesOfClass(trace, CCTAnalysisModule.class);
-            CCTAnalysisModule module = null;
+            module = null;
 
             // Selects only the CCTAnalysis module
             for (IAnalysisModule mod : iter) {
@@ -282,7 +285,7 @@ public class SampleView extends AbstractTimeGraphView {
     // This function is for a small selection menu - size is hard coded:
     @Override
     protected void fillLocalMenu(IMenuManager manager) {
-        //super.fillLocalMenu(manager);
+        // super.fillLocalMenu(manager);
 
         MenuManager itemA = new MenuManager("Select Execution A: ");
         // fFlatAction = createFlatAction();
@@ -310,7 +313,7 @@ public class SampleView extends AbstractTimeGraphView {
         manager.add(new Separator());
         manager.add(itemB);
 
-        //Threshold:
+        // Threshold:
         MenuManager itemTh = new MenuManager("Select threshold:");
 
         // Test just to put information on the
@@ -321,11 +324,11 @@ public class SampleView extends AbstractTimeGraphView {
 
         manager.add(new Separator());
         manager.add(itemTh);
-        //Merger:
+        // Merger:
         manager.add(new Separator());
         manager.add(getMergeAction());
 
-        //Delimiters
+        // Delimiters
         manager.add(new Separator());
         MenuManager itemDel = new MenuManager("Select delimiters");
 
@@ -333,8 +336,8 @@ public class SampleView extends AbstractTimeGraphView {
         String initialLabelEntry = new String("lttng_ust_cyg_profile:func_entry");
         String initialLabelExit = new String("lttng_ust_cyg_profile:func_exit");
 
-        itemDel.add(getDelimitationActionDialog("Change entry",initialLabelEntry,0));//itemDel.add(getDelimiters());
-        itemDel.add(getDelimitationActionDialog("Change exit",initialLabelExit,1));//itemDel.add(getDelimiters());
+        itemDel.add(getDelimitationActionDialog("Change entry", initialLabelEntry, 0));// itemDel.add(getDelimiters());
+        itemDel.add(getDelimitationActionDialog("Change exit", initialLabelExit, 1));// itemDel.add(getDelimiters());
 
         manager.add(itemDel);
     }
@@ -359,7 +362,7 @@ public class SampleView extends AbstractTimeGraphView {
             public void run() {
                 System.out.println("Automatic merge");
                 CCTAnalysisModule.mergeTrees();
-                //default:
+                // default:
                 rebuild();
                 refresh();
                 redraw();
@@ -372,41 +375,44 @@ public class SampleView extends AbstractTimeGraphView {
 
         return delimiterButton;
     }
-    //test with bookmark:
+
+    // test with bookmark:
     public Action getDelimitationActionDialog(String labelText, String initialLabel, int kind) {
         Action fToggleBookmarkAction = null;
-            fToggleBookmarkAction = new Action() {
-                private IMarkerEvent fBookmarks;
+        fToggleBookmarkAction = new Action() {
+            private IMarkerEvent fBookmarks;
 
-                @Override
-                public void runWithEvent(Event event) {
-                    IMarkerEvent selectedBookmark = null;
-                    if (selectedBookmark == null) {
-                        final long time = 0;
-                        final long duration = 1000;
-                        final AddDelimiterDialog dialog = new AddDelimiterDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), initialLabel );
-                        if (dialog.open() == Window.OK) {
-                            final String label = dialog.getValue();
-                            System.out.println(label + dialog.fBegin);
-                            //final RGBA rgba = dialog.getColorValue();
-                            //IMarkerEvent bookmark = new MarkerEvent(null, time, duration, IMarkerEvent.BOOKMARKS, rgba, label, true);
-                            if(kind == 0) {
-                                BeginDelimiter = label;
-                            } else {
-                                EndDelimiter = label;
-                            }
-
-                            CCTAnalysisModule.redoAnalysis(BeginDelimiter,EndDelimiter);
+            @Override
+            public void runWithEvent(Event event) {
+                IMarkerEvent selectedBookmark = null;
+                if (selectedBookmark == null) {
+                    final long time = 0;
+                    final long duration = 1000;
+                    final AddDelimiterDialog dialog = new AddDelimiterDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), initialLabel);
+                    if (dialog.open() == Window.OK) {
+                        final String label = dialog.getValue();
+                        System.out.println(label + dialog.fBegin);
+                        // final RGBA rgba = dialog.getColorValue();
+                        // IMarkerEvent bookmark = new MarkerEvent(null, time,
+                        // duration, IMarkerEvent.BOOKMARKS, rgba, label, true);
+                        if (kind == 0) {
+                            BeginDelimiter = label;
+                        } else {
+                            EndDelimiter = label;
                         }
+
+                        resetAnalysis(BeginDelimiter, EndDelimiter);
                     }
                 }
-            };
-            fToggleBookmarkAction.setText(labelText);
-            fToggleBookmarkAction.setToolTipText(Messages.TmfTimeGraphViewer_DelimitationText);
-            //fToggleBookmarkAction.setImageDescriptor(ADD_BOOKMARK);
+            }
+        };
+        fToggleBookmarkAction.setText(labelText);
+        fToggleBookmarkAction.setToolTipText(Messages.TmfTimeGraphViewer_DelimitationText);
+        // fToggleBookmarkAction.setImageDescriptor(ADD_BOOKMARK);
 
         return fToggleBookmarkAction;
     }
+
     /**
      * Get the Merge Action
      *
@@ -419,7 +425,7 @@ public class SampleView extends AbstractTimeGraphView {
             public void run() {
                 System.out.println("Automatic merge");
                 CCTAnalysisModule.mergeTrees();
-                //default:
+                // default:
                 rebuild();
                 refresh();
                 redraw();
@@ -432,13 +438,27 @@ public class SampleView extends AbstractTimeGraphView {
         return mergeButton;
     }
 
+    @SuppressWarnings("restriction")
+    private void resetAnalysis(String entry, String exit) {
+
+        if (entry != null && exit != null) {
+            module.setParameters(entry, exit);
+            module.schedule();
+            module.waitForCompletion();
+
+            rebuild();
+            refresh();
+            redraw();
+        }
+    }
+
     /**
      * Get the differential selection
      *
      * @return The Action object
      */
     private IAction createTreeSelection(String name, int i) {
-        IAction action = new Action(name, IAction.AS_CHECK_BOX) { //AS_DROP_DOWN_MENU
+        IAction action = new Action(name, IAction.AS_CHECK_BOX) { // AS_DROP_DOWN_MENU
             @Override
             public void run() {
                 if (i == 1) {
@@ -477,7 +497,7 @@ public class SampleView extends AbstractTimeGraphView {
 
         };
         action.setToolTipText("Select the threshold for comparison");
-        if((!fDiff) && (i == 0)) {
+        if ((!fDiff) && (i == 0)) {
             action.setChecked(true);
         }
         return action;
@@ -1013,6 +1033,7 @@ public class SampleView extends AbstractTimeGraphView {
             return new ITimeGraphEntry[0];
         }
     }
+
     public class AddDelimiterDialog extends MultiLineInputDialog {
 
         private Label thresholdLabel;
@@ -1025,7 +1046,8 @@ public class SampleView extends AbstractTimeGraphView {
          * @param parentShell
          *            the parent shell
          * @param initialValue
-         *            the initial input value, or <code>null</code> if none (equivalent to the empty string)
+         *            the initial input value, or <code>null</code> if none
+         *            (equivalent to the empty string)
          */
         public AddDelimiterDialog(Shell parentShell, String initialValue) {
             super(parentShell, "Add Delimiters", Messages.AddBookmarkDialog_Message, initialValue);

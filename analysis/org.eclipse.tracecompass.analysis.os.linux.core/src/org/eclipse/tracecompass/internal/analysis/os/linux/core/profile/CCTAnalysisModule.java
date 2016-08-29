@@ -126,7 +126,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         @Override
         public void handleData(final ITmfEvent event) {
             // Just for test, print on the console and add to the stack:
-
+            System.out.println(fEntry + " " + fExit);
             final String eventName = event.getType().getName();
             ProfileData data;
             Random rand = new Random();
@@ -830,15 +830,15 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     }
 
+    private static void setBeginAndEntry(String begin, String end) {
+        fEntry = begin;
+        fExit = end;
+    }
+
     // This function do again the analysis with different parameters
-    public static void redoAnalysis(String entry, String exit) {
+    public void setParameters(String entry, String exit) {
         if (entry != null && exit != null) {
-            System.out.println("do again" + entry + " " + exit);
-
-            fEntry = entry;
-            fExit = exit;
-
-            reset();
+            setBeginAndEntry(entry, exit);
         }
     }
 
