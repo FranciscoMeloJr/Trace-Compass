@@ -837,6 +837,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             fEntry = entry;
             fExit = exit;
+
+            reset();
         }
     }
 
