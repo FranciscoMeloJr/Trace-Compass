@@ -48,8 +48,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     ArrayList<Node<ProfileData>> fRoots = new ArrayList<>();
     Node<ProfileData> parent = fRoot;
     String Sdelimiter = new String("interval:tracepoint");
-    String fEntry = new String("lttng_ust_cyg_profile:func_entry");
-    String fExit = new String("lttng_ust_cyg_profile:func_exit");
+    static String fEntry = new String("lttng_ust_cyg_profile:func_entry");
+    static String fExit = new String("lttng_ust_cyg_profile:func_exit");
     long fGap;
     static boolean diff;
 
@@ -491,11 +491,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 Node<ProfileData> nodey = hmap2.get(key);
                 if (nodex != null && nodex.getProfileData() != null) {
                     ProfileData data = nodex.fProfileData;
-                    if(nodey.getProfileData()!=null) {
+                    if (nodey.getProfileData() != null) {
                         data.setDuration((data.getDuration() + nodey.getProfileData().getDuration()) / 2);
                     }
                     nodex.setProfileData(data);
-                    Node<ProfileData>  copy = nodex.copy();
+                    Node<ProfileData> copy = nodex.copy();
                     copy.setProfileData(data);
                     result.put(key, nodex);
                 }
@@ -829,11 +829,14 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
     }
-    //This funciton do again:
-    public static void redoAnalysis(String a, String b) {
-        if(a!=null && b!=null)
-        {
-            System.out.println("do again" + a + " "+ b);
+
+    // This function do again the analysis with different parameters
+    public static void redoAnalysis(String entry, String exit) {
+        if (entry != null && exit != null) {
+            System.out.println("do again" + entry + " " + exit);
+
+            fEntry = entry;
+            fExit = exit;
         }
     }
 
