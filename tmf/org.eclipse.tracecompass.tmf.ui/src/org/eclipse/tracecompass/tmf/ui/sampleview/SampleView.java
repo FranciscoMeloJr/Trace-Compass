@@ -159,7 +159,6 @@ public class SampleView extends AbstractTimeGraphView {
 
         try {
             Iterable<CCTAnalysisModule> iter = TmfTraceUtils.getAnalysisModulesOfClass(trace, CCTAnalysisModule.class);
-            module = null;
 
             // Selects only the CCTAnalysis module
             for (IAnalysisModule mod : iter) {
@@ -400,7 +399,6 @@ public class SampleView extends AbstractTimeGraphView {
                         } else {
                             EndDelimiter = label;
                         }
-
                         resetAnalysis(BeginDelimiter, EndDelimiter);
                     }
                 }
@@ -442,12 +440,11 @@ public class SampleView extends AbstractTimeGraphView {
     private void resetAnalysis(String entry, String exit) {
 
         if (entry != null && exit != null) {
+
             module.setParameters(entry, exit);
             module.schedule();
             module.waitForCompletion();
 
-            rebuild();
-            refresh();
             redraw();
         }
     }
