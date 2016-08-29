@@ -12,20 +12,26 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IContributionManager;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.RGBA;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Scale;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.CCTAnalysisModule;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfileData;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfileVisitor;
@@ -35,7 +41,7 @@ import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileT
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.ITmfImageConstants;
 import org.eclipse.tracecompass.internal.tmf.ui.Messages;
-import org.eclipse.tracecompass.internal.tmf.ui.dialogs.AddBookmarkDialog;
+import org.eclipse.tracecompass.internal.tmf.ui.dialogs.MultiLineInputDialog;
 import org.eclipse.tracecompass.tmf.core.analysis.IAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.signal.TmfWindowRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
@@ -53,7 +59,6 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphTimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.IMarkerEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.MarkerEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphControl;
@@ -92,6 +97,8 @@ public class SampleView extends AbstractTimeGraphView {
 
     static // To show differences:
     boolean fDiff;
+    static String BeginDelimiter = null;
+    static String EndDelimiter = null;
 
     // true for flamegraph
     static boolean inv;
@@ -326,8 +333,8 @@ public class SampleView extends AbstractTimeGraphView {
         String initialLabelEntry = new String("lttng_ust_cyg_profile:func_entry");
         String initialLabelExit = new String("lttng_ust_cyg_profile:func_exit");
 
-        itemDel.add(getDelimitationActionDialog("Change entry",initialLabelEntry));//itemDel.add(getDelimiters());
-        itemDel.add(getDelimitationActionDialog("Change exit",initialLabelExit));//itemDel.add(getDelimiters());
+        itemDel.add(getDelimitationActionDialog("Change entry",initialLabelEntry,0));//itemDel.add(getDelimiters());
+        itemDel.add(getDelimitationActionDialog("Change exit",initialLabelExit,1));//itemDel.add(getDelimiters());
 
         manager.add(itemDel);
     }
@@ -366,7 +373,7 @@ public class SampleView extends AbstractTimeGraphView {
         return delimiterButton;
     }
     //test with bookmark:
-    public Action getDelimitationActionDialog(String labelText, String initialLabel) {
+    public Action getDelimitationActionDialog(String labelText, String initialLabel, int kind) {
         Action fToggleBookmarkAction = null;
             fToggleBookmarkAction = new Action() {
                 private IMarkerEvent fBookmarks;
@@ -377,12 +384,19 @@ public class SampleView extends AbstractTimeGraphView {
                     if (selectedBookmark == null) {
                         final long time = 0;
                         final long duration = 1000;
-                        final AddBookmarkDialog dialog = new AddBookmarkDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), initialLabel );
+                        final AddDelimiterDialog dialog = new AddDelimiterDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), initialLabel );
                         if (dialog.open() == Window.OK) {
                             final String label = dialog.getValue();
-                            System.out.println(label);
-                            final RGBA rgba = dialog.getColorValue();
-                            IMarkerEvent bookmark = new MarkerEvent(null, time, duration, IMarkerEvent.BOOKMARKS, rgba, label, true);
+                            System.out.println(label + dialog.fBegin);
+                            //final RGBA rgba = dialog.getColorValue();
+                            //IMarkerEvent bookmark = new MarkerEvent(null, time, duration, IMarkerEvent.BOOKMARKS, rgba, label, true);
+                            if(kind == 0) {
+                                BeginDelimiter = label;
+                            } else {
+                                EndDelimiter = label;
+                            }
+
+                            CCTAnalysisModule.redoAnalysis(BeginDelimiter,EndDelimiter);
                         }
                     }
                 }
@@ -998,6 +1012,52 @@ public class SampleView extends AbstractTimeGraphView {
             }
             return new ITimeGraphEntry[0];
         }
+    }
+    public class AddDelimiterDialog extends MultiLineInputDialog {
+
+        private Label thresholdLabel;
+        private int fBegin = 0;
+        private Scale fthresholdScale;
+
+        /**
+         * Constructor
+         *
+         * @param parentShell
+         *            the parent shell
+         * @param initialValue
+         *            the initial input value, or <code>null</code> if none (equivalent to the empty string)
+         */
+        public AddDelimiterDialog(Shell parentShell, String initialValue) {
+            super(parentShell, "Add Delimiters", Messages.AddBookmarkDialog_Message, initialValue);
+        }
+
+        @Override
+        protected Control createDialogArea(Composite parent) {
+            Composite areaComposite = (Composite) super.createDialogArea(parent);
+            Composite colorComposite = new Composite(areaComposite, SWT.NONE);
+            RowLayout layout = new RowLayout();
+            layout.center = true;
+            colorComposite.setLayout(layout);
+            colorComposite.moveBelow(getText());
+            thresholdLabel = new Label(colorComposite, SWT.NONE);
+            thresholdLabel.setText("Threshold");
+            fthresholdScale = new Scale(colorComposite, SWT.NONE);
+            fthresholdScale.setMaximum(100);
+            fthresholdScale.setSelection(fBegin);
+            fthresholdScale.setIncrement(1);
+            fthresholdScale.setPageIncrement(16);
+            fthresholdScale.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    fBegin = fthresholdScale.getSelection();
+                    thresholdLabel.setText(Integer.toString(fBegin));
+                }
+            });
+            thresholdLabel = new Label(colorComposite, SWT.NONE);
+            thresholdLabel.setText(Integer.toString(fBegin));
+            return areaComposite;
+        }
+
     }
 
 }

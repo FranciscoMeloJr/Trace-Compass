@@ -829,5 +829,12 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
     }
+    //This funciton do again:
+    public static void redoAnalysis(String a, String b) {
+        if(a!=null && b!=null)
+        {
+            System.out.println("do again" + a + " "+ b);
+        }
+    }
 
 }
