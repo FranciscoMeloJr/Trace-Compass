@@ -440,11 +440,10 @@ public class SampleView extends AbstractTimeGraphView {
     private void resetAnalysis(String entry, String exit) {
 
         if (entry != null && exit != null) {
-
             module.setParameters(entry, exit);
-            module.schedule();
-            module.waitForCompletion();
-
+            //module.schedule();
+            //module.waitForCompletion();
+            rebuild();
             redraw();
         }
     }
