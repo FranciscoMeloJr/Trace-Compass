@@ -840,8 +840,27 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         if (entry != null && exit != null) {
             setBeginAndEntry(entry, exit);
         }
-        
+
         super.resetAnalysis();
+    }
+
+    public static void densityTest() {
+
+        int tam = 100;
+        int rn = 0;
+        int max = 100;
+        int min = 0;
+        ArrayList<Integer> array = new ArrayList<>();
+        for(int i=0;i<tam;i++){
+            Random rand = new Random();
+            rn = rand.nextInt(max - min + 1) + min;
+            array.add(rn);
+        }
+
+        int index = 0;
+        while(index < array.size()){
+            System.out.println(array.get(index));
+        }
     }
 
 }

@@ -56,7 +56,6 @@ import org.eclipse.tracecompass.tmf.ui.views.timegraph.AbstractTimeGraphView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.ITimeGraphTimeListener;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphContentProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphTimeEvent;
-import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.IMarkerEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeEvent;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.ITimeGraphEntry;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model.TimeEvent;
@@ -120,6 +119,7 @@ public class SampleView extends AbstractTimeGraphView {
 
     // Names of the functions:
     List<String> FUNCTION_NAMES = new ArrayList<>();
+    private Action fInvertionAction;
 
     /**
      * The constructor.
@@ -284,7 +284,7 @@ public class SampleView extends AbstractTimeGraphView {
     // This function is for a small selection menu - size is hard coded:
     @Override
     protected void fillLocalMenu(IMenuManager manager) {
-        // super.fillLocalMenu(manager);
+        //super.fillLocalMenu(manager);
 
         MenuManager itemA = new MenuManager("Select Execution A: ");
         // fFlatAction = createFlatAction();
@@ -339,14 +339,29 @@ public class SampleView extends AbstractTimeGraphView {
         itemDel.add(getDelimitationActionDialog("Change exit", initialLabelExit, 1));// itemDel.add(getDelimiters());
 
         manager.add(itemDel);
+
+        //invertion
+        manager.add(getInvertAction());
     }
 
-    @Override
-    protected void fillLocalToolBar(IToolBarManager manager) {
-        super.fillLocalToolBar(manager);
-
-        // New implementation
-        // manager.add(fTimeGraphWrapper.getTimeGraphViewer().getSelectAction());
+    /**
+     * Get the invert action - this is used for testing algorithm
+     *
+     * @return The Action object
+     */
+    public Action getInvertAction() {
+            // resetScale
+            fInvertionAction = new Action() {
+                @Override
+                public void run() {
+                    System.out.println("Invert");
+                    CCTAnalysisModule.densityTest();
+                }
+            };
+            fInvertionAction.setText("Invertion");
+            fInvertionAction.setToolTipText("New Tip");
+            fInvertionAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_NODE_START));
+        return fInvertionAction;
     }
 
     /**
@@ -379,28 +394,23 @@ public class SampleView extends AbstractTimeGraphView {
     public Action getDelimitationActionDialog(String labelText, String initialLabel, int kind) {
         Action fToggleBookmarkAction = null;
         fToggleBookmarkAction = new Action() {
-            private IMarkerEvent fBookmarks;
 
             @Override
             public void runWithEvent(Event event) {
-                IMarkerEvent selectedBookmark = null;
-                if (selectedBookmark == null) {
-                    final long time = 0;
-                    final long duration = 1000;
-                    final AddDelimiterDialog dialog = new AddDelimiterDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), initialLabel);
-                    if (dialog.open() == Window.OK) {
-                        final String label = dialog.getValue();
-                        System.out.println(label + dialog.fBegin);
-                        // final RGBA rgba = dialog.getColorValue();
-                        // IMarkerEvent bookmark = new MarkerEvent(null, time,
-                        // duration, IMarkerEvent.BOOKMARKS, rgba, label, true);
-                        if (kind == 0) {
-                            BeginDelimiter = label;
-                        } else {
-                            EndDelimiter = label;
-                        }
-                        resetAnalysis(BeginDelimiter, EndDelimiter);
+                final AddDelimiterDialog dialog = new AddDelimiterDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), initialLabel);
+                if (dialog.open() == Window.OK) {
+                    final String label = dialog.getValue();
+                    System.out.println(label + dialog.fBegin);
+                    // final RGBA rgba = dialog.getColorValue();
+                    // IMarkerEvent bookmark = new MarkerEvent(null, time,
+                    // duration, IMarkerEvent.BOOKMARKS, rgba, label, true);
+                    if (kind == 0) {
+                        BeginDelimiter = label;
+                    } else {
+                        EndDelimiter = label;
                     }
+                    resetAnalysis(BeginDelimiter, EndDelimiter);
+
                 }
             }
         };
@@ -441,8 +451,8 @@ public class SampleView extends AbstractTimeGraphView {
 
         if (entry != null && exit != null) {
             module.setParameters(entry, exit);
-            //module.schedule();
-            //module.waitForCompletion();
+            // module.schedule();
+            // module.waitForCompletion();
             rebuild();
             redraw();
         }
