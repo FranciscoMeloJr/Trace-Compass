@@ -840,7 +840,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         if (entry != null && exit != null) {
             setBeginAndEntry(entry, exit);
         }
-
+        
         super.resetAnalysis();
     }
 
