@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -850,16 +851,129 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         int rn = 0;
         int max = 100;
         int min = 0;
+        int sum = 0;
+        int item;
+        double mean = 0;
+        double SDAM = 0;
+
         ArrayList<Integer> array = new ArrayList<>();
-        for(int i=0;i<tam;i++){
+
+        for (int i = 0; i < tam; i++) {
             Random rand = new Random();
             rn = rand.nextInt(max - min + 1) + min;
             array.add(rn);
         }
 
         int index = 0;
-        while(index < array.size()){
-            System.out.println(array.get(index));
+        while (index < array.size()) {
+            System.out.print(array.get(index) + " ");
+            sum += array.get(index);
+            index++;
+        }
+        mean = sum / array.size();
+
+        while (index < array.size()) {
+            item = array.get(index);
+            SDAM += (item - mean) * (item - mean);
+            index++;
+        }
+
+        // JNB
+        // Do another
+        int[] x = getJenksBreaks(array, 3);
+        index = 0;
+        for (index = 0; index < array.size(); index++) {
+            item = array.get(index);
+            System.out.print(item + " ");
+            index++;
+        }
+        System.out.print("\n");
+    }
+
+    // JNB
+    /**
+     * @return int[]
+     * @param list
+     *            com.sun.java.util.collections.ArrayList
+     * @param numclass
+     *            int
+     */
+    public static int[] getJenksBreaks(ArrayList<Integer> list, int numclass) {
+
+        // int numclass;
+        int numdata = list.size();
+
+        double[][] mat1 = new double[numdata + 1][numclass + 1];
+        double[][] mat2 = new double[numdata + 1][numclass + 1];
+        double[] st = new double[numdata];
+
+        for (int i = 1; i <= numclass; i++) {
+            mat1[1][i] = 1;
+            mat2[1][i] = 0;
+            for (int j = 2; j <= numdata; j++) {
+                mat2[j][i] = Double.MAX_VALUE;
+            }
+        }
+        double v = 0;
+        for (int l = 2; l <= numdata; l++) {
+            double s1 = 0;
+            double s2 = 0;
+            double w = 0;
+            for (int m = 1; m <= l; m++) {
+                int i3 = l - m + 1;
+
+                Integer temp = list.get(i3 - 1);
+                double val = temp.doubleValue();
+
+                s2 += val * val;
+                s1 += val;
+
+                w++;
+                v = s2 - (s1 * s1) / w;
+                int i4 = i3 - 1;
+                if (i4 != 0) {
+                    for (int j = 2; j <= numclass; j++) {
+                        if (mat2[l][j] >= (v + mat2[i4][j - 1])) {
+                            mat1[l][j] = i3;
+                            mat2[l][j] = v + mat2[i4][j - 1];
+                        }
+                    }
+                }
+
+            }
+
+            mat1[l][1] = 1;
+            mat2[l][1] = v;
+        }
+
+        int k = numdata;
+
+        int[] kclass = new int[numclass];
+
+        kclass[numclass - 1] = list.size() - 1;
+
+        for (int j = numclass; j >= 2; j--) {
+            System.out.println("rank = " + mat1[k][j]);
+            int id = (int) (mat1[k][j]) - 2;
+            System.out.println("val = " + list.get(id));
+            // System.out.println(mat2[k][j]);
+
+            kclass[j - 2] = id;
+            k = (int) mat1[k][j] - 1;
+        }
+        return kclass;
+    }
+
+    class doubleComp implements Comparator {
+        @Override
+        public int compare(Object a, Object b) {
+            if (((Double) a).doubleValue() < ((Double) b).doubleValue()) {
+                return -1;
+            }
+            if (((Double) a).doubleValue() > ((Double) b).doubleValue()) {
+                return 1;
+            }
+            return 0;
         }
     }
 
