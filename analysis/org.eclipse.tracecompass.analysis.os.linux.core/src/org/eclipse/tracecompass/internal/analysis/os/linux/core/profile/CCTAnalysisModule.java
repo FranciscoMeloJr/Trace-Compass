@@ -848,7 +848,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     public static void classificationTest() {
 
-        int tam = 10;
+        int tam = 100;
         int rn = 0;
         int max = 100;
         int min = 0;
@@ -859,41 +859,116 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         ArrayList<Integer> array = new ArrayList<>();
 
-        for (int i = 0; i < tam; i++) {
-            Random rand = new Random();
-            rn = rand.nextInt(max - min + 1) + min;
-            array.add(rn);
-        }
+        array.add(2);
+        array.add(3);
+        array.add(4);
 
-        int index = 0;
-        while (index < array.size()) {
-            System.out.print(array.get(index) + " ");
-            sum += array.get(index);
-            index++;
-        }
-        mean = sum / array.size();
+        array.add(10);
+        array.add(11);
+        array.add(12);
 
+        array.add(55);
+        array.add(56);
+        array.add(57);
+
+        /*
+         * for (int i = 0; i < tam; i++) { Random rand = new Random(); rn =
+         * rand.nextInt(max - min + 1) + min; array.add(rn); }
+         */
+
+        // Collections.sort(array);
+        int index;
+        index = 0;
         while (index < array.size()) {
             item = array.get(index);
             SDAM += (item - mean) * (item - mean);
             index++;
         }
 
-        Collections.sort(array);
         // JNB
         int x[];
         // for(int j = 1; j<=10; j++){
         int j = 10;
         System.out.println("Breaks " + j);
-        x = getJenksBreaks(array, j);
-        index = 0;
-        for (index = 0; index < array.size(); index++) {
-            item = array.get(index);
-            System.out.print(item + " ");
-            index++;
-        }
+        myClassification(array);
+        // getJenksBreaks(array, j);
+
+        print(array);
+
         System.out.print("\n");
         // }
+    }
+
+    public static void myClassification(ArrayList<Integer> array) {
+
+        // calculate the mean:
+        int index = 0;
+        int sum = 0;
+        double mean;
+        double tolerance = 10;
+        ArrayList<Double> meanDistance = new ArrayList<>();
+        index = 0;
+
+        // result will be in groups:
+        ArrayList<Integer>[] groups = new ArrayList[100];
+
+        while (index < array.size()) {
+            sum += array.get(index);
+            index++;
+        }
+
+        mean = sum / array.size();
+
+        index = 0;
+        double result;
+        while (index < array.size()) {
+            result = array.get(index) - mean;
+            meanDistance.add(result);
+            index++;
+        }
+
+        index = 0;
+        int groupCounter = 0;
+        int indexGroup = 0;
+        double number;
+        int aux;
+        double x;
+        Double last = null;
+        System.out.println("X");
+        while (index < array.size()) {
+            number = meanDistance.get(index);
+            if (last != null) {
+                x = last * (1 + tolerance);
+
+                aux = array.get(index);
+                if (number < x) {
+                    indexGroup++;
+                } else {
+                    indexGroup = 0;
+
+                }
+                groups[groupCounter].add(aux);
+                last = meanDistance.get(index);
+
+            } else {
+                aux = array.get(index);
+                if(groups[groupCounter] == null) {
+                    groups[groupCounter] = new ArrayList<>();
+                }
+                groups[groupCounter].add(aux);
+            }
+            index++;
+        }
+        System.out.println("Y");
+        index = 0;
+        int tam = 9;
+        while (index < tam) {
+            for (int j = 0; j < groups[index].size(); j++) {
+                System.out.print(groups[index].get(j) + " ");
+            }
+            System.out.println(" ");
+            index++;
+        }
     }
 
     // JNB
@@ -961,7 +1036,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             System.out.println("rank = " + mat1[k][j]);
             int id = (int) (mat1[k][j]) - 2;
             System.out.println("val = " + list.get(id));
-            System.out.println(mat2[k][j]);
 
             kclass[j - 2] = id;
             k = (int) mat1[k][j] - 1;
@@ -993,4 +1067,13 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         return null;
     }
 
+    // print function:
+
+    public static void print(ArrayList<Integer> array) {
+        int index = 0;
+        while (index < array.size()) {
+            System.out.print(array.get(index) + " ");
+            index++;
+        }
+    }
 }
