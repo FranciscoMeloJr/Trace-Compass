@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -845,9 +846,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         super.resetAnalysis();
     }
 
-    public static void densityTest() {
+    public static void classificationTest() {
 
-        int tam = 100;
+        int tam = 10;
         int rn = 0;
         int max = 100;
         int min = 0;
@@ -878,8 +879,13 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             index++;
         }
 
+        Collections.sort(array);
         // JNB
-        int[] x = getJenksBreaks(array, 3);
+        int x[];
+        // for(int j = 1; j<=10; j++){
+        int j = 10;
+        System.out.println("Breaks " + j);
+        x = getJenksBreaks(array, j);
         index = 0;
         for (index = 0; index < array.size(); index++) {
             item = array.get(index);
@@ -887,6 +893,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             index++;
         }
         System.out.print("\n");
+        // }
     }
 
     // JNB
@@ -954,7 +961,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             System.out.println("rank = " + mat1[k][j]);
             int id = (int) (mat1[k][j]) - 2;
             System.out.println("val = " + list.get(id));
-            // System.out.println(mat2[k][j]);
+            System.out.println(mat2[k][j]);
 
             kclass[j - 2] = id;
             k = (int) mat1[k][j] - 1;
