@@ -879,7 +879,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
         // JNB
-        // Do another
         int[] x = getJenksBreaks(array, 3);
         index = 0;
         for (index = 0; index < array.size(); index++) {
@@ -939,7 +938,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         }
                     }
                 }
-
             }
 
             mat1[l][1] = 1;
@@ -961,6 +959,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             kclass[j - 2] = id;
             k = (int) mat1[k][j] - 1;
         }
+
         return kclass;
     }
 
@@ -975,6 +974,16 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
             return 0;
         }
+    }
+
+    // this function is the kernel density estimation
+    /**
+     * @return int[]
+     * @param list
+     */
+    public int[] KDE(ArrayList<Integer> temp) {
+        System.out.println("KDE");
+        return null;
     }
 
 }

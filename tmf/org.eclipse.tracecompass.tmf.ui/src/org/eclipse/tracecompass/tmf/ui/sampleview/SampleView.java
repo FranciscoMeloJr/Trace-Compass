@@ -354,7 +354,7 @@ public class SampleView extends AbstractTimeGraphView {
             fInvertionAction = new Action() {
                 @Override
                 public void run() {
-                    System.out.println("Invert");
+                    System.out.println("Simulation");
                     CCTAnalysisModule.densityTest();
                 }
             };
