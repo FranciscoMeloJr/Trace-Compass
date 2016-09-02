@@ -879,10 +879,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         // for(int j = 1; j<=10; j++){
         int j = 10;
         */
-        Gaussian(arrayTest1,1000,2,3);
-        Gaussian(arrayTest2,1000,8,3);
+        Gaussian(arrayTest1,1000,1,3);
+        Gaussian(arrayTest2,1000,9,3);
 
-        //myClassification(array);
+        //
         // getJenksBreaks(array, j);
 
         arrayTotal = arrayTest1;
@@ -892,6 +892,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         System.out.print("Total");
         print(arrayTotal);
 
+        variationClassification(arrayTotal);
 
         // }
     }
@@ -900,27 +901,31 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         // calculate the mean:
         int index = 0;
-        int sum = 0;
-        double mean;
+        int sumSq = 0;
+        double meanSq;
         double tolerance = 10;
         ArrayList<Double> meanDistance = new ArrayList<>();
         index = 0;
+
+        //First sort:
+        Collections.sort(array);
 
         try{
         // result will be in groups:
         ArrayList<Integer>[] groups = new ArrayList[100];
 
         while (index < array.size()) {
-            sum += array.get(index);
+            sumSq += array.get(index)*array.get(index);
             index++;
         }
 
-        mean = sum / array.size();
+        meanSq = sumSq / array.size();
 
+        //Variation (mean - sqr(value))
         index = 0;
         double result;
         while (index < array.size()) {
-            result = array.get(index) - mean;
+            result = (array.get(index)*array.get(index)) - meanSq;
             meanDistance.add(result);
             index++;
         }
@@ -935,31 +940,31 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         System.out.println("X");
         while (index < array.size()) {
             number = meanDistance.get(index);
+            aux = array.get(index);
             if (last != null) {
-                x = last * (1 + tolerance);
+                x = last * ((100 + tolerance)/100);
 
-                aux = array.get(index);
                 if (number < x) {
-                    indexGroup++;
+                    groups[groupCounter].add(aux);
                 } else {
-                    indexGroup = 0;
-
+                    groupCounter++;
+                    groups[groupCounter] = new ArrayList<>();
+                    groups[groupCounter].add(aux);
                 }
-                groups[groupCounter].add(aux);
-                last = meanDistance.get(index);
 
             } else {
-                aux = array.get(index);
                 if (groups[groupCounter] == null) {
                     groups[groupCounter] = new ArrayList<>();
                 }
                 groups[groupCounter].add(aux);
+
             }
+            last = number;
             index++;
         }
         System.out.println("Y");
         index = 0;
-        int tam = 9;
+        int tam = groupCounter;
         while (index < tam) {
             for (int j = 0; j < groups[index].size(); j++) {
                 System.out.print(groups[index].get(j) + " ");
