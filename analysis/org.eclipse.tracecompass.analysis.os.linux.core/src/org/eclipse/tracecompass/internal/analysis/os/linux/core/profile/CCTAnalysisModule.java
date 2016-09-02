@@ -872,8 +872,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
          *
          * // JNB int x[]; // for(int j = 1; j<=10; j++){ int j = 10;
          */
-        Gaussian(arrayTest1, 1000, 1, 3);
-        Gaussian(arrayTest2, 1000, 9, 3);
+        Gaussian(arrayTest1, 1000, 100, 3);
+        Gaussian(arrayTest2, 1000, 10, 3);
 
         //
         // getJenksBreaks(array, j);
@@ -898,6 +898,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         double meanSq;
         double tolerance = 10;
         ArrayList<Double> meanDistance = new ArrayList<>();
+        ArrayList<Integer> resultArray = new ArrayList<>();
         index = 0;
 
         // First sort:
@@ -924,52 +925,56 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
 
             index = 0;
-            int groupCounter = 0;
-            int number;
             double meanNumber;
             double comparative = 0;
             Double last = null;
 
             while (index < array.size()) {
-                number = array.get(index);
+
                 meanNumber = meanDistance.get(index);
                 if (last != null) {
                     comparative = last * ((100 + tolerance) / 100);
-                } else {
-                    comparative = meanNumber;
-                }
 
-                if (meanNumber <= comparative) {
-                    if (groups[groupCounter] == null) {
-                        groups[groupCounter] = new ArrayList<>();
+                    if ((meanNumber <= comparative)||(meanNumber <= last )) {
+                        resultArray.add(array.get(index));
+
+                    } else {
+                        resultArray.add(999);
+                        resultArray.add(array.get(index));
                     }
-                    groups[groupCounter].add(number);
 
-                    last = meanNumber;
                 } else {
-                    // the mean is above the tolerance:
-                    groups[groupCounter] = new ArrayList<>();
-                    groups[groupCounter].add(number);
-                    last = meanNumber;
-                    groupCounter++;
+                    resultArray.add(array.get(index));
                 }
+                last = meanNumber;
                 index++;
             }
-            System.out.println("Y");
-            index = 0;
-            int tam = groupCounter;
-            while (index < tam) {
-                for (int j = 0; j < groups[index].size(); j++) {
-                    System.out.print(groups[index].get(j) + " ");
+            System.out.println(" \n Result");
+            for (int j = 0; j < resultArray.size(); j++) {
+                if (resultArray.get(j) == 999) {
+                    System.out.println("");
+                } else {
+                    System.out.print(resultArray.get(j) + " ");
                 }
-                System.out.println(" ");
-                index++;
+
             }
+            /*
+             * while (index < tam) { for (int j = 0; j < groups[index].size();
+             * j++) { System.out.print(groups[index].get(j) + " "); }
+             * System.out.println(" "); index++; }
+             */
         } catch (Exception ex) {
             System.out.println("exception");
         }
     }
 
+    //Insertion standard deviation short
+    public static int[] standardGroupInsertion(ArrayList<Integer> list, int numclass) {
+
+        //compare the standard deviation and insert in the array.
+
+        return null;
+    }
     // JNB
     /**
      * @return int[]
@@ -1083,14 +1088,12 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         System.out.println("Gaussian");
 
         Random r = new Random();
-        double StandardDeviation = SD;
-        double Mean = mean;
 
         for (int i = 0; i < tam; i++) {
             // double mySample = r.nextGaussian();
             // array.add(mySample);
 
-            double val = r.nextGaussian() * SD + Mean;
+            double val = r.nextGaussian() * SD + mean;
             int randonNumber = (int) Math.round(val);
             array.add(randonNumber);
         }
