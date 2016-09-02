@@ -1076,4 +1076,18 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             index++;
         }
     }
+
+    //Generating a set of gaussian distritubion
+    public static void Gaussian(ArrayList<Double> array, int tam)
+    {
+
+        Random r = new Random();
+        double StandardDeviation = 2;
+        double Mean = 2;
+
+        for(int i = 0; i< tam; i++){
+            double mySample = r.nextGaussian()*StandardDeviation+Mean;
+            array.add(mySample);
+        }
+    }
 }
