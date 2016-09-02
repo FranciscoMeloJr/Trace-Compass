@@ -853,33 +853,22 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         int max = 100;
         int min = 0;
         int sum = 0;
-        int item;
+        double item;
         double mean = 0;
         double SDAM = 0;
 
-        ArrayList<Integer> array = new ArrayList<>();
-
-        array.add(2);
-        array.add(3);
-        array.add(4);
-
-        array.add(10);
-        array.add(11);
-        array.add(12);
-
-        array.add(55);
-        array.add(56);
-        array.add(57);
-
+        ArrayList<Double> arrayTest1 = new ArrayList<>();
+        ArrayList<Double> arrayTest2 = new ArrayList<>();
+        ArrayList<Double> arrayTotal = new ArrayList<>();
         /*
          * for (int i = 0; i < tam; i++) { Random rand = new Random(); rn =
          * rand.nextInt(max - min + 1) + min; array.add(rn); }
          */
 
-        // Collections.sort(array);
+        /* Collections.sort(array);
         int index;
         index = 0;
-        while (index < array.size()) {
+        while (index < arrayTest1.size()) {
             item = array.get(index);
             SDAM += (item - mean) * (item - mean);
             index++;
@@ -889,11 +878,19 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         int x[];
         // for(int j = 1; j<=10; j++){
         int j = 10;
-        System.out.println("Breaks " + j);
-        myClassification(array);
+        */
+        Gaussian(arrayTest1,100,2,3);
+        Gaussian(arrayTest2,100,8,3);
+
+        //myClassification(array);
         // getJenksBreaks(array, j);
 
-        print(array);
+        print(arrayTest1);
+        print(arrayTest2);
+
+        arrayTotal = arrayTest1;
+        arrayTotal.addAll(arrayTest2);
+        Collections.shuffle(arrayTotal);
 
         System.out.print("\n");
         // }
@@ -909,6 +906,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         ArrayList<Double> meanDistance = new ArrayList<>();
         index = 0;
 
+        try{
         // result will be in groups:
         ArrayList<Integer>[] groups = new ArrayList[100];
 
@@ -952,7 +950,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             } else {
                 aux = array.get(index);
-                if(groups[groupCounter] == null) {
+                if (groups[groupCounter] == null) {
                     groups[groupCounter] = new ArrayList<>();
                 }
                 groups[groupCounter].add(aux);
@@ -969,6 +967,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             System.out.println(" ");
             index++;
         }
+        }catch(Exception ex)
+        {
+            System.out.println("exception");
+         }
     }
 
     // JNB
@@ -1069,7 +1071,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     // print function:
 
-    public static void print(ArrayList<Integer> array) {
+    public static void print(ArrayList<Double> array) {
         int index = 0;
         while (index < array.size()) {
             System.out.print(array.get(index) + " ");
@@ -1077,17 +1079,26 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
     }
 
-    //Generating a set of gaussian distritubion
-    public static void Gaussian(ArrayList<Double> array, int tam)
-    {
+    // Generating a set of normal distritubion
+    public static void Gaussian(ArrayList<Double> array, int tam, double SD, double mean) {
+
+        System.out.println("Gaussian");
 
         Random r = new Random();
-        double StandardDeviation = 2;
-        double Mean = 2;
+        double StandardDeviation = SD;
+        double Mean = mean;
 
-        for(int i = 0; i< tam; i++){
-            double mySample = r.nextGaussian()*StandardDeviation+Mean;
+        for (int i = 0; i < tam; i++) {
+            double mySample = r.nextGaussian() * StandardDeviation + Mean;
             array.add(mySample);
         }
+
+        int index = 0;
+        while(index < array.size())
+        {
+            System.out.format("%.3f ", array.get(index));
+            index ++;
+        }
+        System.out.println(" ");
     }
 }
