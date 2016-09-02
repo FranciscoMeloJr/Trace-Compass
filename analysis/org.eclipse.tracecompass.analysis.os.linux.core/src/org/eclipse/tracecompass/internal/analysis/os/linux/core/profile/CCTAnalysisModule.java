@@ -857,9 +857,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         double mean = 0;
         double SDAM = 0;
 
-        ArrayList<Double> arrayTest1 = new ArrayList<>();
-        ArrayList<Double> arrayTest2 = new ArrayList<>();
-        ArrayList<Double> arrayTotal = new ArrayList<>();
+        ArrayList<Integer> arrayTest1 = new ArrayList<>();
+        ArrayList<Integer> arrayTest2 = new ArrayList<>();
+        ArrayList<Integer> arrayTotal = new ArrayList<>();
         /*
          * for (int i = 0; i < tam; i++) { Random rand = new Random(); rn =
          * rand.nextInt(max - min + 1) + min; array.add(rn); }
@@ -879,24 +879,24 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         // for(int j = 1; j<=10; j++){
         int j = 10;
         */
-        Gaussian(arrayTest1,100,2,3);
-        Gaussian(arrayTest2,100,8,3);
+        Gaussian(arrayTest1,1000,2,3);
+        Gaussian(arrayTest2,1000,8,3);
 
         //myClassification(array);
         // getJenksBreaks(array, j);
-
-        print(arrayTest1);
-        print(arrayTest2);
 
         arrayTotal = arrayTest1;
         arrayTotal.addAll(arrayTest2);
         Collections.shuffle(arrayTotal);
 
-        System.out.print("\n");
+        System.out.print("Total");
+        print(arrayTotal);
+
+
         // }
     }
 
-    public static void myClassification(ArrayList<Integer> array) {
+    public static void variationClassification(ArrayList<Integer> array) {
 
         // calculate the mean:
         int index = 0;
@@ -1071,7 +1071,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     // print function:
 
-    public static void print(ArrayList<Double> array) {
+    public static void print(ArrayList<Integer> array) {
+        System.out.println("\n");
         int index = 0;
         while (index < array.size()) {
             System.out.print(array.get(index) + " ");
@@ -1080,7 +1081,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     // Generating a set of normal distritubion
-    public static void Gaussian(ArrayList<Double> array, int tam, double SD, double mean) {
+    public static void Gaussian(ArrayList<Integer> array, int tam, double mean, double SD) {
 
         System.out.println("Gaussian");
 
@@ -1089,14 +1090,19 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         double Mean = mean;
 
         for (int i = 0; i < tam; i++) {
-            double mySample = r.nextGaussian() * StandardDeviation + Mean;
-            array.add(mySample);
+            //double mySample = r.nextGaussian();
+            //array.add(mySample);
+
+            double val = r.nextGaussian() * SD + Mean;
+            int randonNumber = (int) Math.round(val);
+            array.add(randonNumber);
         }
 
         int index = 0;
         while(index < array.size())
         {
-            System.out.format("%.3f ", array.get(index));
+            //System.out.format("%.3f ", array.get(index));
+            System.out.print(array.get(index) + " ");
             index ++;
         }
         System.out.println(" ");
