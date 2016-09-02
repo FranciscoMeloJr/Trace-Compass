@@ -865,22 +865,15 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
          * rand.nextInt(max - min + 1) + min; array.add(rn); }
          */
 
-        /* Collections.sort(array);
-        int index;
-        index = 0;
-        while (index < arrayTest1.size()) {
-            item = array.get(index);
-            SDAM += (item - mean) * (item - mean);
-            index++;
-        }
-
-        // JNB
-        int x[];
-        // for(int j = 1; j<=10; j++){
-        int j = 10;
-        */
-        Gaussian(arrayTest1,1000,1,3);
-        Gaussian(arrayTest2,1000,9,3);
+        /*
+         * Collections.sort(array); int index; index = 0; while (index <
+         * arrayTest1.size()) { item = array.get(index); SDAM += (item - mean) *
+         * (item - mean); index++; }
+         *
+         * // JNB int x[]; // for(int j = 1; j<=10; j++){ int j = 10;
+         */
+        Gaussian(arrayTest1, 1000, 1, 3);
+        Gaussian(arrayTest2, 1000, 9, 3);
 
         //
         // getJenksBreaks(array, j);
@@ -907,75 +900,74 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         ArrayList<Double> meanDistance = new ArrayList<>();
         index = 0;
 
-        //First sort:
+        // First sort:
         Collections.sort(array);
 
-        try{
-        // result will be in groups:
-        ArrayList<Integer>[] groups = new ArrayList[100];
+        try {
+            // result will be in groups:
+            ArrayList<Integer>[] groups = new ArrayList[100];
 
-        while (index < array.size()) {
-            sumSq += array.get(index)*array.get(index);
-            index++;
-        }
+            while (index < array.size()) {
+                sumSq += array.get(index) * array.get(index);
+                index++;
+            }
 
-        meanSq = sumSq / array.size();
+            meanSq = sumSq / array.size();
 
-        //Variation (mean - sqr(value))
-        index = 0;
-        double result;
-        while (index < array.size()) {
-            result = (array.get(index)*array.get(index)) - meanSq;
-            meanDistance.add(result);
-            index++;
-        }
+            // Variation (mean - sqr(value))
+            index = 0;
+            double result;
+            while (index < array.size()) {
+                result = (array.get(index) * array.get(index)) - meanSq;
+                meanDistance.add(result);
+                index++;
+            }
 
-        index = 0;
-        int groupCounter = 0;
-        int indexGroup = 0;
-        double number;
-        int aux;
-        double x;
-        Double last = null;
-        System.out.println("X");
-        while (index < array.size()) {
-            number = meanDistance.get(index);
-            aux = array.get(index);
-            if (last != null) {
-                x = last * ((100 + tolerance)/100);
+            index = 0;
+            int groupCounter = 0;
+            int number;
+            double meanNumber;
+            double comparative = 0;
+            Double last = null;
 
-                if (number < x) {
-                    groups[groupCounter].add(aux);
+            while (index < array.size()) {
+                number = array.get(index);
+                meanNumber = meanDistance.get(index);
+                if (last != null) {
+                    comparative = last * ((100 + tolerance) / 100);
                 } else {
+                    comparative = meanNumber;
+                }
+
+                if (meanNumber <= comparative) {
+                    if (groups[groupCounter] == null) {
+                        groups[groupCounter] = new ArrayList<>();
+                    }
+                    groups[groupCounter].add(number);
+
+                    last = meanNumber;
+                } else {
+                    // the mean is above the tolerance:
+                    groups[groupCounter] = new ArrayList<>();
+                    groups[groupCounter].add(number);
+                    last = meanNumber;
                     groupCounter++;
-                    groups[groupCounter] = new ArrayList<>();
-                    groups[groupCounter].add(aux);
                 }
-
-            } else {
-                if (groups[groupCounter] == null) {
-                    groups[groupCounter] = new ArrayList<>();
+                index++;
+            }
+            System.out.println("Y");
+            index = 0;
+            int tam = groupCounter;
+            while (index < tam) {
+                for (int j = 0; j < groups[index].size(); j++) {
+                    System.out.print(groups[index].get(j) + " ");
                 }
-                groups[groupCounter].add(aux);
-
+                System.out.println(" ");
+                index++;
             }
-            last = number;
-            index++;
-        }
-        System.out.println("Y");
-        index = 0;
-        int tam = groupCounter;
-        while (index < tam) {
-            for (int j = 0; j < groups[index].size(); j++) {
-                System.out.print(groups[index].get(j) + " ");
-            }
-            System.out.println(" ");
-            index++;
-        }
-        }catch(Exception ex)
-        {
+        } catch (Exception ex) {
             System.out.println("exception");
-         }
+        }
     }
 
     // JNB
@@ -1095,8 +1087,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         double Mean = mean;
 
         for (int i = 0; i < tam; i++) {
-            //double mySample = r.nextGaussian();
-            //array.add(mySample);
+            // double mySample = r.nextGaussian();
+            // array.add(mySample);
 
             double val = r.nextGaussian() * SD + Mean;
             int randonNumber = (int) Math.round(val);
@@ -1104,11 +1096,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
         int index = 0;
-        while(index < array.size())
-        {
-            //System.out.format("%.3f ", array.get(index));
+        while (index < array.size()) {
+            // System.out.format("%.3f ", array.get(index));
             System.out.print(array.get(index) + " ");
-            index ++;
+            index++;
         }
         System.out.println(" ");
     }
