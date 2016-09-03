@@ -971,28 +971,53 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
              * j++) { System.out.print(groups[index].get(j) + " "); }
              * System.out.println(" "); index++; }
              */
+            ArrayList<Integer> test = new ArrayList<>();
+            test.add(10);test.add(10);test.add(10);
+            test.add(100);test.add(100);test.add(100);
+            System.out.println(standardGroupInsertion(test));
         } catch (Exception ex) {
             System.out.println("exception");
         }
     }
 
-    // Insertion standard deviation short
-    public static int[] standardGroupInsertion(ArrayList<Integer> list) {
+    // Insertion standard deviation, this function goes through the array
+    public static int standardGroupInsertion(ArrayList<Integer> list) {
 
         // compare the standard deviation and insert in the array.
-        int number;
-        double mean;
-        double std;
+        double mean = 0;
+        double arraySTD = 0;
+        int tolerance = 10;
 
-        ArrayList<Integer> x = new ArrayList<>();
+        ArrayList<Integer> temp = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> groups = new ArrayList<>();
 
-        /*
-         * for(int i =0; i< list.size();i++){ mean = x.mean(); std = x.std();
-         * x.add(number);
-         *
-         * }
-         */
-        return null;
+        for (int i = 0; i < list.size(); i++) {
+            if ((arraySTD + mean + tolerance) < list.get(i)) {
+                groups.add(temp);
+                temp = new ArrayList<>();
+                temp.add(list.get(i));
+                mean = calculateMean(temp);
+                arraySTD = mean - list.get(i); arraySTD *=arraySTD;
+
+            } else{
+                temp.add(list.get(i));
+                mean = list.get(i);
+                arraySTD = 0;
+            }
+        }
+
+        return groups.size();
+    }
+
+    private static double calculateMean(ArrayList<Integer> temp) {
+
+        double sum = 0;
+        double mean = 0;
+        for(int i = 0; i< temp.size(); i++){
+            sum += temp.get(i);
+        }
+        mean = sum/temp.size();
+        return mean;
     }
 
     // JNB
