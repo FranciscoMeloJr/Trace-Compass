@@ -906,7 +906,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         try {
             // result will be in groups:
-            ArrayList<Integer>[] groups = new ArrayList[100];
+            ArrayList<ArrayList<Integer>> groups = new ArrayList<>();
 
             while (index < array.size()) {
                 sumSq += array.get(index) * array.get(index);
@@ -926,16 +926,18 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             index = 0;
             double meanNumber;
-            double comparative = 0;
+            Double comparative = null;
             Double last = null;
 
             while (index < array.size()) {
 
                 meanNumber = meanDistance.get(index);
+                meanNumber = Math.abs(meanNumber);
+
                 if (last != null) {
                     comparative = last * ((100 + tolerance) / 100);
-
-                    if ((meanNumber <= comparative)||(meanNumber <= last )) {
+                    comparative = Math.abs(comparative);
+                    if (meanNumber <= comparative) {
                         resultArray.add(array.get(index));
 
                     } else {
@@ -949,15 +951,21 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 last = meanNumber;
                 index++;
             }
-            System.out.println(" \n Result");
+            resultArray.add(999);
+
+            // System.out.println(" \n Result");
+            ArrayList<Integer> temp = new ArrayList<>();
             for (int j = 0; j < resultArray.size(); j++) {
                 if (resultArray.get(j) == 999) {
-                    System.out.println("");
+                    System.out.println(" xxx ");
+                    groups.add(temp);
+                    temp = new ArrayList<>();
                 } else {
-                    System.out.print(resultArray.get(j) + " ");
+                    // System.out.print(resultArray.get(j) + " ");
+                    temp.add(resultArray.get(j));
                 }
-
             }
+            System.out.println("Final Size" + groups.size());
             /*
              * while (index < tam) { for (int j = 0; j < groups[index].size();
              * j++) { System.out.print(groups[index].get(j) + " "); }
@@ -968,13 +976,25 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
     }
 
-    //Insertion standard deviation short
-    public static int[] standardGroupInsertion(ArrayList<Integer> list, int numclass) {
+    // Insertion standard deviation short
+    public static int[] standardGroupInsertion(ArrayList<Integer> list) {
 
-        //compare the standard deviation and insert in the array.
+        // compare the standard deviation and insert in the array.
+        int number;
+        double mean;
+        double std;
 
+        ArrayList<Integer> x = new ArrayList<>();
+
+        /*
+         * for(int i =0; i< list.size();i++){ mean = x.mean(); std = x.std();
+         * x.add(number);
+         *
+         * }
+         */
         return null;
     }
+
     // JNB
     /**
      * @return int[]
