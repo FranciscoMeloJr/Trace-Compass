@@ -872,8 +872,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
          *
          * // JNB int x[]; // for(int j = 1; j<=10; j++){ int j = 10;
          */
-        Gaussian(arrayTest1, 1000, 100, 3);
-        Gaussian(arrayTest2, 1000, 10, 3);
+        Gaussian(arrayTest1, 10, 100, 3);
+        Gaussian(arrayTest2, 10, 10, 3);
 
         //
         // getJenksBreaks(array, j);
@@ -887,7 +887,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         variationClassification(arrayTotal);
 
-        // }
     }
 
     public static void variationClassification(ArrayList<Integer> array) {
@@ -928,30 +927,35 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             double meanNumber;
             Double comparative = null;
             Double last = null;
-
+            System.out.println("start:");
             while (index < array.size()) {
 
-                meanNumber = meanDistance.get(index);
-                meanNumber = Math.abs(meanNumber);
+                System.out.println("value " + array.get(index) + " mean number: " + (meanSq - (array.get(index) * array.get(index))));
+                meanNumber = (meanSq - (array.get(index) * array.get(index))); // Math.abs(meanDistance.get(index));
 
-                if (last != null) {
-                    comparative = last * ((100 + tolerance) / 100);
-                    comparative = Math.abs(comparative);
-                    if (meanNumber <= comparative) {
-                        resultArray.add(array.get(index));
-
+                if (resultArray.isEmpty()) {
+                    resultArray.add(array.get(index));
+                } else {
+                    //last = resultArray.get(index - 1);
+                    last = meanDistance.get( index -1 );
+                    if (last != 9999) {
+                        double x = (last + last / 10);
+                        double y = (last - last / 10);
+                        if (x <= meanNumber && meanNumber >= y) {
+                            System.out.print("ta dentro");
+                            resultArray.add(array.get(index));
+                        } else {
+                            System.out.print("ta fora");
+                            resultArray.add(9999);
+                            resultArray.add(array.get(index));
+                        }
                     } else {
-                        resultArray.add(999);
                         resultArray.add(array.get(index));
                     }
-
-                } else {
-                    resultArray.add(array.get(index));
                 }
-                last = meanNumber;
                 index++;
             }
-            resultArray.add(999);
+            resultArray.add(9999);
 
             // System.out.println(" \n Result");
             ArrayList<Integer> temp = new ArrayList<>();
@@ -965,16 +969,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     temp.add(resultArray.get(j));
                 }
             }
-            System.out.println("Final Size" + groups.size());
-            /*
-             * while (index < tam) { for (int j = 0; j < groups[index].size();
-             * j++) { System.out.print(groups[index].get(j) + " "); }
-             * System.out.println(" "); index++; }
-             */
-            ArrayList<Integer> test = new ArrayList<>();
-            test.add(10);test.add(10);test.add(10);
-            test.add(100);test.add(100);test.add(100);
-            System.out.println(standardGroupInsertion(test));
+            if (groups.size() > 1) {
+                System.out.println("Final Size" + groups.size() + " " + groups.get(0).size() + " " + groups.get(1).size());
+            }
+
         } catch (Exception ex) {
             System.out.println("exception");
         }
@@ -997,9 +995,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 temp = new ArrayList<>();
                 temp.add(list.get(i));
                 mean = calculateMean(temp);
-                arraySTD = mean - list.get(i); arraySTD *=arraySTD;
+                arraySTD = mean - list.get(i);
+                arraySTD *= arraySTD;
 
-            } else{
+            } else {
                 temp.add(list.get(i));
                 mean = list.get(i);
                 arraySTD = 0;
@@ -1013,10 +1012,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         double sum = 0;
         double mean = 0;
-        for(int i = 0; i< temp.size(); i++){
+        for (int i = 0; i < temp.size(); i++) {
             sum += temp.get(i);
         }
-        mean = sum/temp.size();
+        mean = sum / temp.size();
         return mean;
     }
 
