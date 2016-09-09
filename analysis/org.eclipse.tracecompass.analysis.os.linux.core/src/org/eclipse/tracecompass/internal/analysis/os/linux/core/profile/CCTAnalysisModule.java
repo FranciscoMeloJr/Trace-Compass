@@ -873,7 +873,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
          * // JNB int x[]; // for(int j = 1; j<=10; j++){ int j = 10;
          */
         Gaussian(arrayTest1, 10, 100, 3);
-        Gaussian(arrayTest2, 10, 10, 3);
+        Gaussian(arrayTest2, 10, 1000, 3);
 
         //
         // getJenksBreaks(array, j);
@@ -924,50 +924,98 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
 
             index = 0;
-            double meanNumber;
-            Double comparative = null;
-            Double last = null;
-            System.out.println("start:");
+
+            int limit = 100;
+            System.out.println("Simulation:");
             index = 1;
-            while (index < meanDistance.size()) {
-                Double number1 = meanDistance.get(index - 1);
-                Double number2 = meanDistance.get(index);
-                Double total = (number1 - number2);
-                System.out.println(number1 + " " + number2 + " " + total);
+            int size = 100;
+            while (2 < size) {
+                resultArray = new ArrayList<>();
+                groups = new ArrayList<>();
+                index = 1;
+                while (index < meanDistance.size()) {
+                    Double number1 = meanDistance.get(index - 1);
+                    Double number2 = meanDistance.get(index);
+                    if (number1 != 9999) {
+                        Double total = (number1 - number2);
+                        // System.out.println(number1 + " " + number2 + " " +
+                        // total);
 
-                if (Math.abs(total) < 600) {
-                    System.out.println("in");
-                    resultArray.add(array.get(index));
-                } else {
-                    System.out.println("out");
-                    resultArray.add(9999);
-                    resultArray.add(array.get(index));
+                        if (Math.abs(total) < limit) {
+                            // System.out.println("in");
+                            resultArray.add(array.get(index));
+                        } else {
+                            // System.out.println("out");
+                            resultArray.add(9999);
+                            resultArray.add(array.get(index));
+                        }
+                    } else {
+                        resultArray.add(array.get(index));
+                    }
+                    index++;
                 }
-                index ++;
-            }
-            resultArray.add(9999);
+                resultArray.add(9999);
 
-            // System.out.println(" \n Result");
-            ArrayList<Integer> temp = new ArrayList<>();
-            for (int j = 0; j < resultArray.size(); j++) {
-                if (resultArray.get(j) == 9999) {
-                    System.out.println(" xxx ");
-                    groups.add(temp);
-                    temp = new ArrayList<>();
-                } else {
-                    // System.out.print(resultArray.get(j) + " ");
-                    temp.add(resultArray.get(j));
+                // System.out.println(" \n Result");
+                ArrayList<Integer> temp = new ArrayList<>();
+                for (int j = 0; j < resultArray.size(); j++) {
+                    if (resultArray.get(j) == 9999) {
+                        groups.add(temp);
+                        temp = new ArrayList<>();
+                    } else {
+                        // System.out.print(resultArray.get(j) + " ");
+                        temp.add(resultArray.get(j));
+                    }
                 }
-            }
-            if (groups.size() > 1) {
-                System.out.println("Final Size" + groups.size() + " " + groups.get(0).size() + " " + groups.get(1).size());
-            }
 
-        } catch (Exception ex) {
+                // Ckmeans implementation:
+
+                if (groups.size() > 1) {
+                    System.out.print("Final Size " + groups.size());
+                    size = groups.size();
+                    for(int j = 0; j< groups.size(); j++) {
+                        System.out.print(" " + j +" " + variation(groups.get(j)));
+                    }
+
+                }
+                limit += 100;
+                System.out.println(" ");
+            }
+        } catch (
+
+
+        Exception ex) {
             System.out.println("exception");
         }
     }
 
+    // Insertion standard deviation, this function goes through the array
+    public static int mean(ArrayList<Integer> list) {
+        int sum = 0;
+        for(int i=0;i<list.size();i++) {
+            sum+=list.get(i);
+        }
+
+        return sum/list.size();
+    }
+    // Insertion standard deviation, this function goes through the array
+    public static int variation(ArrayList<Integer> list) {
+        int max = list.get(0);
+        int min = list.get(0);
+        int number;
+
+        for(int index = 0; index < list.size(); index++ )
+        {
+            number = list.get(index);
+            if(number > max) {
+                max = list.get(index);
+            }
+            if(number < min) {
+                max = list.get(index);
+            }
+        }
+        return max - min;
+    }
     // Insertion standard deviation, this function goes through the array
     public static int standardGroupInsertion(ArrayList<Integer> list) {
 
