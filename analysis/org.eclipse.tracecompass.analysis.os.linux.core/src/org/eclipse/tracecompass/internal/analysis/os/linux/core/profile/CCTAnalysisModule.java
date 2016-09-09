@@ -928,39 +928,29 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             Double comparative = null;
             Double last = null;
             System.out.println("start:");
-            while (index < array.size()) {
+            index = 1;
+            while (index < meanDistance.size()) {
+                Double number1 = meanDistance.get(index - 1);
+                Double number2 = meanDistance.get(index);
+                Double total = (number1 - number2);
+                System.out.println(number1 + " " + number2 + " " + total);
 
-                System.out.println("value " + array.get(index) + " mean number: " + (meanSq - (array.get(index) * array.get(index))));
-                meanNumber = (meanSq - (array.get(index) * array.get(index))); // Math.abs(meanDistance.get(index));
-
-                if (resultArray.isEmpty()) {
+                if (Math.abs(total) < 600) {
+                    System.out.println("in");
                     resultArray.add(array.get(index));
                 } else {
-                    //last = resultArray.get(index - 1);
-                    last = meanDistance.get( index -1 );
-                    if (last != 9999) {
-                        double x = (last + last / 10);
-                        double y = (last - last / 10);
-                        if (x <= meanNumber && meanNumber >= y) {
-                            System.out.print("ta dentro");
-                            resultArray.add(array.get(index));
-                        } else {
-                            System.out.print("ta fora");
-                            resultArray.add(9999);
-                            resultArray.add(array.get(index));
-                        }
-                    } else {
-                        resultArray.add(array.get(index));
-                    }
+                    System.out.println("out");
+                    resultArray.add(9999);
+                    resultArray.add(array.get(index));
                 }
-                index++;
+                index ++;
             }
             resultArray.add(9999);
 
             // System.out.println(" \n Result");
             ArrayList<Integer> temp = new ArrayList<>();
             for (int j = 0; j < resultArray.size(); j++) {
-                if (resultArray.get(j) == 999) {
+                if (resultArray.get(j) == 9999) {
                     System.out.println(" xxx ");
                     groups.add(temp);
                     temp = new ArrayList<>();
