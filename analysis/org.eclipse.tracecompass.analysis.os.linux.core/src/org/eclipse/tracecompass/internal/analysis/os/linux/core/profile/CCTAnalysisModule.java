@@ -876,18 +876,33 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         Collections.shuffle(arrayTotal);
 
         System.out.print("Total");
-        //print(arrayTotal);
+        // print(arrayTotal);
 
         variationClassification(arrayTotal);
 
     }
 
-    public static void variationClassification(ArrayList<Integer> array) {
+    public static void variationClassification(Object parameter) {
 
+        boolean verificationInteger = false;
+
+        if (parameter instanceof ArrayList<?>) {
+            if (((ArrayList<?>) parameter).get(0) instanceof Integer) {
+                verificationInteger = true;
+                ArrayList<Integer> array = (ArrayList<Integer>) parameter;
+         }
+            else{
+                ArrayList<Double> array = new ArrayList<>();
+                array = (ArrayList<Double>) parameter;
+            }
+        }
         // calculate the mean:
         int index = 0;
         int sumSq = 0;
         double meanSq;
+
+        //minVal = (a < b) ? a : b;
+
         ArrayList<Double> meanDistance = new ArrayList<>();
         ArrayList<Integer> resultArray = new ArrayList<>();
         index = 0;
@@ -1195,30 +1210,21 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     public static void RunClassification() {
 
-        //Getting the data:
+        // Getting the data:
         int i = 0;
 
-        LinkedHashMap<KeyTree, Node<ProfileData>> temp;
+        Node<ProfileData> temp;
+        long duration;
         ArrayList<Double> durationList = new ArrayList<>();
 
         for (int j = 0; j < hashECCTs.length; j++) {
-            if (hashECCTs[j] != null) {
-                //take the hashECCTs:
-                temp = hashECCTs[j];
-
-                for (KeyTree key : temp.keySet()) {
-
-                    @Nullable
-                    Node<ProfileData> xis = temp.get(key);
-                    long duration = xis.getProfileData().getDuration();
-                    durationList.add(Double.valueOf(duration));
-                }
-                durationList.add((double) 9999);
-            }
+            temp = ArrayECCTs.get(j);
+            duration = temp.getProfileData().getDuration();
+            durationList.add(Double.valueOf(duration));
         }
 
-        //Run the classification method:
-        variationClassification(A);
+        // Run the classification method:
+        variationClassification(durationList);
 
     }
 }
