@@ -970,15 +970,14 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         if (groups.get(j).size() > 0) {
                             System.out.print(" " + j + " " + variation(groups.get(j)));
                         }
-                        if (groups.size() == 3) {
-                            System.out.println("Size in two groups");
-                            print(groups);
-                        }
+
                     }
                 }
                 limit += 100;
                 System.out.println(" ");
             }
+            System.out.println("Size in "+ groups.size()+" groups");
+            print(groups);
         } catch (
 
         Exception ex) {
@@ -1192,5 +1191,34 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             index++;
         }
         System.out.println(" ");
+    }
+
+    public static void RunClassification() {
+
+        //Getting the data:
+        int i = 0;
+
+        LinkedHashMap<KeyTree, Node<ProfileData>> temp;
+        ArrayList<Double> durationList = new ArrayList<>();
+
+        for (int j = 0; j < hashECCTs.length; j++) {
+            if (hashECCTs[j] != null) {
+                //take the hashECCTs:
+                temp = hashECCTs[j];
+
+                for (KeyTree key : temp.keySet()) {
+
+                    @Nullable
+                    Node<ProfileData> xis = temp.get(key);
+                    long duration = xis.getProfileData().getDuration();
+                    durationList.add(Double.valueOf(duration));
+                }
+                durationList.add((double) 9999);
+            }
+        }
+
+        //Run the classification method:
+        variationClassification(A);
+
     }
 }

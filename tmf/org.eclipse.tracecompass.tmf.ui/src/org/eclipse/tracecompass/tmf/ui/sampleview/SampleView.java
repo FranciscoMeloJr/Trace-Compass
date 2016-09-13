@@ -13,7 +13,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
@@ -284,7 +283,7 @@ public class SampleView extends AbstractTimeGraphView {
     // This function is for a small selection menu - size is hard coded:
     @Override
     protected void fillLocalMenu(IMenuManager manager) {
-        //super.fillLocalMenu(manager);
+        // super.fillLocalMenu(manager);
 
         MenuManager itemA = new MenuManager("Select Execution A: ");
         // fFlatAction = createFlatAction();
@@ -340,7 +339,7 @@ public class SampleView extends AbstractTimeGraphView {
 
         manager.add(itemDel);
 
-        //Classification
+        // Classification
         manager.add(getClassificationAction());
     }
 
@@ -350,23 +349,24 @@ public class SampleView extends AbstractTimeGraphView {
      * @return The Action object
      */
     public Action getClassificationAction() {
-            // resetScale
-            fInvertionAction = new Action() {
-                @Override
-                public void run() {
-                    System.out.println("Simulation");
-                    //CCTAnalysisModule.classificationTest();
-                    //Calling the Variation Classification
-                    System.out.println("Test");
-                    ArrayList<Integer> A = new ArrayList<>();
-                    A.add(10);A.add(11); A.add(12); A.add(13);
-                    A.add(100);A.add(101); A.add(102); A.add(103);
-                    CCTAnalysisModule.variationClassification(A);
-                }
-            };
-            fInvertionAction.setText("Classification");
-            fInvertionAction.setToolTipText("Classification using variation method");
-            fInvertionAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_NODE_START));
+        // resetScale
+        fInvertionAction = new Action() {
+            @Override
+            public void run() {
+                System.out.println("Simulation");
+                // CCTAnalysisModule.classificationTest();
+                // Calling the Variation Classification
+                System.out.println("Test");
+                ArrayList<Integer> A = new ArrayList<>();
+                A.add(10); A.add(11); A.add(12); A.add(13);
+                A.add(100); A.add(101); A.add(102); A.add(103);
+                CCTAnalysisModule.RunClassification();
+                //CCTAnalysisModule.variationClassification(A);
+            }
+        };
+        fInvertionAction.setText("Classification");
+        fInvertionAction.setToolTipText("Classification using variation method");
+        fInvertionAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_NODE_START));
         return fInvertionAction;
     }
 
