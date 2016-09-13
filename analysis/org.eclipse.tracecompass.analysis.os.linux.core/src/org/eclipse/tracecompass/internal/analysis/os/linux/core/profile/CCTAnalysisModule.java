@@ -848,17 +848,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     public static void classificationTest() {
 
-        int tam = 100;
-        int rn = 0;
-        int max = 100;
-        int min = 0;
-        int sum = 0;
-        double item;
-        double mean = 0;
-        double SDAM = 0;
-
         ArrayList<Integer> arrayTest1 = new ArrayList<>();
         ArrayList<Integer> arrayTest2 = new ArrayList<>();
+        ArrayList<Integer> arrayTest3 = new ArrayList<>();
         ArrayList<Integer> arrayTotal = new ArrayList<>();
         /*
          * for (int i = 0; i < tam; i++) { Random rand = new Random(); rn =
@@ -874,16 +866,17 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
          */
         Gaussian(arrayTest1, 10, 100, 3);
         Gaussian(arrayTest2, 10, 1000, 3);
-
+        Gaussian(arrayTest3, 10, 500, 3);
         //
         // getJenksBreaks(array, j);
 
         arrayTotal = arrayTest1;
         arrayTotal.addAll(arrayTest2);
+        arrayTotal.addAll(arrayTest3);
         Collections.shuffle(arrayTotal);
 
         System.out.print("Total");
-        print(arrayTotal);
+        //print(arrayTotal);
 
         variationClassification(arrayTotal);
 
@@ -895,7 +888,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         int index = 0;
         int sumSq = 0;
         double meanSq;
-        double tolerance = 10;
         ArrayList<Double> meanDistance = new ArrayList<>();
         ArrayList<Integer> resultArray = new ArrayList<>();
         index = 0;
@@ -929,10 +921,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             System.out.println("Simulation:");
             index = 1;
             int size = 100;
-            while (2 < size) {
+            while (3 < size) {
                 resultArray = new ArrayList<>();
                 groups = new ArrayList<>();
                 index = 1;
+                resultArray.add(array.get(index));
                 while (index < meanDistance.size()) {
                     Double number1 = meanDistance.get(index - 1);
                     Double number2 = meanDistance.get(index);
@@ -973,16 +966,20 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 if (groups.size() > 1) {
                     System.out.print("Final Size " + groups.size());
                     size = groups.size();
-                    for(int j = 0; j< groups.size(); j++) {
-                        System.out.print(" " + j +" " + variation(groups.get(j)));
+                    for (int j = 0; j < groups.size(); j++) {
+                        if (groups.get(j).size() > 0) {
+                            System.out.print(" " + j + " " + variation(groups.get(j)));
+                        }
+                        if (groups.size() == 3) {
+                            System.out.println("Size in two groups");
+                            print(groups);
+                        }
                     }
-
                 }
                 limit += 100;
                 System.out.println(" ");
             }
         } catch (
-
 
         Exception ex) {
             System.out.println("exception");
@@ -992,30 +989,31 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     // Insertion standard deviation, this function goes through the array
     public static int mean(ArrayList<Integer> list) {
         int sum = 0;
-        for(int i=0;i<list.size();i++) {
-            sum+=list.get(i);
+        for (int i = 0; i < list.size(); i++) {
+            sum += list.get(i);
         }
 
-        return sum/list.size();
+        return sum / list.size();
     }
+
     // Insertion standard deviation, this function goes through the array
     public static int variation(ArrayList<Integer> list) {
         int max = list.get(0);
         int min = list.get(0);
         int number;
 
-        for(int index = 0; index < list.size(); index++ )
-        {
+        for (int index = 0; index < list.size(); index++) {
             number = list.get(index);
-            if(number > max) {
+            if (number > max) {
                 max = list.get(index);
             }
-            if(number < min) {
+            if (number < min) {
                 max = list.get(index);
             }
         }
         return max - min;
     }
+
     // Insertion standard deviation, this function goes through the array
     public static int standardGroupInsertion(ArrayList<Integer> list) {
 
@@ -1155,12 +1153,19 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     // print function:
 
-    public static void print(ArrayList<Integer> array) {
+    public static void print(ArrayList<ArrayList<Integer>> groups) {
         System.out.println("\n");
-        int index = 0;
-        while (index < array.size()) {
-            System.out.print(array.get(index) + " ");
-            index++;
+        int index;
+        ArrayList<Integer> temp;
+
+        for (int i = 0; i < groups.size(); i++) {
+            index = 0;
+            temp = groups.get(i);
+            while (index < temp.size()) {
+                System.out.print(temp.get(index) + " ");
+                index++;
+            }
+            System.out.println("\n");
         }
     }
 
