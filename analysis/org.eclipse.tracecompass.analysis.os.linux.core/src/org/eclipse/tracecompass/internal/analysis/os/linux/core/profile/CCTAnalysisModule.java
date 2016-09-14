@@ -886,14 +886,16 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         boolean verificationInteger = false;
 
+        Kludge temp;
         if (parameter instanceof ArrayList<?>) {
             if (((ArrayList<?>) parameter).get(0) instanceof Integer) {
                 verificationInteger = true;
                 ArrayList<Integer> array = (ArrayList<Integer>) parameter;
-         }
-            else{
+                temp = new Kludge(array, null);
+            } else {
                 ArrayList<Double> array = new ArrayList<>();
                 array = (ArrayList<Double>) parameter;
+                temp = new Kludge(null, array);
             }
         }
         // calculate the mean:
@@ -901,34 +903,25 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         int sumSq = 0;
         double meanSq;
 
-        //minVal = (a < b) ? a : b;
+        // minVal = (a < b) ? a : b;
 
         ArrayList<Double> meanDistance = new ArrayList<>();
         ArrayList<Integer> resultArray = new ArrayList<>();
         index = 0;
 
         // First sort:
-        Collections.sort(array);
+        temp.sort();
 
         try {
             // result will be in groups:
             ArrayList<ArrayList<Integer>> groups = new ArrayList<>();
 
-            while (index < array.size()) {
-                sumSq += array.get(index) * array.get(index);
-                index++;
-            }
-
-            meanSq = sumSq / array.size();
+            meanSq = temp.getMeanSq();
 
             // Variation (mean - sqr(value))
             index = 0;
             double result;
-            while (index < array.size()) {
-                result = (array.get(index) * array.get(index)) - meanSq;
-                meanDistance.add(result);
-                index++;
-            }
+            temp.calculateMeanArray();
 
             index = 0;
 
@@ -936,6 +929,61 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             System.out.println("Simulation:");
             index = 1;
             int size = 100;
+
+            //Do the simulation:
+            temp.Simulation();
+            System.out.println("Size in " + groups.size() + " groups");
+            print(groups);
+        } catch (
+
+        Exception ex) {
+            System.out.println("exception");
+        }
+    }
+
+    // Insertion standard deviation, this function goes through the array
+    public static int mean(ArrayList<Integer> list) {
+        int sum = 0;
+        for (int i = 0; i < list.size(); i++) {
+            sum += list.get(i);
+        }
+
+        return sum / list.size();
+    }
+
+    // Necessary for tests and simulations at the same time:
+    class Kludge {
+        double meanSq = 0;
+        boolean isInteger = false;
+        ArrayList<Integer> arrayIntegers;
+        ArrayList<Double> arrayDouble;
+        ArrayList<Double> meanDistance = new ArrayList<>();
+
+        Kludge(ArrayList<Integer> arrayI, ArrayList<Double> arrayD) {
+            if (arrayD == null) {
+                arrayIntegers = new ArrayList<>();
+                arrayIntegers = arrayI;
+                isInteger = true;
+            } else {
+                arrayDouble = new ArrayList<>();
+                arrayDouble = arrayD;
+            }
+        }
+
+        public void Simulation() {
+            int index;
+            ArrayList<?> resultArray;
+            ArrayList<?> array;
+            if(isInteger){
+                ArrayList<Integer> array = arrayIntegers();
+                ArrayList<Integer> resultArray;
+            }
+            else
+            {
+                ArrayList<Double> array = arrayDouble();
+                ArrayList<Double> resultArray;
+            }
+
             while (3 < size) {
                 resultArray = new ArrayList<>();
                 groups = new ArrayList<>();
@@ -991,23 +1039,96 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 limit += 100;
                 System.out.println(" ");
             }
-            System.out.println("Size in "+ groups.size()+" groups");
-            print(groups);
-        } catch (
 
-        Exception ex) {
-            System.out.println("exception");
-        }
-    }
-
-    // Insertion standard deviation, this function goes through the array
-    public static int mean(ArrayList<Integer> list) {
-        int sum = 0;
-        for (int i = 0; i < list.size(); i++) {
-            sum += list.get(i);
         }
 
-        return sum / list.size();
+        public void calculateMeanArray() {
+            if (isInteger) {
+                int sumSq = 0;
+                int index = 0;
+                double result;
+                while (index < arrayIntegers.size()) {
+                    result = (arrayIntegers.get(index) * arrayIntegers.get(index)) - meanSq;
+                    meanDistance.add(result);
+                    index++;
+                }
+            }
+            else{
+                int sumSq = 0;
+                int index = 0;
+                double result;
+
+                while (index < arrayDouble.size()) {
+                    result = (arrayDouble.get(index) * arrayDouble.get(index)) - meanSq;
+                    meanDistance.add(result);
+                    index++;
+                }
+            }
+        }
+
+        public double getMeanSq() {
+            return meanSq;
+        }
+
+        public Integer get(int index, int x) {
+            if (isInteger) {
+                return arrayIntegers.get(index);
+            }
+            return x;
+
+        }
+
+        public Double get(int index) {
+            return arrayDouble.get(index);
+        }
+
+        ArrayList<?> getArrayList() {
+            if (isInteger) {
+                return arrayIntegers;
+            }
+            return arrayDouble;
+        }
+
+        // Sort:
+        void sort() {
+            if (isInteger) {
+                Collections.sort(arrayIntegers);
+            } else {
+                Collections.sort(arrayDouble);
+            }
+        }
+
+        int getSize() {
+            int size = 0;
+            if (isInteger) {
+                size = arrayIntegers.size();
+            } else {
+                size = arrayDouble.size();
+            }
+            return size;
+        }
+
+        void SumSq() {
+            int index = 0;
+
+            if (isInteger) {
+                int sumSq = 0;
+
+                while (index < arrayIntegers.size()) {
+                    sumSq = arrayIntegers.get(index) * arrayIntegers.get(index);
+                    index++;
+                }
+                meanSq = sumSq / arrayIntegers.size();
+            } else {
+                double sumSq = 0;
+                while (index < arrayDouble.size()) {
+                    sumSq = arrayDouble.get(index) * arrayDouble.get(index);
+                    index++;
+                }
+                meanSq = sumSq / arrayDouble.size();
+            }
+
+        }
     }
 
     // Insertion standard deviation, this function goes through the array
