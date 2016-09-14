@@ -982,12 +982,12 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             int index;
             int limit = 100;
             if (isInteger) {
+
                 ArrayList<Integer> array = arrayIntegers;
                 ArrayList<Integer> resultArray;
-
-                ArrayList<ArrayList<Integer>> groups = groups1;
-
-                int size = arrayIntegers.size();
+                ArrayList<ArrayList<Integer>> groups = null;
+                index = 1;
+                int size = 100;
                 while (3 < size) {
                     resultArray = new ArrayList<>();
                     groups = new ArrayList<>();
@@ -998,6 +998,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         Double number2 = meanDistance.get(index);
                         if (number1 != 9999) {
                             Double total = (number1 - number2);
+                            // System.out.println(number1 + " " + number2 + " " +
+                            // total);
 
                             if (Math.abs(total) < limit) {
                                 // System.out.println("in");
@@ -1040,14 +1042,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     }
                     limit += 100;
                     System.out.println(" ");
-                    groups1 = groups;
                 }
-            } else {
-                ArrayList<Double> array = arrayDouble;
-                ArrayList<Double> resultArray;
+                System.out.println("Size in "+ groups.size()+" groups");
+                print(groups);
+                }
             }
-
-        }
 
         public void calculateMeanArray() {
             if (isInteger) {
