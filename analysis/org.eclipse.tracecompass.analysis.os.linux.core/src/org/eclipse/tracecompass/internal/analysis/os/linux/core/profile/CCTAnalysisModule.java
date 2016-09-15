@@ -493,7 +493,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 Node<ProfileData> nodey = hmap2.get(key);
                 if (nodex != null && nodex.getProfileData() != null) {
                     ProfileData data = nodex.fProfileData;
-                    if (nodey.getProfileData() != null) {
+                    if (nodey != null && nodey.getProfileData() != null) {
                         data.setDuration((data.getDuration() + nodey.getProfileData().getDuration()) / 2);
                     }
                     nodex.setProfileData(data);
@@ -883,32 +883,30 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     public static void variationClassification(Object parameter) {
-        Kludge temp = null;
-        Kludge xis = new Kludge(parameter);
-        temp = xis;
+        // Can be Integer or Double:
+        Classification temp = new Classification(parameter);
         // calculate the mean:
         try {
             // result will be in groups:
-            if (temp != null) {
-                temp.calculateMeanArray();
 
-                // First sort:
-                temp.sort();
+            //temp.calculateMeanArray();
 
-                ArrayList<ArrayList<Integer>> groups = new ArrayList<>();
+            // First sort:
+            temp.doSimulation();
 
-                double meanSq = temp.getMeanSq();
+            //ArrayList<ArrayList<Integer>> groups = new ArrayList<>();
 
-                // Variation (mean - sqr(value))
-                temp.calculateMeanArray();
-                System.out.println("Simulation:");
+            //double meanSq = temp.getMeanSq();
 
-                // Do the simulation:
-                temp.Simulation();
-                System.out.println("Size in " + groups.size() + " groups");
-                temp.display();
+            // Variation (mean - sqr(value))
+            //temp.calculateMeanArray();
+            //System.out.println("Simulation:");
 
-            }
+            // Do the simulation:
+            //temp.Simulation();
+            //System.out.println("Size in " + groups.size() + " groups");
+            //temp.display();
+
         } catch (Exception ex) {
             System.out.println("exception");
         }
@@ -925,7 +923,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     // Necessary for tests and simulations at the same time:
-    static class Kludge {
+    static class Classification {
         double meanSq = 0;
         boolean isInteger = false;
         ArrayList<Integer> arrayIntegers;
@@ -935,8 +933,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         ArrayList<ArrayList<Integer>> groups1 = new ArrayList<>();
         ArrayList<ArrayList<Double>> groups2 = new ArrayList<>();
 
-        Kludge(Object parameter)
-        {
+        Classification(Object parameter) {
             if (parameter instanceof ArrayList<?>) {
                 if (((ArrayList<?>) parameter).get(0) instanceof Integer) {
                     ArrayList<Integer> arrayI = (ArrayList<Integer>) parameter;
@@ -944,8 +941,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     arrayIntegers = arrayI;
                     isInteger = true;
                     groups1 = new ArrayList<>();
-                }
-                else{
+                } else {
                     ArrayList<Double> arrayD = (ArrayList<Double>) parameter;
                     arrayDouble = new ArrayList<>();
                     arrayDouble = arrayD;
@@ -954,7 +950,17 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
 
         }
-        Kludge(ArrayList<Integer> arrayI, ArrayList<Double> arrayD) {
+
+        public void doSimulation() {
+            if(isInteger){
+                SimulationI();
+            }else{
+                System.out.println("Double simulation");
+                SimulationD();
+            }
+        }
+
+        Classification(ArrayList<Integer> arrayI, ArrayList<Double> arrayD) {
             if (arrayD == null) {
                 arrayIntegers = new ArrayList<>();
                 arrayIntegers = arrayI;
@@ -967,25 +973,53 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 groups2 = new ArrayList<>();
             }
         }
-
-        public void display()
-        {
-            if(isInteger){
-                doPrint(groups1);
+        //Display the result:
+        public void display() {
+            if (isInteger) {
+                printI(groups1);
+            }
+            else{
+                printD(groups2);
             }
         }
-        public void doPrint(ArrayList<ArrayList<Integer>> groups) {
-            print(groups);
-        }
 
-        public void Simulation() {
-            int index;
-            int limit = 100;
-            if (isInteger) {
+        //Integer
+        public void SimulationI() {
 
-                ArrayList<Integer> array = arrayIntegers;
-                ArrayList<Integer> resultArray;
-                ArrayList<ArrayList<Integer>> groups = null;
+            // calculate the mean:
+            int index = 0;
+            int sumSq = 0;
+            ArrayList<Integer> resultArray = new ArrayList<>();
+            ArrayList<Integer> array = arrayIntegers;
+            index = 0;
+
+            // First sort:
+            Collections.sort(array);
+
+            try {
+                // result will be in groups:
+                ArrayList<ArrayList<Integer>> groups = new ArrayList<>();
+
+                while (index < array.size()) {
+                    sumSq += array.get(index) * array.get(index);
+                    index++;
+                }
+
+                meanSq = sumSq / array.size();
+
+                // Variation (mean - sqr(value))
+                index = 0;
+                double result;
+                while (index < array.size()) {
+                    result = (array.get(index) * array.get(index)) - meanSq;
+                    meanDistance.add(result);
+                    index++;
+                }
+
+                index = 0;
+
+                int limit = 100;
+                System.out.println("Simulation:");
                 index = 1;
                 int size = 100;
                 while (3 < size) {
@@ -998,7 +1032,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         Double number2 = meanDistance.get(index);
                         if (number1 != 9999) {
                             Double total = (number1 - number2);
-                            // System.out.println(number1 + " " + number2 + " " +
+                            // System.out.println(number1 + " " + number2 + " "
+                            // +
                             // total);
 
                             if (Math.abs(total) < limit) {
@@ -1035,7 +1070,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         size = groups.size();
                         for (int j = 0; j < groups.size(); j++) {
                             if (groups.get(j).size() > 0) {
-                                System.out.print(" " + j + " " + variation(groups.get(j)));
+                                System.out.print(" " + j + " " + variationI(groups.get(j)));
                             }
 
                         }
@@ -1043,10 +1078,127 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     limit += 100;
                     System.out.println(" ");
                 }
-                System.out.println("Size in "+ groups.size()+" groups");
-                print(groups);
-                }
+                System.out.println("Size in " + groups.size() + " groups");
+                printI(groups);
+            } catch (
+
+            Exception ex) {
+                System.out.println("exception");
             }
+
+        }
+
+        //Double:
+        public void SimulationD() {
+
+            // calculate the mean:
+            int index = 0;
+            int sumSq = 0;
+            ArrayList<Double> resultArray = new ArrayList<>();
+            ArrayList<Double> array = arrayDouble;
+            index = 0;
+
+            // First sort:
+            Collections.sort(array);
+
+            try {
+                // result will be in groups:
+                ArrayList<ArrayList<Double>> groups = new ArrayList<>();
+
+                while (index < array.size()) {
+                    sumSq += array.get(index) * array.get(index);
+                    index++;
+                }
+
+                meanSq = sumSq / array.size();
+
+                // Variation (mean - sqr(value))
+                index = 0;
+                double result;
+                while (index < array.size()) {
+                    result = (array.get(index) * array.get(index)) - meanSq;
+                    meanDistance.add(result);
+                    index++;
+                }
+
+                index = 0;
+
+                int limit = 100;
+                System.out.println("Simulation:");
+                index = 1;
+                int size = 100;
+                int X = 0;
+                while (3 < size) {
+                    resultArray = new ArrayList<>();
+                    groups = new ArrayList<>();
+                    index = 1;
+                    resultArray.add(array.get(index));
+                    while (index < meanDistance.size()) {
+                        Double number1 = meanDistance.get(index - 1);
+                        Double number2 = meanDistance.get(index);
+                        if (number1 != 9999) {
+                            Double total = (number1 - number2);
+                            // System.out.println(number1 + " " + number2 + " "
+                            // +
+                            // total);
+
+                            if (Math.abs(total) < limit) {
+                                // System.out.println("in");
+                                resultArray.add(array.get(index));
+                            } else {
+                                // System.out.println("out");
+                                resultArray.add((double) 9999);
+                                resultArray.add(array.get(index));
+                            }
+                        } else {
+                            resultArray.add(array.get(index));
+                        }
+                        index++;
+                    }
+                    resultArray.add((double) 9999);
+
+                    // System.out.println(" \n Result");
+                    ArrayList<Double> temp = new ArrayList<>();
+                    for (int j = 0; j < resultArray.size(); j++) {
+                        if (resultArray.get(j) == 9999) {
+                            groups.add(temp);
+                            temp = new ArrayList<>();
+                        } else {
+                            // System.out.print(resultArray.get(j) + " ");
+                            temp.add(resultArray.get(j));
+                        }
+                    }
+
+                    // Ckmeans implementation:
+
+                    if (groups.size() > 1) {
+                        System.out.print("Final Size " + groups.size());
+                        size = groups.size();
+                        for (int j = 0; j < groups.size(); j++) {
+                            if (groups.get(j).size() > 0) {
+                                System.out.print(" " + j + " " + variationD(groups.get(j)));
+                            }
+
+                        }
+                    }
+                    limit += 100;
+                    System.out.println(" ");
+
+                    X++;
+                    if(X == 1000) {
+                        break;
+                    }
+                }
+
+                System.out.println("Size in " + groups.size() + " groups");
+                printD(groups);
+            } catch (
+
+            Exception ex) {
+                System.out.println("exception");
+            }
+
+        }
 
         public void calculateMeanArray() {
             if (isInteger) {
@@ -1111,6 +1263,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             return size;
         }
 
+        //Sum Squares:
         void SumSq() {
             int index = 0;
 
@@ -1132,25 +1285,163 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
 
         }
-    }
 
-    // Insertion standard deviation, this function goes through the array
-    public static int variation(ArrayList<Integer> list) {
-        int max = list.get(0);
-        int min = list.get(0);
-        int number;
+        // Insertion standard deviation, this function goes through the array
+        public static int variationI(ArrayList<Integer> list) {
+            int max = list.get(0);
+            int min = list.get(0);
+            int number;
 
-        for (int index = 0; index < list.size(); index++) {
-            number = list.get(index);
-            if (number > max) {
-                max = list.get(index);
+            for (int index = 0; index < list.size(); index++) {
+                number = list.get(index);
+                if (number > max) {
+                    max = list.get(index);
+                }
+                if (number < min) {
+                    max = list.get(index);
+                }
             }
-            if (number < min) {
-                max = list.get(index);
+            return max - min;
+        }
+        // Insertion standard deviation, this function goes through the array
+        public static double variationD(ArrayList<Double> list) {
+            double max = list.get(0);
+            double min = list.get(0);
+            double number;
+
+            for (int index = 0; index < list.size(); index++) {
+                number = list.get(index);
+                if (number > max) {
+                    max = list.get(index);
+                }
+                if (number < min) {
+                    max = list.get(index);
+                }
+            }
+            return max - min;
+        }
+     // print integer:
+        public static void printI(ArrayList<ArrayList<Integer>> groups) {
+            System.out.println("\n");
+            int index;
+            ArrayList<Integer> temp;
+
+            for (int i = 0; i < groups.size(); i++) {
+                index = 0;
+                temp = groups.get(i);
+                while (index < temp.size()) {
+                    System.out.print(temp.get(index) + " ");
+                    index++;
+                }
+                System.out.println("\n");
             }
         }
-        return max - min;
+
+        //print double:
+        public static void printD(ArrayList<ArrayList<Double>> groups) {
+            System.out.println("\n");
+            int index;
+            ArrayList<Double> temp;
+
+            for (int i = 0; i < groups.size(); i++) {
+                index = 0;
+                temp = groups.get(i);
+                while (index < temp.size()) {
+                    System.out.print(temp.get(index) + " ");
+                    index++;
+                }
+                System.out.println("\n");
+            }
+        }
+        // JNB
+        /**
+         * @return int[]
+         * @param list
+         *            com.sun.java.util.collections.ArrayList
+         * @param numclass
+         *            int
+         */
+        public static int[] getJenksBreaks(ArrayList<Integer> list, int numclass) {
+
+            // int numclass;
+            int numdata = list.size();
+
+            double[][] mat1 = new double[numdata + 1][numclass + 1];
+            double[][] mat2 = new double[numdata + 1][numclass + 1];
+            double[] st = new double[numdata];
+
+            for (int i = 1; i <= numclass; i++) {
+                mat1[1][i] = 1;
+                mat2[1][i] = 0;
+                for (int j = 2; j <= numdata; j++) {
+                    mat2[j][i] = Double.MAX_VALUE;
+                }
+            }
+            double v = 0;
+            for (int l = 2; l <= numdata; l++) {
+                double s1 = 0;
+                double s2 = 0;
+                double w = 0;
+                for (int m = 1; m <= l; m++) {
+                    int i3 = l - m + 1;
+
+                    Integer temp = list.get(i3 - 1);
+                    double val = temp.doubleValue();
+
+                    s2 += val * val;
+                    s1 += val;
+
+                    w++;
+                    v = s2 - (s1 * s1) / w;
+                    int i4 = i3 - 1;
+                    if (i4 != 0) {
+                        for (int j = 2; j <= numclass; j++) {
+                            if (mat2[l][j] >= (v + mat2[i4][j - 1])) {
+                                mat1[l][j] = i3;
+                                mat2[l][j] = v + mat2[i4][j - 1];
+                            }
+                        }
+                    }
+                }
+
+                mat1[l][1] = 1;
+                mat2[l][1] = v;
+            }
+
+            int k = numdata;
+
+            int[] kclass = new int[numclass];
+
+            kclass[numclass - 1] = list.size() - 1;
+
+            for (int j = numclass; j >= 2; j--) {
+                System.out.println("rank = " + mat1[k][j]);
+                int id = (int) (mat1[k][j]) - 2;
+                System.out.println("val = " + list.get(id));
+
+                kclass[j - 2] = id;
+                k = (int) mat1[k][j] - 1;
+            }
+
+            return kclass;
+        }
+
+        class doubleComp implements Comparator {
+            @Override
+            public int compare(Object a, Object b) {
+                if (((Double) a).doubleValue() < ((Double) b).doubleValue()) {
+                    return -1;
+                }
+                if (((Double) a).doubleValue() > ((Double) b).doubleValue()) {
+                    return 1;
+                }
+                return 0;
+            }
+        }
+
     }
+
+
 
     // Insertion standard deviation, this function goes through the array
     public static int standardGroupInsertion(ArrayList<Integer> list) {
@@ -1193,91 +1484,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         return mean;
     }
 
-    // JNB
-    /**
-     * @return int[]
-     * @param list
-     *            com.sun.java.util.collections.ArrayList
-     * @param numclass
-     *            int
-     */
-    public static int[] getJenksBreaks(ArrayList<Integer> list, int numclass) {
-
-        // int numclass;
-        int numdata = list.size();
-
-        double[][] mat1 = new double[numdata + 1][numclass + 1];
-        double[][] mat2 = new double[numdata + 1][numclass + 1];
-        double[] st = new double[numdata];
-
-        for (int i = 1; i <= numclass; i++) {
-            mat1[1][i] = 1;
-            mat2[1][i] = 0;
-            for (int j = 2; j <= numdata; j++) {
-                mat2[j][i] = Double.MAX_VALUE;
-            }
-        }
-        double v = 0;
-        for (int l = 2; l <= numdata; l++) {
-            double s1 = 0;
-            double s2 = 0;
-            double w = 0;
-            for (int m = 1; m <= l; m++) {
-                int i3 = l - m + 1;
-
-                Integer temp = list.get(i3 - 1);
-                double val = temp.doubleValue();
-
-                s2 += val * val;
-                s1 += val;
-
-                w++;
-                v = s2 - (s1 * s1) / w;
-                int i4 = i3 - 1;
-                if (i4 != 0) {
-                    for (int j = 2; j <= numclass; j++) {
-                        if (mat2[l][j] >= (v + mat2[i4][j - 1])) {
-                            mat1[l][j] = i3;
-                            mat2[l][j] = v + mat2[i4][j - 1];
-                        }
-                    }
-                }
-            }
-
-            mat1[l][1] = 1;
-            mat2[l][1] = v;
-        }
-
-        int k = numdata;
-
-        int[] kclass = new int[numclass];
-
-        kclass[numclass - 1] = list.size() - 1;
-
-        for (int j = numclass; j >= 2; j--) {
-            System.out.println("rank = " + mat1[k][j]);
-            int id = (int) (mat1[k][j]) - 2;
-            System.out.println("val = " + list.get(id));
-
-            kclass[j - 2] = id;
-            k = (int) mat1[k][j] - 1;
-        }
-
-        return kclass;
-    }
-
-    class doubleComp implements Comparator {
-        @Override
-        public int compare(Object a, Object b) {
-            if (((Double) a).doubleValue() < ((Double) b).doubleValue()) {
-                return -1;
-            }
-            if (((Double) a).doubleValue() > ((Double) b).doubleValue()) {
-                return 1;
-            }
-            return 0;
-        }
-    }
 
     // this function is the kernel density estimation
     /**
@@ -1289,23 +1495,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         return null;
     }
 
-    // print function:
-
-    public static void print(ArrayList<ArrayList<Integer>> groups) {
-        System.out.println("\n");
-        int index;
-        ArrayList<Integer> temp;
-
-        for (int i = 0; i < groups.size(); i++) {
-            index = 0;
-            temp = groups.get(i);
-            while (index < temp.size()) {
-                System.out.print(temp.get(index) + " ");
-                index++;
-            }
-            System.out.println("\n");
-        }
-    }
 
     // Generating a set of normal distritubion
     public static void Gaussian(ArrayList<Integer> array, int tam, double mean, double SD) {

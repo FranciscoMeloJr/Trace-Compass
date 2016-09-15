@@ -360,8 +360,8 @@ public class SampleView extends AbstractTimeGraphView {
                 ArrayList<Integer> A = new ArrayList<>();
                 A.add(10); A.add(11); A.add(12); A.add(13);
                 A.add(100); A.add(101); A.add(102); A.add(103);
-                //CCTAnalysisModule.RunClassification();
-                CCTAnalysisModule.variationClassification(A);
+                CCTAnalysisModule.RunClassification();
+                //CCTAnalysisModule.variationClassification(A);
             }
         };
         fInvertionAction.setText("Classification");
