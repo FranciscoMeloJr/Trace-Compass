@@ -1072,18 +1072,15 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
                     // System.out.println(" \n Result");
                     ArrayList<Integer> temp = new ArrayList<>();
-                    int position = 0;
 
                     for (int j = 0; j < resultArray.size(); j++) {
                         int each = resultArray.get(j);
                         if ( each == 9999) {
                             groups.add(temp);
                             temp = new ArrayList<>();
-                            position ++;
                         } else {
                             // System.out.print(resultArray.get(j) + " ");
                             temp.add(each);
-                            hashGroupNumber.put(Integer.toString(position), each);
                         }
                     }
 
@@ -1103,7 +1100,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     System.out.println(" ");
                 }
                 System.out.println("Size in " + groups.size() + " groups");
-                printI(groups);
+                printI(groups, hashGroupNumber);
                 showClassification(hashGroupNumber);
             } catch (
 
@@ -1384,8 +1381,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             return max - min;
         }
 
-        // print integer:
-        public static void printI(ArrayList<ArrayList<Integer>> groups) {
+        // print integer - change this function here:
+        public static void printI(ArrayList<ArrayList<Integer>> groups, LinkedHashMap<String, Integer> hashGroupNumber) {
             System.out.println("\n");
             int index;
             ArrayList<Integer> temp;
