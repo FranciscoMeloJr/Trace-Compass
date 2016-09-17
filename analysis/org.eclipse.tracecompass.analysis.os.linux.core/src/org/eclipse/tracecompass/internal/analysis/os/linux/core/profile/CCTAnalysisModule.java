@@ -914,7 +914,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             // temp.display();
 
         } catch (Exception ex) {
-            System.out.println("exception");
+            System.out.println("exception variation");
         }
     }
 
@@ -1140,7 +1140,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             } catch (
 
             Exception ex) {
-                System.out.println("exception");
+                System.out.println("Exception Simulation");
             }
 
         }
