@@ -1048,13 +1048,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             index = 0;
 
             // Group <-> Integer
-            LinkedHashMap<String, Integer> hashGroupNumber = new LinkedHashMap<>();
+            LinkedHashMap<String, Integer> hashGroupNumber = new LinkedHashMap<>();;
 
             // First sort:
             Collections.sort(array);
-
-            // all the array is pointing to group 1:
-            initiateI(array, hashGroupNumber);
 
             try {
                 // result will be in groups:
@@ -1081,6 +1078,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 System.out.println("Simulation:");
                 int i = 0;
                 while (limit < 1000) {
+                    hashGroupNumber = new LinkedHashMap<>();
+                    // all the array is pointing to group 1:
+                    initiateI(array, hashGroupNumber);
+
+                    hashGroupNumber = new LinkedHashMap<>();
                     int group = 0;
                     resultArray = new ArrayList<>();
                     groups = new ArrayList<>();
