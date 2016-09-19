@@ -11,6 +11,7 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.internal.analysis.timing.ui.flamegraph;
 
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -39,6 +40,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.tracecompass.internal.analysis.timing.core.callgraph.CallGraphAnalysis;
+import org.eclipse.tracecompass.internal.analysis.timing.core.callgraph.ThreadNode;
 import org.eclipse.tracecompass.internal.analysis.timing.ui.Activator;
 import org.eclipse.tracecompass.internal.analysis.timing.ui.callgraph.CallGraphAnalysisUI;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
@@ -214,9 +216,15 @@ public class FlameGraphView extends TmfView {
                 }
                 callGraphAnalysis.waitForCompletion(monitor);
                 Display.getDefault().asyncExec(() -> {
+
+                    // CallGraphAnalysis:
+
+                    // This gets the thread nodes:
                     fTimeGraphViewer.setInput(callGraphAnalysis.getThreadNodes());
+                    // reset the start and finish time:
                     fTimeGraphViewer.resetStartFinishTime();
                     fLock.release();
+                    experiences(callGraphAnalysis);
                 });
                 return Status.OK_STATUS;
             }
@@ -224,6 +232,17 @@ public class FlameGraphView extends TmfView {
         j.schedule();
     }
 
+    //Function to do experiences:
+    private static void experiences(CallGraphAnalysis callGraphAnalysis)
+    {
+        @NonNull
+        List<ThreadNode> listThreads = callGraphAnalysis.getThreadNodes();
+
+        System.out.println("Experiences");
+        for(ThreadNode each : listThreads){
+            System.out.println(each);
+        }
+    }
     /**
      * Await the next refresh
      *

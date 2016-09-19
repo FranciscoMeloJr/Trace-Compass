@@ -983,6 +983,7 @@ public class TimeGraphViewer implements ITimeDataProvider, IMarkerAxisListener, 
     @Override
     public void resetStartFinishTime() {
         setStartFinishTimeNotify(fTime0Bound, fTime1Bound);
+        System.out.println(fTime1Bound);
         fTimeRangeFixed = false;
     }
 

@@ -41,4 +41,9 @@ public class ThreadNode extends AggregatedCalledFunction {
         return fId;
     }
 
+    @Override
+    public String toString(){
+        return Long.toString(fId);
+    }
+
 }

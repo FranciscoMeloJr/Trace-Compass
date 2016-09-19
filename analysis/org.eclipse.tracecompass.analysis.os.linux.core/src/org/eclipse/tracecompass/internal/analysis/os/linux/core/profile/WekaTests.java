@@ -11,7 +11,10 @@ import weka.core.Instances;
 
 
 public class WekaTests {
-
+    public static void main(String[] args) throws Exception{
+        return;
+    }
+/*
     public static void main(String[] args) throws Exception{
 
          // Declare two numeric attributes
@@ -74,4 +77,5 @@ public class WekaTests {
              System.out.println();
          }
     }
+*/
 }
