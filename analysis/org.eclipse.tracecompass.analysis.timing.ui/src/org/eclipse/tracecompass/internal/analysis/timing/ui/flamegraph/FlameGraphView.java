@@ -11,9 +11,9 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.internal.analysis.timing.ui.flamegraph;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -31,6 +31,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuDetectEvent;
 import org.eclipse.swt.events.MenuDetectListener;
@@ -38,11 +39,13 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.tracecompass.internal.analysis.timing.core.callgraph.CallGraphAnalysis;
 import org.eclipse.tracecompass.internal.analysis.timing.core.callgraph.ThreadNode;
 import org.eclipse.tracecompass.internal.analysis.timing.ui.Activator;
 import org.eclipse.tracecompass.internal.analysis.timing.ui.callgraph.CallGraphAnalysisUI;
+import org.eclipse.tracecompass.internal.tmf.ui.ITmfImageConstants;
 import org.eclipse.tracecompass.segmentstore.core.ISegment;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSelectionRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.signal.TmfSignalHandler;
@@ -53,6 +56,7 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.editors.ITmfTraceEditor;
+import org.eclipse.tracecompass.tmf.ui.sampleview.SampleView.AddDelimiterDialog;
 import org.eclipse.tracecompass.tmf.ui.symbols.TmfSymbolProviderUpdatedSignal;
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
@@ -61,6 +65,7 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphContro
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.PlatformUI;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -68,8 +73,9 @@ import com.google.common.annotations.VisibleForTesting;
  * View to display the flame graph .This uses the flameGraphNode tree generated
  * by CallGraphAnalysisUI.
  *
- * @author Sonia Farrah
+ * @author Sonia Farrah with changes of Francisco M.
  */
+
 public class FlameGraphView extends TmfView {
 
     /**
@@ -99,6 +105,8 @@ public class FlameGraphView extends TmfView {
      * for the same resource.
      */
     private final Semaphore fLock = new Semaphore(1);
+
+    private IStructuredSelection fRoots;
 
     /**
      * Constructor
@@ -217,7 +225,7 @@ public class FlameGraphView extends TmfView {
                 callGraphAnalysis.waitForCompletion(monitor);
                 Display.getDefault().asyncExec(() -> {
 
-                    // CallGraphAnalysis:
+                    // CallGraphAnalysis tests:
 
                     // This gets the thread nodes:
                     fTimeGraphViewer.setInput(callGraphAnalysis.getThreadNodes());
@@ -232,17 +240,17 @@ public class FlameGraphView extends TmfView {
         j.schedule();
     }
 
-    //Function to do experiences:
-    private static void experiences(CallGraphAnalysis callGraphAnalysis)
-    {
+    // Function to do experiences:
+    private static void experiences(CallGraphAnalysis callGraphAnalysis) {
         @NonNull
         List<ThreadNode> listThreads = callGraphAnalysis.getThreadNodes();
 
         System.out.println("Experiences");
-        for(ThreadNode each : listThreads){
+        for (ThreadNode each : listThreads) {
             System.out.println(each);
         }
     }
+
     /**
      * Await the next refresh
      *
@@ -358,12 +366,14 @@ public class FlameGraphView extends TmfView {
     private void contributeToActionBars() {
         IActionBars bars = getViewSite().getActionBars();
         fillLocalToolBar(bars.getToolBarManager());
+        fillLocalMenu(bars.getMenuManager());
     }
 
     private void fillLocalToolBar(IToolBarManager manager) {
         manager.add(getSortByNameAction());
         manager.add(getSortByIdAction());
         manager.add(new Separator());
+
     }
 
     private Action getSortByNameAction() {
@@ -383,6 +393,72 @@ public class FlameGraphView extends TmfView {
             fSortByNameAction.setImageDescriptor(SORT_BY_NAME_ICON);
         }
         return fSortByNameAction;
+    }
+
+    // Mod:
+    // This function is for a small selection menu - size is hard coded:
+    protected void fillLocalMenu(IMenuManager manager) {
+        // super.fillLocalMenu(manager);
+
+        manager.add(getSortByUnknown());
+
+        MenuManager itemA = new MenuManager("Select Execution A: ");
+        // fFlatAction = createFlatAction();
+        // fFlatAction = createFlatAction();
+
+        // Test just to put information on the
+        // System.out.println(FUNCTION_NAMES.size());
+        int size = 10;
+        if (fRoots != null) {
+            size = fRoots.size();
+        }
+        for (int i = 0; i < size; i++) {
+            itemA.add(createTreeSelection(Integer.toString(i), 1));
+        }
+        manager.add(new Separator());
+        manager.add(itemA);
+        // ItemB
+        MenuManager itemB = new MenuManager("Select Execution B: ");
+
+        // Test just to put information on the
+        for (int i = 0; i < size; i++) {
+            itemB.add(createTreeSelection(Integer.toString(i), 2));
+        }
+
+        manager.add(new Separator());
+        manager.add(itemB);
+
+        // Threshold:
+        MenuManager itemTh = new MenuManager("Select threshold:");
+
+        // Test just to put information on the
+        int sizeT = 10;
+        for (int i = 0; i <= sizeT; i++) {
+            itemTh.add(selectThreshold(i));
+        }
+
+        manager.add(new Separator());
+        manager.add(itemTh);
+        // Merger:
+        manager.add(new Separator());
+        manager.add(getMergeAction());
+
+        // Delimiters
+        manager.add(new Separator());
+        MenuManager itemDel = new MenuManager("Select delimiters");
+
+        // Test just to put information on the
+        String initialLabelEntry = new String("lttng_ust_cyg_profile:func_entry");
+        String initialLabelExit = new String("lttng_ust_cyg_profile:func_exit");
+
+        itemDel.add(getDelimitationActionDialog("Change entry", initialLabelEntry, 0));// itemDel.add(getDelimiters());
+        itemDel.add(getDelimitationActionDialog("Change exit", initialLabelExit, 1));// itemDel.add(getDelimiters());
+
+        manager.add(itemDel);
+
+        // Classification
+        manager.add(getClassificationAction());
+
     }
 
     private Action getSortByIdAction() {
@@ -466,4 +542,144 @@ public class FlameGraphView extends TmfView {
         }
     }
 
+    /// Mods:
+    private static boolean fDiff;
+    int threshold;
+    private Action fSortByUnknown;
+
+    private Action fInvertionAction;
+
+    // this function is related with the threshold comparison:
+    private IAction selectThreshold(int i) {
+        // IAction action1 = new Action(Integer.toString(i),
+        // IAction.AS_CHECK_BOX){ };
+        // IAction.AS_RADIO_BUTTON
+        IAction action = new Action(Integer.toString(i), IAction.AS_RADIO_BUTTON) {
+            @Override
+            public void run() {
+                threshold = i;
+            }
+
+        };
+        action.setToolTipText("Select the threshold for comparison");
+        if ((!fDiff) && (i == 0)) {
+            action.setChecked(true);
+        }
+        return action;
+
+    }
+
+    private static Action getMergeAction() {
+        Action mergeButton = null;
+        mergeButton = new Action() {
+            @Override
+            public void run() {
+                System.out.println("Automatic merge");
+            }
+        };
+        mergeButton.setText("Grouping selection");
+        mergeButton.setToolTipText("This button will automatically merge similiar executions");
+        mergeButton.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_CONFLICT));
+
+        return mergeButton;
+    }
+    // ------------------------------------------------------------------------
+    // Mods:
+    // ------------------------------------------------------------------------
+
+    private Action getSortByUnknown() {
+        if (fSortByUnknown == null) {
+            fSortByUnknown = new Action("Differential", IAction.AS_CHECK_BOX) {
+                @Override
+                public void run() {
+
+                }
+            };
+            fSortByUnknown.setToolTipText("Differential");
+        }
+        return fSortByUnknown;
+    }
+
+    private static IAction createTreeSelection(String name, int i) {
+        IAction action = new Action(name, IAction.AS_CHECK_BOX) { // AS_DROP_DOWN_MENU
+            @Override
+            public void run() {
+                if (i == 1) {
+                    // System.out.println("Taking the tree A:" + name);
+                    // Call the differential function
+                    Dif[0] = Integer.parseInt(name);
+                } else {
+                    System.out.println("Taking the tree B:" + name + " " + "(" + Dif[0] + " " + Dif[1] + ") ");
+                    // Call the differential function
+                }
+            }
+
+        };
+        action.setToolTipText("Selection of execution for comparison");
+        return action;
+    }
+
+    // test with bookmark:
+    private static Action getDelimitationActionDialog(String labelText, String initialLabel, int kind) {
+        Action fToggleBookmarkAction = null;
+        fToggleBookmarkAction = new Action() {
+
+            @Override
+            public void runWithEvent(Event event) {
+                final AddDelimiterDialog dialog = new AddDelimiterDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), initialLabel);
+                if (dialog.open() == Window.OK) {
+                    final String label = dialog.getValue();
+                    System.out.println(label + dialog.fBegin);
+                    String BeginDelimiter;
+                    String EndDelimiter;
+                    // final RGBA rgba = dialog.getColorValue();
+                    // IMarkerEvent bookmark = new MarkerEvent(null, time,
+                    // duration, IMarkerEvent.BOOKMARKS, rgba, label, true);
+                    if (kind == 0) {
+                        BeginDelimiter = label;
+                    } else {
+                        EndDelimiter = label;
+                    }
+                    // resetAnalysis(BeginDelimiter, EndDelimiter);
+
+                }
+            }
+        };
+        fToggleBookmarkAction.setText(labelText);
+        fToggleBookmarkAction.setToolTipText(Messages.TmfTimeGraphViewer_DelimitationText);
+        // fToggleBookmarkAction.setImageDescriptor(ADD_BOOKMARK);
+
+        return fToggleBookmarkAction;
+    }
+
+    public Action getClassificationAction() {
+        // resetScale
+        fInvertionAction = new Action() {
+            @Override
+            public void run() {
+                System.out.println("Simulation");
+                // CCTAnalysisModule.classificationTest();
+                // Calling the Variation Classification
+                System.out.println("Test");
+                // test
+                ArrayList<Integer> A = new ArrayList<>();
+                A.add(10);
+                A.add(11);
+                A.add(12);
+                A.add(13);
+                A.add(100);
+                A.add(101);
+                A.add(102);
+                A.add(103);
+
+                // Run over the tree:
+                // CCTAnalysisModule.RunClassification();
+
+            }
+        };
+        fInvertionAction.setText("Classification");
+        fInvertionAction.setToolTipText("Classification using variation method");
+        fInvertionAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_NODE_START));
+        return fInvertionAction;
+    }
 }

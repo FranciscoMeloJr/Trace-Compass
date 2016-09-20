@@ -32,3 +32,4 @@ Export-Package: org.eclipse.tracecompass.analysis.timing.ui.views.segmentstore,
  org.eclipse.tracecompass.internal.analysis.timing.ui.views.segmentstore.scatter;x-internal:=true,
  org.eclipse.tracecompass.internal.analysis.timing.ui.views.segmentstore.statistics;x-internal:=true,
  org.eclipse.tracecompass.internal.analysis.timing.ui.views.segmentstore.table;x-internal:=true
+Import-Package: org.eclipse.tracecompass.internal.analysis.os.linux.core.profile
