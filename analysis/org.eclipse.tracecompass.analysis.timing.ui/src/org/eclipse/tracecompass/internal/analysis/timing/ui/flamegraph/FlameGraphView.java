@@ -31,7 +31,6 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MenuDetectEvent;
 import org.eclipse.swt.events.MenuDetectListener;
@@ -39,7 +38,6 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.tracecompass.internal.analysis.timing.core.callgraph.CallGraphAnalysis;
 import org.eclipse.tracecompass.internal.analysis.timing.core.callgraph.ThreadNode;
@@ -56,8 +54,11 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.editors.ITmfTraceEditor;
+<<<<<<< cbc278e58ae5152758e837207a7e282626baf4b8
 import org.eclipse.tracecompass.tmf.ui.sampleview.SampleView.AddDelimiterDialog;
 import org.eclipse.tracecompass.tmf.ui.symbols.TmfSymbolProviderUpdatedSignal;
+=======
+>>>>>>> Version 2.0 flame changes
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphViewer;
@@ -65,7 +66,6 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphContro
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.PlatformUI;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -89,6 +89,11 @@ public class FlameGraphView extends TmfView {
     private static final ImageDescriptor SORT_BY_ID_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_num.gif"); //$NON-NLS-1$
     private static final ImageDescriptor SORT_BY_ID_REV_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_num_rev.gif"); //$NON-NLS-1$
 
+<<<<<<< cbc278e58ae5152758e837207a7e282626baf4b8
+=======
+    protected static final int[] Dif = null;
+
+>>>>>>> Version 2.0 flame changes
     private TimeGraphViewer fTimeGraphViewer;
 
     private FlameGraphContentProvider fTimeGraphContentProvider;
@@ -445,16 +450,6 @@ public class FlameGraphView extends TmfView {
 
         // Delimiters
         manager.add(new Separator());
-        MenuManager itemDel = new MenuManager("Select delimiters");
-
-        // Test just to put information on the
-        String initialLabelEntry = new String("lttng_ust_cyg_profile:func_entry");
-        String initialLabelExit = new String("lttng_ust_cyg_profile:func_exit");
-
-        itemDel.add(getDelimitationActionDialog("Change entry", initialLabelEntry, 0));// itemDel.add(getDelimiters());
-        itemDel.add(getDelimitationActionDialog("Change exit", initialLabelExit, 1));// itemDel.add(getDelimiters());
-
-        manager.add(itemDel);
 
         // Classification
         manager.add(getClassificationAction());
@@ -529,6 +524,7 @@ public class FlameGraphView extends TmfView {
         setSortOption(SortOption.fromName(sortOption));
     }
 
+<<<<<<< cbc278e58ae5152758e837207a7e282626baf4b8
     /**
      * Symbol map provider updated
      *
@@ -542,6 +538,8 @@ public class FlameGraphView extends TmfView {
         }
     }
 
+=======
+>>>>>>> Version 2.0 flame changes
     /// Mods:
     private static boolean fDiff;
     int threshold;
@@ -618,6 +616,7 @@ public class FlameGraphView extends TmfView {
         action.setToolTipText("Selection of execution for comparison");
         return action;
     }
+<<<<<<< cbc278e58ae5152758e837207a7e282626baf4b8
 
     // test with bookmark:
     private static Action getDelimitationActionDialog(String labelText, String initialLabel, int kind) {
@@ -652,6 +651,9 @@ public class FlameGraphView extends TmfView {
         return fToggleBookmarkAction;
     }
 
+=======
+
+>>>>>>> Version 2.0 flame changes
     public Action getClassificationAction() {
         // resetScale
         fInvertionAction = new Action() {
