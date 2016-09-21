@@ -43,7 +43,7 @@ public class ThreadNode extends AggregatedCalledFunction {
 
     @Override
     public String toString(){
-        return Long.toString(fId);
+        return Long.toString(fId) + getSymbol();
     }
 
 }

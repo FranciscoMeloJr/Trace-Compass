@@ -11,9 +11,12 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.internal.analysis.timing.ui.flamegraph;
 
+import java.awt.Event;
+import java.awt.Window;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -54,11 +57,8 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.editors.ITmfTraceEditor;
-<<<<<<< cbc278e58ae5152758e837207a7e282626baf4b8
 import org.eclipse.tracecompass.tmf.ui.sampleview.SampleView.AddDelimiterDialog;
 import org.eclipse.tracecompass.tmf.ui.symbols.TmfSymbolProviderUpdatedSignal;
-=======
->>>>>>> Version 2.0 flame changes
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphViewer;
@@ -66,6 +66,7 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphContro
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.PlatformUI;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -87,13 +88,13 @@ public class FlameGraphView extends TmfView {
     private static final ImageDescriptor SORT_BY_NAME_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_alpha.gif"); //$NON-NLS-1$
     private static final ImageDescriptor SORT_BY_NAME_REV_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_alpha_rev.gif"); //$NON-NLS-1$
     private static final ImageDescriptor SORT_BY_ID_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_num.gif"); //$NON-NLS-1$
-    private static final ImageDescriptor SORT_BY_ID_REV_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_num_rev.gif"); //$NON-NLS-1$
+    private static final ImageDescriptor SORT_BY_ID_REV_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_num_rev.gif"); //$NON-NLS-0$
 
-<<<<<<< cbc278e58ae5152758e837207a7e282626baf4b8
-=======
+    <<<<<<<cbc278e58ae5152758e837207a7e282626baf4b8=======
     protected static final int[] Dif = null;
 
->>>>>>> Version 2.0 flame changes
+    >>>>>>>Version 2.0
+    flame changes
     private TimeGraphViewer fTimeGraphViewer;
 
     private FlameGraphContentProvider fTimeGraphContentProvider;
@@ -524,7 +525,6 @@ public class FlameGraphView extends TmfView {
         setSortOption(SortOption.fromName(sortOption));
     }
 
-<<<<<<< cbc278e58ae5152758e837207a7e282626baf4b8
     /**
      * Symbol map provider updated
      *
@@ -538,8 +538,6 @@ public class FlameGraphView extends TmfView {
         }
     }
 
-=======
->>>>>>> Version 2.0 flame changes
     /// Mods:
     private static boolean fDiff;
     int threshold;
@@ -616,7 +614,6 @@ public class FlameGraphView extends TmfView {
         action.setToolTipText("Selection of execution for comparison");
         return action;
     }
-<<<<<<< cbc278e58ae5152758e837207a7e282626baf4b8
 
     // test with bookmark:
     private static Action getDelimitationActionDialog(String labelText, String initialLabel, int kind) {
@@ -651,9 +648,6 @@ public class FlameGraphView extends TmfView {
         return fToggleBookmarkAction;
     }
 
-=======
-
->>>>>>> Version 2.0 flame changes
     public Action getClassificationAction() {
         // resetScale
         fInvertionAction = new Action() {

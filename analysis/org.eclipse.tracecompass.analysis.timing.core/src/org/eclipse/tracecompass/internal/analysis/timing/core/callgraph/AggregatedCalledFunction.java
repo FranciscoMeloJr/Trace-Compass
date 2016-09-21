@@ -264,4 +264,9 @@ public class AggregatedCalledFunction {
     public AggregatedCalledFunctionStatistics getFunctionStatistics() {
         return fStatistics;
     }
+
+    @Override
+    public String toString() {
+        return Long.toString(fDuration);
+    }
 }
