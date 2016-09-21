@@ -11,12 +11,10 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.internal.analysis.timing.ui.flamegraph;
 
-import java.awt.Event;
-import java.awt.Window;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
+import java.util.ArrayList;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -59,7 +57,6 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.editors.ITmfTraceEditor;
-import org.eclipse.tracecompass.tmf.ui.sampleview.SampleView.AddDelimiterDialog;
 import org.eclipse.tracecompass.tmf.ui.symbols.TmfSymbolProviderUpdatedSignal;
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
@@ -68,7 +65,6 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphContro
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
-import org.eclipse.ui.PlatformUI;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -110,6 +106,8 @@ public class FlameGraphView extends TmfView {
      * for the same resource.
      */
     private final Semaphore fLock = new Semaphore(1);
+    private Action fResetScaleAction;
+    private Action fInvertion;
 
     private IStructuredSelection fRoots;
 
@@ -240,6 +238,7 @@ public class FlameGraphView extends TmfView {
                     experiences(callGraphAnalysis);
 
                     Traversal(callGraphAnalysis);
+                    experiments(callGraphAnalysis);
                 });
                 return Status.OK_STATUS;
             }
@@ -256,7 +255,7 @@ public class FlameGraphView extends TmfView {
         for (ThreadNode each : listThreads) {
             System.out.println(each);
     // Function to the traversal, allowing the operations:
-    private static void Traversal(CallGraphAnalysis callGraphAn) {
+    private static void experiments(CallGraphAnalysis callGraphAn) {
         @NonNull
         List<ThreadNode> listThreads = callGraphAn.getThreadNodes();
 
@@ -294,7 +293,7 @@ public class FlameGraphView extends TmfView {
             result.add(current);
         }
 
-        System.out.println("\n");
+        System.out.println("Size result "+ result.size() + "\n");
         return result;
     }
 
@@ -593,8 +592,8 @@ public class FlameGraphView extends TmfView {
 
         manager.add(getReset());
 
+        manager.add(getInvertion());
         manager.add(new Separator());
-
         manager.add(getDifferential());
 
         MenuManager itemA = new MenuManager("Select Execution A: ");
@@ -613,7 +612,7 @@ public class FlameGraphView extends TmfView {
         for (int i = 0; i < size; i++) {
             itemA.add(createTreeSelection(Integer.toString(i), 1));
         }
-        manager.add(new Separator());
+        //manager.add(new Separator());
         manager.add(itemA);
         // ItemB
         MenuManager itemB = new MenuManager("Select Execution B: ");
@@ -623,7 +622,6 @@ public class FlameGraphView extends TmfView {
             itemB.add(createTreeSelection(Integer.toString(i), 2));
         }
 
-        manager.add(new Separator());
         manager.add(itemB);
 
         // Threshold:
@@ -635,7 +633,6 @@ public class FlameGraphView extends TmfView {
             itemTh.add(selectThreshold(i));
         }
 
-        manager.add(new Separator());
         manager.add(itemTh);
         // Merger:
         manager.add(new Separator());
@@ -690,6 +687,9 @@ public class FlameGraphView extends TmfView {
     private Action getSortByUnknown() {
         if (fSortByUnknown == null) {
             fSortByUnknown = new Action("Differential", IAction.AS_CHECK_BOX) {
+    private Action getDifferential() {
+        if (fDifferential == null) {
+            fDifferential = new Action("Execute Differential", IAction.AS_PUSH_BUTTON) {
                 @Override
                 public void run() {
 
@@ -700,6 +700,18 @@ public class FlameGraphView extends TmfView {
         return fSortByUnknown;
     }
 
+    private Action getInvertion() {
+        if (fInvertion == null) {
+            fInvertion = new Action("Invertion", IAction.AS_PUSH_BUTTON) {
+                @Override
+                public void run() {
+
+                }
+            };
+            fInvertion.setToolTipText("Invertion");
+        }
+        return fInvertion;
+    }
     private static IAction createTreeSelection(String name, int i) {
         IAction action = new Action(name, IAction.AS_CHECK_BOX) { // AS_DROP_DOWN_MENU
             @Override
@@ -790,6 +802,12 @@ public class FlameGraphView extends TmfView {
             fResetScaleAction = new Action("Reset", IAction.AS_PUSH_BUTTON) {
                 @Override
                 public void run() {
+                    reset();
+                }
+
+                //Reset mod:
+                private void reset() {
+                   //Find the longest thread and set it as time range
 
                 }
             };

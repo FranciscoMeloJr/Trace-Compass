@@ -18,6 +18,7 @@ package org.eclipse.tracecompass.internal.analysis.timing.core.callgraph;
 public class ThreadNode extends AggregatedCalledFunction {
 
     private final long fId;
+    private int fColor;
 
     /**
      * @param calledFunction
@@ -30,6 +31,7 @@ public class ThreadNode extends AggregatedCalledFunction {
     public ThreadNode(AbstractCalledFunction calledFunction, int maxDepth, long id) {
         super(calledFunction, maxDepth);
         fId = id;
+        fColor = 0;
     }
 
     /**
@@ -41,9 +43,26 @@ public class ThreadNode extends AggregatedCalledFunction {
         return fId;
     }
 
+    //Mod:
     @Override
     public String toString(){
         return Long.toString(fId) + getSymbol();
     }
 
+    //This function does the differential:
+    public void diff(ThreadNode o){
+
+        if(getDuration() <= o.getDuration()){
+            fColor = -1;
+        }
+        else{
+            fColor = 1;
+        }
+
+    }
+
+    //return the color of the comparison:
+    public long getColor() {
+        return fColor;
+    }
 }

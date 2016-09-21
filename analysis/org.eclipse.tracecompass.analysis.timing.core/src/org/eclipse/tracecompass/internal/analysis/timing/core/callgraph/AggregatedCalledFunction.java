@@ -265,6 +265,7 @@ public class AggregatedCalledFunction {
         return fStatistics;
     }
 
+    //Mod:
     @Override
     public String toString() {
         return Long.toString(fDuration) + " " + getClass().getName();
