@@ -267,6 +267,6 @@ public class AggregatedCalledFunction {
 
     @Override
     public String toString() {
-        return Long.toString(fDuration);
+        return Long.toString(fDuration) + " " + getClass().getName();
     }
 }

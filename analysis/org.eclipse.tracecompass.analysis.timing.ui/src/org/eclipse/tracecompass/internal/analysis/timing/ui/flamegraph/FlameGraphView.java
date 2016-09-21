@@ -14,6 +14,7 @@ package org.eclipse.tracecompass.internal.analysis.timing.ui.flamegraph;
 import java.awt.Event;
 import java.awt.Window;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
@@ -42,6 +43,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.tracecompass.internal.analysis.timing.core.callgraph.AggregatedCalledFunction;
 import org.eclipse.tracecompass.internal.analysis.timing.core.callgraph.CallGraphAnalysis;
 import org.eclipse.tracecompass.internal.analysis.timing.core.callgraph.ThreadNode;
 import org.eclipse.tracecompass.internal.analysis.timing.ui.Activator;
@@ -88,13 +90,10 @@ public class FlameGraphView extends TmfView {
     private static final ImageDescriptor SORT_BY_NAME_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_alpha.gif"); //$NON-NLS-1$
     private static final ImageDescriptor SORT_BY_NAME_REV_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_alpha_rev.gif"); //$NON-NLS-1$
     private static final ImageDescriptor SORT_BY_ID_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_num.gif"); //$NON-NLS-1$
-    private static final ImageDescriptor SORT_BY_ID_REV_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_num_rev.gif"); //$NON-NLS-0$
+    private static final ImageDescriptor SORT_BY_ID_REV_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_num_rev.gif"); // $NON-NLS-0$
 
-    <<<<<<<cbc278e58ae5152758e837207a7e282626baf4b8=======
     protected static final int[] Dif = null;
 
-    >>>>>>>Version 2.0
-    flame changes
     private TimeGraphViewer fTimeGraphViewer;
 
     private FlameGraphContentProvider fTimeGraphContentProvider;
@@ -239,6 +238,8 @@ public class FlameGraphView extends TmfView {
                     fTimeGraphViewer.resetStartFinishTime();
                     fLock.release();
                     experiences(callGraphAnalysis);
+
+                    Traversal(callGraphAnalysis);
                 });
                 return Status.OK_STATUS;
             }
@@ -254,7 +255,47 @@ public class FlameGraphView extends TmfView {
         System.out.println("Experiences");
         for (ThreadNode each : listThreads) {
             System.out.println(each);
+    // Function to the traversal, allowing the operations:
+    private static void Traversal(CallGraphAnalysis callGraphAn) {
+        @NonNull
+        List<ThreadNode> listThreads = callGraphAn.getThreadNodes();
+
+        System.out.println("Size listThreads " + listThreads.size());
+
+        // run over the threads
+        // each thread has a list of aggregated called functions, which have
+        // their own list <aggregated functions>
+        for (ThreadNode eachThreadNode : listThreads) {
+
+            /*
+             * @NonNull Collection<@NonNull AggregatedCalledFunction> x =
+             * eachThreadNode.getChildren();
+             * System.out.println(eachThreadNode.getSymbol() + " " + x.size());
+             */
+            levelOrderTraversal(eachThreadNode);
         }
+
+    }
+
+    // Mod Level Order traversal:
+    public static LinkedList<AggregatedCalledFunction> levelOrderTraversal(ThreadNode root) {
+        System.out.print("levelOrderTraversal ");
+        LinkedList<AggregatedCalledFunction> queue = new LinkedList<>();
+        LinkedList<AggregatedCalledFunction> result = new LinkedList<>();
+
+        queue.add(root);
+        while (!queue.isEmpty()) {
+            AggregatedCalledFunction current = queue.poll();
+            System.out.print(current.toString());
+            for (AggregatedCalledFunction child : current.getChildren()) {
+                queue.add(child);
+                System.out.println(child.getDepth());
+            }
+            result.add(current);
+        }
+
+        System.out.println("\n");
+        return result;
     }
 
     /**
@@ -545,6 +586,69 @@ public class FlameGraphView extends TmfView {
 
     private Action fInvertionAction;
 
+    // Mod:
+    // This function is for a small selection menu - size is hard coded:
+    protected void fillLocalMenu(IMenuManager manager) {
+        // super.fillLocalMenu(manager);
+
+        manager.add(getReset());
+
+        manager.add(new Separator());
+
+        manager.add(getDifferential());
+
+        MenuManager itemA = new MenuManager("Select Execution A: ");
+        // fFlatAction = createFlatAction();
+        // fFlatAction = createFlatAction();
+
+        // Test just to put information on the
+        // System.out.println(FUNCTION_NAMES.size());
+        int size = 10;
+        List<ThreadNode> listThreads = callGraphAnalysis.getThreadNodes();
+
+        if (listThreads != null) {
+            size = listThreads.size();
+        }
+
+        for (int i = 0; i < size; i++) {
+            itemA.add(createTreeSelection(Integer.toString(i), 1));
+        }
+        manager.add(new Separator());
+        manager.add(itemA);
+        // ItemB
+        MenuManager itemB = new MenuManager("Select Execution B: ");
+
+        // Test just to put information on the
+        for (int i = 0; i < size; i++) {
+            itemB.add(createTreeSelection(Integer.toString(i), 2));
+        }
+
+        manager.add(new Separator());
+        manager.add(itemB);
+
+        // Threshold:
+        MenuManager itemTh = new MenuManager("Select threshold:");
+
+        // Test just to put information on the
+        int sizeThreshold = 10;
+        for (int i = 0; i <= sizeThreshold; i++) {
+            itemTh.add(selectThreshold(i));
+        }
+
+        manager.add(new Separator());
+        manager.add(itemTh);
+        // Merger:
+        manager.add(new Separator());
+        manager.add(getMergeAction());
+
+        // Delimiters
+        manager.add(new Separator());
+
+        // Classification
+        manager.add(getClassificationAction());
+
+    }
+
     // this function is related with the threshold comparison:
     private IAction selectThreshold(int i) {
         // IAction action1 = new Action(Integer.toString(i),
@@ -678,4 +782,20 @@ public class FlameGraphView extends TmfView {
         fInvertionAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_NODE_START));
         return fInvertionAction;
     }
+
+    // Reset function:
+    public Action getReset() {
+
+        if (fResetScaleAction == null) {
+            fResetScaleAction = new Action("Reset", IAction.AS_PUSH_BUTTON) {
+                @Override
+                public void run() {
+
+                }
+            };
+            fResetScaleAction.setToolTipText("Reset");
+        }
+        return fResetScaleAction;
+    }
+
 }
