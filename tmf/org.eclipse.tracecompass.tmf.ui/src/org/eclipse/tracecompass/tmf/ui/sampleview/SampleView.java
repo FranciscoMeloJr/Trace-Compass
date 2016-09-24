@@ -71,7 +71,7 @@ import org.eclipse.ui.PlatformUI;
 
 /**
  * @author frank
- * @since 2.0
+ * @since 2.1
  *
  */
 public class SampleView extends AbstractTimeGraphView {
@@ -97,6 +97,7 @@ public class SampleView extends AbstractTimeGraphView {
     boolean fDiff;
     static String BeginDelimiter = null;
     static String EndDelimiter = null;
+    static String DelimiterString = null;
 
     // true for flamegraph
     static boolean inv;
@@ -285,6 +286,10 @@ public class SampleView extends AbstractTimeGraphView {
     protected void fillLocalMenu(IMenuManager manager) {
         // super.fillLocalMenu(manager);
 
+        MenuManager itemEx = new MenuManager("Execute");
+        itemEx.add(getExecute());
+        manager.add(itemEx);
+
         MenuManager itemA = new MenuManager("Select Execution A: ");
         // fFlatAction = createFlatAction();
         // fFlatAction = createFlatAction();
@@ -333,9 +338,11 @@ public class SampleView extends AbstractTimeGraphView {
         // Test just to put information on the
         String initialLabelEntry = new String("lttng_ust_cyg_profile:func_entry");
         String initialLabelExit = new String("lttng_ust_cyg_profile:func_exit");
+        String initialLabelDelimitation = new String("interval:tracepoint");
 
         itemDel.add(getDelimitationActionDialog("Change entry", initialLabelEntry, 0));// itemDel.add(getDelimiters());
         itemDel.add(getDelimitationActionDialog("Change exit", initialLabelExit, 1));// itemDel.add(getDelimiters());
+        itemDel.add(getDelimitationActionDialog("Change delimiter", initialLabelDelimitation, -1));
 
         manager.add(itemDel);
 
@@ -419,6 +426,9 @@ public class SampleView extends AbstractTimeGraphView {
                     } else {
                         EndDelimiter = label;
                     }
+                    if(kind == -1) {
+                        DelimiterString = label;
+                    }
                     resetAnalysis(BeginDelimiter, EndDelimiter);
 
                 }
@@ -468,6 +478,26 @@ public class SampleView extends AbstractTimeGraphView {
         }
     }
 
+    /**
+     * Get the execute button
+     *
+     * @return The Action object
+     */
+    private IAction getExecute() {
+        IAction action = new Action("Execute", IAction.AS_CHECK_BOX) { // AS_DROP_DOWN_MENU
+            @Override
+            public void run() {
+                    System.out.println("threshold" + x);
+                    CCTAnalysisModule.diffTrees(fMap[Dif[0]], fMap[Dif[1]], x);
+                    rebuild(); // update(); //rebuild();//
+                    refresh();
+                    redraw();
+
+            }
+        };
+        action.setToolTipText("Selection of execution for comparison");
+        return action;
+    }
     /**
      * Get the differential selection
      *

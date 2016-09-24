@@ -49,6 +49,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     Node<ProfileData> fRoot = Node.create(new ProfileData(0, "root"));
     ArrayList<Node<ProfileData>> fRoots = new ArrayList<>();
     Node<ProfileData> parent = fRoot;
+    // String used to split the tree:
     String Sdelimiter = new String("interval:tracepoint");
     static String fEntry = new String("lttng_ust_cyg_profile:func_entry");
     static String fExit = new String("lttng_ust_cyg_profile:func_exit");
@@ -145,6 +146,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     if (field.getValue().equals("end")) {
                         ArrayECCTs.add(fNode);
                         parent = null;
+                    }
+                    if (field.getValue().equals("context")) {
+                        System.out.println("Context" + field.getValue()); // $NON-NLS-1$
                     }
                 }
             }
@@ -318,7 +322,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     for (KeyTree key : temp.keySet()) {
 
                         Node eachNode = temp.get(key);
+
                         ProfileData data = (ProfileData) eachNode.getProfileData();
+
                         level = key.getLevel();
 
                         parent1 = eachNode.getParent();
@@ -1048,7 +1054,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             index = 0;
 
             // Group <-> Integer
-            LinkedHashMap<String, Integer> hashGroupNumber = new LinkedHashMap<>();;
+            LinkedHashMap<String, Integer> hashGroupNumber = new LinkedHashMap<>();
 
             // First sort:
             Collections.sort(array);
@@ -1093,19 +1099,19 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         Double current = meanDistance.get(i);
                         Double previous = meanDistance.get(i - 1);
                         // Double calculated = current + previous;
-                        if (current > previous  && current > previous * ((100+limit)/100) ) {
+                        if (current > previous && current > previous * ((100 + limit) / 100)) {
                             group++;
                         }
-                        if (current < previous && current < previous * ((100-limit)/100)) {
+                        if (current < previous && current < previous * ((100 - limit) / 100)) {
                             group++;
                         }
-                        //System.out.println("Group"+ group + array.get(i));
+                        // System.out.println("Group"+ group + array.get(i));
                         hashGroupNumber.put(String.valueOf(group), array.get(i));
                         i++;
                     }
 
                     limit += 10;
-                    System.out.println("groups"+ group);
+                    System.out.println("groups" + group);
                 }
                 printI(groups);
                 showClassification(hashGroupNumber);
@@ -1441,7 +1447,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             double[][] mat1 = new double[numdata + 1][numclass + 1];
             double[][] mat2 = new double[numdata + 1][numclass + 1];
-            double[] st = new double[numdata];
+            // double[] st = new double[numdata];
 
             for (int i = 1; i <= numclass; i++) {
                 mat1[1][i] = 1;
@@ -1555,15 +1561,15 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         return mean;
     }
 
-    // this function is the kernel density estimation
+    // this function is the Kernel Density Estimation
     /**
      * @return int[]
      * @param list
      */
-    public int[] KDE(ArrayList<Integer> temp) {
-        System.out.println("KDE");
-        return null;
-    }
+    /*
+     * public int[] KDE(ArrayList<Integer> temp) { System.out.println("KDE");
+     * return null; }
+     */
 
     // Generating a set of normal distritubion
     public static void Gaussian(ArrayList<Integer> array, int tam, double mean, double SD) {
