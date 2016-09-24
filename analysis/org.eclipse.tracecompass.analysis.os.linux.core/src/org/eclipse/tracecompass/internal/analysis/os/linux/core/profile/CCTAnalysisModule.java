@@ -50,7 +50,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     ArrayList<Node<ProfileData>> fRoots = new ArrayList<>();
     Node<ProfileData> parent = fRoot;
     // String used to split the tree:
-    String Sdelimiter = new String("interval:tracepoint");
+    static String Sdelimiter = new String("interval:tracepoint");
     static String fEntry = new String("lttng_ust_cyg_profile:func_entry");
     static String fExit = new String("lttng_ust_cyg_profile:func_exit");
     long fGap;
@@ -838,15 +838,22 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     }
 
-    private static void setBeginAndEntry(String begin, String end) {
+    private static void setBeginAndEntry(String begin, String end, String interval) {
         fEntry = begin;
         fExit = end;
+        if (interval != null) {
+            Sdelimiter = interval;
+        }
     }
 
     // This function do again the analysis with different parameters
-    public void setParameters(String entry, String exit) {
+    public void setParameters(String entry, String exit, String interval) {
         if (entry != null && exit != null) {
-            setBeginAndEntry(entry, exit);
+            if (interval != null) {
+                setBeginAndEntry(entry, exit, interval);
+            } else {
+                setBeginAndEntry(entry, exit, null);
+            }
         }
 
         super.resetAnalysis();

@@ -119,7 +119,8 @@ public class SampleView extends AbstractTimeGraphView {
 
     // Names of the functions:
     List<String> FUNCTION_NAMES = new ArrayList<>();
-    private Action fInvertionAction;
+    private Action fClassificationAction;
+    private Action fKDEAction;
 
     /**
      * The constructor.
@@ -286,7 +287,7 @@ public class SampleView extends AbstractTimeGraphView {
     protected void fillLocalMenu(IMenuManager manager) {
         // super.fillLocalMenu(manager);
 
-        //MenuManager itemEx = new MenuManager("Execute");
+        // MenuManager itemEx = new MenuManager("Execute");
         IAction x = getExecute();
         manager.add(x);
 
@@ -336,15 +337,14 @@ public class SampleView extends AbstractTimeGraphView {
         String initialLabelExit = new String("lttng_ust_cyg_profile:func_exit");
         String initialLabelDelimitation = new String("interval:tracepoint");
 
-        itemDel.add(getDelimitationActionDialog("Change entry", initialLabelEntry, 0));// itemDel.add(getDelimiters());
-        itemDel.add(getDelimitationActionDialog("Change exit", initialLabelExit, 1));// itemDel.add(getDelimiters());
-        itemDel.add(getDelimitationActionDialog("Change delimiter", initialLabelDelimitation, -1));
+        itemDel.add(getDelimitationActionDialog("Change entry", initialLabelEntry, 1));// itemDel.add(getDelimiters());
+        itemDel.add(getDelimitationActionDialog("Change exit", initialLabelExit, 2));// itemDel.add(getDelimiters());
+        itemDel.add(getDelimitationActionDialog("Change delimiter", initialLabelDelimitation, 0));
 
         manager.add(itemDel);
         // Merger:
         manager.add(new Separator());
         manager.add(getMergeAction());
-
 
         // Classification
         manager.add(getClassificationAction());
@@ -360,21 +360,22 @@ public class SampleView extends AbstractTimeGraphView {
      */
     public Action getKDEAction() {
         // resetScale
-        fInvertionAction = new Action() {
+        fKDEAction = new Action() {
             @Override
             public void run() {
                 System.out.println("Apply KDE");
 
-                //Run over the tree:
-                //CCTAnalysisModule.RunKDE();
+                // Run over the tree:
+                // CCTAnalysisModule.RunKDE();
 
             }
         };
-        fInvertionAction.setText("KDE");
-        fInvertionAction.setToolTipText("Use the KDE method");
-        fInvertionAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_PIN_VIEW));
-        return fInvertionAction;
+        fKDEAction.setText("KDE");
+        fKDEAction.setToolTipText("Use the KDE method");
+        fKDEAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_PIN_VIEW));
+        return fKDEAction;
     }
+
     /**
      * Get the invert action - this is used for testing algorithm
      *
@@ -382,28 +383,34 @@ public class SampleView extends AbstractTimeGraphView {
      */
     public Action getClassificationAction() {
         // resetScale
-        fInvertionAction = new Action() {
+        fClassificationAction = new Action() {
             @Override
             public void run() {
                 System.out.println("Simulation");
                 // CCTAnalysisModule.classificationTest();
                 // Calling the Variation Classification
                 System.out.println("Test");
-                //test
+                // test
                 ArrayList<Integer> A = new ArrayList<>();
-                A.add(10); A.add(11); A.add(12); A.add(13);
-                A.add(100); A.add(101); A.add(102); A.add(103);
+                A.add(10);
+                A.add(11);
+                A.add(12);
+                A.add(13);
+                A.add(100);
+                A.add(101);
+                A.add(102);
+                A.add(103);
                 CCTAnalysisModule.variationClassification(A, null);
 
-                //Run over the tree:
-                //CCTAnalysisModule.RunClassification();
+                // Run over the tree:
+                // CCTAnalysisModule.RunClassification();
 
             }
         };
-        fInvertionAction.setText("Classification");
-        fInvertionAction.setToolTipText("Classification using variation method");
-        fInvertionAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_NODE_START));
-        return fInvertionAction;
+        fClassificationAction.setText("Classification");
+        fClassificationAction.setToolTipText("Classification using variation method");
+        fClassificationAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_NODE_START));
+        return fClassificationAction;
     }
 
     /**
@@ -432,29 +439,37 @@ public class SampleView extends AbstractTimeGraphView {
         return delimiterButton;
     }
 
-    // test with bookmark:
+    /**
+     * Get the reset scale action. kind depends on each type of button
+     *
+     * @param initialLabel
+     *            label of the button
+     * @return The Action object
+     */
+
     public Action getDelimitationActionDialog(String labelText, String initialLabel, int kind) {
         Action fToggleBookmarkAction = null;
         fToggleBookmarkAction = new Action() {
 
             @Override
             public void runWithEvent(Event event) {
-                final AddDelimiterDialog dialog = new AddDelimiterDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), initialLabel);
+                final AddDelimiterDialog dialog = new AddDelimiterDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), initialLabel, kind);
+
                 if (dialog.open() == Window.OK) {
                     final String label = dialog.getValue();
                     System.out.println(label + dialog.fBegin);
                     // final RGBA rgba = dialog.getColorValue();
                     // IMarkerEvent bookmark = new MarkerEvent(null, time,
                     // duration, IMarkerEvent.BOOKMARKS, rgba, label, true);
-                    if (kind == 0) {
+                    if (kind == 1) {
                         BeginDelimiter = label;
                     } else {
                         EndDelimiter = label;
                     }
-                    if(kind == -1) {
+                    if (kind == 0) {
                         DelimiterString = label;
                     }
-                    resetAnalysis(BeginDelimiter, EndDelimiter);
+                    resetAnalysis(BeginDelimiter, EndDelimiter, DelimiterString);
 
                 }
             }
@@ -492,14 +507,23 @@ public class SampleView extends AbstractTimeGraphView {
     }
 
     @SuppressWarnings("restriction")
-    private void resetAnalysis(String entry, String exit) {
+    private void resetAnalysis(String entry, String exit, String stringInterval) {
 
         if (entry != null && exit != null) {
-            module.setParameters(entry, exit);
-            // module.schedule();
-            // module.waitForCompletion();
-            rebuild();
-            redraw();
+            if (stringInterval == null) {
+                module.setParameters(entry, exit, null);
+                // module.schedule();
+                // module.waitForCompletion();
+                rebuild();
+                redraw();
+            }
+            else {
+                module.setParameters(entry, exit,stringInterval);
+                // module.schedule();
+                // module.waitForCompletion();
+                rebuild();
+                redraw();
+            }
         }
     }
 
@@ -512,17 +536,18 @@ public class SampleView extends AbstractTimeGraphView {
         IAction action = new Action("Execute", IAction.AS_PUSH_BUTTON) { // AS_DROP_DOWN_MENU
             @Override
             public void run() {
-                    System.out.println("threshold" + threshold);
-                    CCTAnalysisModule.diffTrees(fMap[Dif[0]], fMap[Dif[1]], threshold);
-                    rebuild(); // update(); //rebuild();//
-                    refresh();
-                    redraw();
+                System.out.println("threshold" + threshold);
+                CCTAnalysisModule.diffTrees(fMap[Dif[0]], fMap[Dif[1]], threshold);
+                rebuild(); // update(); //rebuild();//
+                refresh();
+                redraw();
 
             }
         };
         action.setToolTipText("Selection of execution for comparison");
         return action;
     }
+
     /**
      * Get the differential selection
      *
@@ -1110,6 +1135,7 @@ public class SampleView extends AbstractTimeGraphView {
         private Label thresholdLabel;
         private int fBegin = 0;
         private Scale fthresholdScale;
+        private static final String sentence[] = { "Select Delimiter of tree", "Add Delimiters", "Add Delimiters" };
 
         /**
          * Constructor
@@ -1120,8 +1146,13 @@ public class SampleView extends AbstractTimeGraphView {
          *            the initial input value, or <code>null</code> if none
          *            (equivalent to the empty string)
          */
-        public AddDelimiterDialog(Shell parentShell, String initialValue) {
-            super(parentShell, "Add Delimiters", Messages.AddBookmarkDialog_Message, initialValue);
+        public AddDelimiterDialog(Shell parentShell, String initialValue, int i) {
+            this(parentShell, initialValue, sentence[i]);
+
+        }
+
+        public AddDelimiterDialog(Shell parentShell, String initialValue, String sentence) {
+            super(parentShell, sentence, Messages.AddBookmarkDialog_Message, initialValue);
         }
 
         @Override
