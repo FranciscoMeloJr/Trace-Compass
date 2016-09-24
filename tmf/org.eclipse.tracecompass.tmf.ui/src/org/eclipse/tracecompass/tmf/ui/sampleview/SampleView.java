@@ -286,9 +286,9 @@ public class SampleView extends AbstractTimeGraphView {
     protected void fillLocalMenu(IMenuManager manager) {
         // super.fillLocalMenu(manager);
 
-        MenuManager itemEx = new MenuManager("Execute");
-        itemEx.add(getExecute());
-        manager.add(itemEx);
+        //MenuManager itemEx = new MenuManager("Execute");
+        IAction x = getExecute();
+        manager.add(x);
 
         MenuManager itemA = new MenuManager("Select Execution A: ");
         // fFlatAction = createFlatAction();
@@ -327,10 +327,6 @@ public class SampleView extends AbstractTimeGraphView {
 
         manager.add(new Separator());
         manager.add(itemTh);
-        // Merger:
-        manager.add(new Separator());
-        manager.add(getMergeAction());
-
         // Delimiters
         manager.add(new Separator());
         MenuManager itemDel = new MenuManager("Select delimiters");
@@ -345,11 +341,40 @@ public class SampleView extends AbstractTimeGraphView {
         itemDel.add(getDelimitationActionDialog("Change delimiter", initialLabelDelimitation, -1));
 
         manager.add(itemDel);
+        // Merger:
+        manager.add(new Separator());
+        manager.add(getMergeAction());
+
 
         // Classification
         manager.add(getClassificationAction());
+
+        // Kernel Density Estimation
+        manager.add(getKDEAction());
     }
 
+    /**
+     * Get the KDE action
+     *
+     * @return The Action object
+     */
+    public Action getKDEAction() {
+        // resetScale
+        fInvertionAction = new Action() {
+            @Override
+            public void run() {
+                System.out.println("Apply KDE");
+
+                //Run over the tree:
+                //CCTAnalysisModule.RunKDE();
+
+            }
+        };
+        fInvertionAction.setText("KDE");
+        fInvertionAction.setToolTipText("Use the KDE method");
+        fInvertionAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_PIN_VIEW));
+        return fInvertionAction;
+    }
     /**
      * Get the invert action - this is used for testing algorithm
      *
@@ -484,11 +509,11 @@ public class SampleView extends AbstractTimeGraphView {
      * @return The Action object
      */
     private IAction getExecute() {
-        IAction action = new Action("Execute", IAction.AS_CHECK_BOX) { // AS_DROP_DOWN_MENU
+        IAction action = new Action("Execute", IAction.AS_PUSH_BUTTON) { // AS_DROP_DOWN_MENU
             @Override
             public void run() {
-                    System.out.println("threshold" + x);
-                    CCTAnalysisModule.diffTrees(fMap[Dif[0]], fMap[Dif[1]], x);
+                    System.out.println("threshold" + threshold);
+                    CCTAnalysisModule.diffTrees(fMap[Dif[0]], fMap[Dif[1]], threshold);
                     rebuild(); // update(); //rebuild();//
                     refresh();
                     redraw();
