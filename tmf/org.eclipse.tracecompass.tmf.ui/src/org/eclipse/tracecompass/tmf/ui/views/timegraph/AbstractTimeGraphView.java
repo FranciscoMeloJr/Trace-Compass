@@ -165,7 +165,7 @@ public abstract class AbstractTimeGraphView extends TmfView implements ITmfTimeA
     // ------------------------------------------------------------------------
 
     /** The timegraph wrapper
-     * @since 2.0*/
+     * @since 2.1*/
     protected ITimeGraphWrapper fTimeGraphWrapper;
 
     private AtomicInteger fDirty = new AtomicInteger();

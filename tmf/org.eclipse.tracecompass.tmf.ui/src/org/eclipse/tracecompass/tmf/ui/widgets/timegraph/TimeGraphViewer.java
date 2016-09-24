@@ -1914,7 +1914,7 @@ public class TimeGraphViewer implements ITimeDataProvider, IMarkerAxisListener, 
      * Get the reset scale action.
      *
      * @return The Action object
-     * @since 2.0
+     * @since 2.1
      */
     public Action getSelectAction() {
         if (fSelectAction == null) {

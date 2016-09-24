@@ -47,6 +47,9 @@ public class AggregatedCalledFunction {
     private long fSelfTime;
     private final int fProcessId;
 
+    //mod:
+    private int fColor;
+
     /**
      * Constructor, parent is not null
      *
@@ -65,6 +68,7 @@ public class AggregatedCalledFunction {
         fMaxDepth = parent.getMaxDepth();
         fParent = parent;
         fStatistics = new AggregatedCalledFunctionStatistics(calledFunction, calledFunction);
+        fColor = 0;
     }
 
     /**
@@ -269,5 +273,22 @@ public class AggregatedCalledFunction {
     @Override
     public String toString() {
         return Long.toString(fDuration) + " " + getClass().getName();
+    }
+
+
+    // This function does the differential:
+    public void diff(ThreadNode o) {
+
+        if (getDuration() <= o.getDuration()) {
+            fColor = -1;
+        } else {
+            fColor = 1;
+        }
+
+    }
+
+    // return the color of the comparison:
+    public long getColor() {
+        return fColor;
     }
 }
