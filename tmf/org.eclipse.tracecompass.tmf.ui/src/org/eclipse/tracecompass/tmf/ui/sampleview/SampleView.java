@@ -121,6 +121,7 @@ public class SampleView extends AbstractTimeGraphView {
     List<String> FUNCTION_NAMES = new ArrayList<>();
     private Action fClassificationAction;
     private Action fKDEAction;
+    private Action fInversion;
 
     /**
      * The constructor.
@@ -351,6 +352,29 @@ public class SampleView extends AbstractTimeGraphView {
 
         // Kernel Density Estimation
         manager.add(getKDEAction());
+        manager.add(getInversionAction());
+    }
+
+    /**
+     * Get the Inversion action
+     *
+     * @return The Action object
+     */
+    public Action getInversionAction() {
+        // resetScale
+        fInversion = new Action() {
+            @Override
+            public void run() {
+                System.out.println("Inversion");
+
+                // Run over the tree:
+                // CCTAnalysisModule.RunKDE();
+
+            }
+        };
+        fInversion.setText("Inversion");
+        fInversion.setToolTipText("Use the inversion");
+        return fInversion;
     }
 
     /**
@@ -453,20 +477,19 @@ public class SampleView extends AbstractTimeGraphView {
 
             @Override
             public void runWithEvent(Event event) {
-                final AddDelimiterDialog dialog = new AddDelimiterDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), initialLabel, kind);
-
+                final AddDelimiterDialog dialog = new AddDelimiterDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), initialLabel);
                 if (dialog.open() == Window.OK) {
                     final String label = dialog.getValue();
                     System.out.println(label + dialog.fBegin);
                     // final RGBA rgba = dialog.getColorValue();
                     // IMarkerEvent bookmark = new MarkerEvent(null, time,
                     // duration, IMarkerEvent.BOOKMARKS, rgba, label, true);
-                    if (kind == 1) {
+                    if (kind == 0) {
                         BeginDelimiter = label;
                     } else {
                         EndDelimiter = label;
                     }
-                    if (kind == 0) {
+                    if(kind == -1) {
                         DelimiterString = label;
                     }
                     resetAnalysis(BeginDelimiter, EndDelimiter, DelimiterString);
@@ -1135,7 +1158,6 @@ public class SampleView extends AbstractTimeGraphView {
         private Label thresholdLabel;
         private int fBegin = 0;
         private Scale fthresholdScale;
-        private static final String sentence[] = { "Select Delimiter of tree", "Add Delimiters", "Add Delimiters" };
 
         /**
          * Constructor
@@ -1146,13 +1168,8 @@ public class SampleView extends AbstractTimeGraphView {
          *            the initial input value, or <code>null</code> if none
          *            (equivalent to the empty string)
          */
-        public AddDelimiterDialog(Shell parentShell, String initialValue, int i) {
-            this(parentShell, initialValue, sentence[i]);
-
-        }
-
-        public AddDelimiterDialog(Shell parentShell, String initialValue, String sentence) {
-            super(parentShell, sentence, Messages.AddBookmarkDialog_Message, initialValue);
+        public AddDelimiterDialog(Shell parentShell, String initialValue) {
+            super(parentShell, "Add Delimiters", Messages.AddBookmarkDialog_Message, initialValue);
         }
 
         @Override
