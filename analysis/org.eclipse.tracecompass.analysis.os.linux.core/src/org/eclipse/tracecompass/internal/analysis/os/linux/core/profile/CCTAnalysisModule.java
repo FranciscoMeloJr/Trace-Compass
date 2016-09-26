@@ -1067,6 +1067,18 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             Collections.sort(array);
 
             try {
+
+                hashGroupNumber = new LinkedHashMap<>();
+                // all the array is pointing to group 1:
+                initiateI(array, hashGroupNumber);
+
+                int group = 0;
+
+                //convert the group in a string to put in the hash:
+                hashGroupNumber.put(String.valueOf(group), array.get(i));
+                showClassification(hashGroupNumber);
+
+                /*
                 // result will be in groups:
                 ArrayList<ArrayList<Integer>> groups = new ArrayList<>();
 
@@ -1095,7 +1107,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     // all the array is pointing to group 1:
                     initiateI(array, hashGroupNumber);
 
-                    hashGroupNumber = new LinkedHashMap<>();
                     int group = 0;
                     resultArray = new ArrayList<>();
                     groups = new ArrayList<>();
@@ -1122,6 +1133,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 }
                 printI(groups);
                 showClassification(hashGroupNumber);
+                */
             } catch (
 
             Exception ex) {
