@@ -68,7 +68,7 @@ public class AggregatedCalledFunction {
         fMaxDepth = parent.getMaxDepth();
         fParent = parent;
         fStatistics = new AggregatedCalledFunctionStatistics(calledFunction, calledFunction);
-        fColor = 0;
+        fColor = 0; //gray is the default
     }
 
     /**
@@ -288,7 +288,7 @@ public class AggregatedCalledFunction {
     }
 
     // return the color of the comparison:
-    public long getColor() {
+    public int getColor() {
         return fColor;
     }
 }

@@ -58,6 +58,7 @@ import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.editors.ITmfTraceEditor;
 import org.eclipse.tracecompass.tmf.ui.symbols.TmfSymbolProviderUpdatedSignal;
+import org.eclipse.tracecompass.tmf.ui.sampleview.SampleViewPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphViewer;
@@ -246,14 +247,6 @@ public class FlameGraphView extends TmfView {
         j.schedule();
     }
 
-    // Function to do experiences:
-    private static void experiences(CallGraphAnalysis callGraphAnalysis) {
-        @NonNull
-        List<ThreadNode> listThreads = callGraphAnalysis.getThreadNodes();
-
-        System.out.println("Experiences");
-        for (ThreadNode each : listThreads) {
-            System.out.println(each);
     // Function to the traversal, allowing the operations:
     private static void experiments(CallGraphAnalysis callGraphAn) {
         @NonNull
@@ -262,7 +255,6 @@ public class FlameGraphView extends TmfView {
         System.out.println("Size listThreads " + listThreads.size());
 
         // run over the threads
-        // each thread has a list of aggregated called functions, which have
         // their own list <aggregated functions>
         for (ThreadNode eachThreadNode : listThreads) {
 
@@ -680,6 +672,7 @@ public class FlameGraphView extends TmfView {
 
         return mergeButton;
     }
+
     // ------------------------------------------------------------------------
     // Mods:
     // ------------------------------------------------------------------------
@@ -687,12 +680,24 @@ public class FlameGraphView extends TmfView {
     private Action getSortByUnknown() {
         if (fSortByUnknown == null) {
             fSortByUnknown = new Action("Differential", IAction.AS_CHECK_BOX) {
+                @Override
+                public void run() {
+                    SampleViewPresentationProvider SampleViewPP = new SampleViewPresentationProvider();
+                    fTimeGraphViewer.setTimeGraphProvider(SampleViewPP);
+                }
+            };
+            fSortByUnknown.setToolTipText("Differential");
+        }
+        return fSortByUnknown;
+    }
+
     private Action getDifferential() {
         if (fDifferential == null) {
             fDifferential = new Action("Execute Differential", IAction.AS_PUSH_BUTTON) {
                 @Override
                 public void run() {
-
+                    SampleViewPresentationProvider SampleViewPP = new SampleViewPresentationProvider();
+                    fTimeGraphViewer.setTimeGraphProvider(SampleViewPP);
                 }
             };
             fSortByUnknown.setToolTipText("Differential");
@@ -712,7 +717,8 @@ public class FlameGraphView extends TmfView {
         }
         return fInvertion;
     }
-    private static IAction createTreeSelection(String name, int i) {
+
+    private IAction createTreeSelection(String name, int i) {
         IAction action = new Action(name, IAction.AS_CHECK_BOX) { // AS_DROP_DOWN_MENU
             @Override
             public void run() {
@@ -732,7 +738,7 @@ public class FlameGraphView extends TmfView {
     }
 
     // test with bookmark:
-    private static Action getDelimitationActionDialog(String labelText, String initialLabel, int kind) {
+    private Action getDelimitationActionDialog(String labelText, String initialLabel, int kind) {
         Action fToggleBookmarkAction = null;
         fToggleBookmarkAction = new Action() {
 

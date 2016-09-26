@@ -116,5 +116,10 @@ Import-Package: com.google.common.base,
  com.google.common.collect,
  org.eclipse.emf.common.util,
  org.eclipse.emf.ecore,
+<<<<<<< 7c8526b7fb8edf035df8069a29ff0cad4a62617d
  com.google.common.annotations,
  org.eclipse.tracecompass.internal.analysis.os.linux.core.profile
+=======
+ org.eclipse.tracecompass.internal.analysis.os.linux.core.profile,
+ org.eclipse.tracecompass.internal.analysis.timing.core.callgraph
+>>>>>>> AggregatedCalled: fColor change. FlameGraphView: inclusion of SampleViewPresentationProvider: getStateTableIndex function.

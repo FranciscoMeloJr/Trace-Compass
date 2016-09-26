@@ -4,6 +4,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.tracecompass.internal.analysis.timing.core.callgraph.AggregatedCalledFunction;
+import org.eclipse.tracecompass.internal.analysis.timing.core.callgraph.ThreadNode;
 import org.eclipse.tracecompass.internal.tmf.ui.Activator;
 import org.eclipse.tracecompass.internal.tmf.ui.Messages;
 import org.eclipse.tracecompass.statesystem.core.exceptions.TimeRangeException;
@@ -19,6 +21,7 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils;
 
 /**
  * @author francisco
+ * @since 2.1
  *
  */
 // Class Presentation Provider:
@@ -84,6 +87,7 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
         return stateTable;
     }
 
+    @SuppressWarnings("restriction")
     @Override
     public int getStateTableIndex(ITimeEvent event) {
 
@@ -94,6 +98,28 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
         // Change:
         if (event instanceof EventNode) {
             EventNode eventNode = (EventNode) event;
+            int color = eventNode.getColor();
+            if (color == 1) {
+                return State.RED.ordinal();
+            }
+            if (color == -1) {
+                return State.GREEN.ordinal();
+            }
+            if (color == 0) {
+                return State.GRAY.ordinal();
+            }
+        }
+        // Changes for CallGraph:
+
+        if (event instanceof ThreadNode){
+            ThreadNode eventNode = (ThreadNode) event;
+            //Gray:
+            return State.GRAY.ordinal();
+        }
+
+        if (event instanceof AggregatedCalledFunction) {
+            AggregatedCalledFunction eventNode = (AggregatedCalledFunction) event;
+
             int color = eventNode.getColor();
             if (color == 1) {
                 return State.RED.ordinal();
