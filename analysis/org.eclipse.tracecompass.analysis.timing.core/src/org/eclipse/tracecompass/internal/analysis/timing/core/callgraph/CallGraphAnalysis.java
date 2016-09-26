@@ -12,6 +12,7 @@ package org.eclipse.tracecompass.internal.analysis.timing.core.callgraph;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -411,5 +412,64 @@ public abstract class CallGraphAnalysis extends TmfAbstractAnalysisModule implem
             }
         }
         return processId;
+    }
+
+   /*
+    * Mods
+    *
+    */
+
+    public void setThreadNodes(List<ThreadNode> newThreadNode){
+        fThreadNodes = newThreadNode;
+    }
+
+    public List<ThreadNode>  mergeFL() {
+        List<ThreadNode> temp = fThreadNodes;
+
+        List<ThreadNode> result = null;
+        //Go through the nodes taking similar ones and put them together:
+
+        return result;
+    }
+
+    //Differential:
+    public ThreadNode differential(ArrayList<Integer> Dif) {
+        ArrayList<ThreadNode> temp = new ArrayList<>();
+        ThreadNode result;
+
+        int j = 0;
+        for(int i = 0; i< Dif.size(); i++){
+            j = Dif.get(i);
+            temp.add(fThreadNodes.get(j));
+        }
+
+        //iterating over temp:
+        for(int i = 0; i< temp.size();i++){
+            @NonNull
+            ThreadNode x = temp.get(i);
+            x.getChildren();
+        }
+        return result;
+    }
+
+    // Level Order traversal:
+    public static LinkedList<AggregatedCalledFunction> levelOrderTraversal(ThreadNode root) {
+        System.out.print("levelOrderTraversal ");
+        LinkedList<AggregatedCalledFunction> queue = new LinkedList<>();
+        LinkedList<AggregatedCalledFunction> result = new LinkedList<>();
+
+        queue.add(root);
+        while (!queue.isEmpty()) {
+            AggregatedCalledFunction current = queue.poll();
+            System.out.print(current.toString());
+            for (AggregatedCalledFunction child : current.getChildren()) {
+                queue.add(child);
+                System.out.println(child.getDepth());
+            }
+            result.add(current);
+        }
+
+        System.out.println("Size result " + result.size() + "\n");
+        return result;
     }
 }

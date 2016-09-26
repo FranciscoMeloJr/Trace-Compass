@@ -11,10 +11,12 @@
  *******************************************************************************/
 package org.eclipse.tracecompass.internal.analysis.timing.ui.flamegraph;
 
+import java.awt.Event;
+import java.awt.Window;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
-import java.util.ArrayList;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -57,8 +59,8 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.editors.ITmfTraceEditor;
-import org.eclipse.tracecompass.tmf.ui.symbols.TmfSymbolProviderUpdatedSignal;
 import org.eclipse.tracecompass.tmf.ui.sampleview.SampleViewPresentationProvider;
+import org.eclipse.tracecompass.tmf.ui.symbols.TmfSymbolProviderUpdatedSignal;
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.TimeGraphViewer;
@@ -66,6 +68,7 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.TimeGraphContro
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.ui.PlatformUI;
 
 import com.google.common.annotations.VisibleForTesting;
 
@@ -89,13 +92,15 @@ public class FlameGraphView extends TmfView {
     private static final ImageDescriptor SORT_BY_ID_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_num.gif"); //$NON-NLS-1$
     private static final ImageDescriptor SORT_BY_ID_REV_ICON = Activator.getDefault().getImageDescripterFromPath("icons/etool16/sort_num_rev.gif"); // $NON-NLS-0$
 
-    protected static final int[] Dif = null;
+    protected static ArrayList<Integer> Dif = null;
 
     private TimeGraphViewer fTimeGraphViewer;
 
     private FlameGraphContentProvider fTimeGraphContentProvider;
 
     private TimeGraphPresentationProvider fPresentationProvider;
+    // Mod:
+    private SampleViewPresentationProvider SampleViewPP;
 
     private ITmfTrace fTrace;
 
@@ -112,6 +117,9 @@ public class FlameGraphView extends TmfView {
 
     private IStructuredSelection fRoots;
 
+    // Mod:
+    static CallGraphAnalysis callGraphAnalysis;
+
     /**
      * Constructor
      */
@@ -124,9 +132,12 @@ public class FlameGraphView extends TmfView {
         super.createPartControl(parent);
         fTimeGraphViewer = new TimeGraphViewer(parent, SWT.NONE);
         fTimeGraphContentProvider = new FlameGraphContentProvider();
-        fPresentationProvider = new FlameGraphPresentationProvider();
+        // Mod presentation provider:
+        SampleViewPP = new SampleViewPresentationProvider();
+
+        // fPresentationProvider = new FlameGraphPresentationProvider();
         fTimeGraphViewer.setTimeGraphContentProvider(fTimeGraphContentProvider);
-        fTimeGraphViewer.setTimeGraphProvider(fPresentationProvider);
+        fTimeGraphViewer.setTimeGraphProvider(SampleViewPP);
         IEditorPart editor = getSite().getPage().getActiveEditor();
         if (editor instanceof ITmfTraceEditor) {
             ITmfTrace trace = ((ITmfTraceEditor) editor).getTrace();
@@ -283,10 +294,19 @@ public class FlameGraphView extends TmfView {
                 System.out.println(child.getDepth());
             }
             result.add(current);
-        }
 
-        System.out.println("Size result "+ result.size() + "\n");
-        return result;
+        // run over the threads
+        // each thread has a list of aggregated called functions, which have
+        // their own list <aggregated functions>
+        for (ThreadNode eachThreadNode : listThreads) {
+
+            /*
+             * @NonNull Collection<@NonNull AggregatedCalledFunction> x =
+             * eachThreadNode.getChildren();
+             * System.out.println(eachThreadNode.getSymbol() + " " + x.size());
+             */
+            CallGraphAnalysis.levelOrderTraversal(eachThreadNode);
+        }
     }
 
     /**
@@ -604,7 +624,7 @@ public class FlameGraphView extends TmfView {
         for (int i = 0; i < size; i++) {
             itemA.add(createTreeSelection(Integer.toString(i), 1));
         }
-        //manager.add(new Separator());
+        // manager.add(new Separator());
         manager.add(itemA);
         // ItemB
         MenuManager itemB = new MenuManager("Select Execution B: ");
@@ -664,6 +684,8 @@ public class FlameGraphView extends TmfView {
             @Override
             public void run() {
                 System.out.println("Automatic merge");
+                List<ThreadNode> result = callGraphAnalysis.mergeFL();
+                callGraphAnalysis.setThreadNodes(result);
             }
         };
         mergeButton.setText("Grouping selection");
@@ -696,8 +718,15 @@ public class FlameGraphView extends TmfView {
             fDifferential = new Action("Execute Differential", IAction.AS_PUSH_BUTTON) {
                 @Override
                 public void run() {
-                    SampleViewPresentationProvider SampleViewPP = new SampleViewPresentationProvider();
-                    fTimeGraphViewer.setTimeGraphProvider(SampleViewPP);
+                    // Change the presentation provider:
+                    // SampleViewPresentationProvider SampleViewPP = new
+                    // SampleViewPresentationProvider();
+                    // fTimeGraphViewer.setTimeGraphProvider(SampleViewPP);
+                    // Redraw ():
+                    System.out.println("Differential");
+
+                    List<ThreadNode> result = callGraphAnalysis.differential(Dif);
+                    callGraphAnalysis.setThreadNodes(result);
                 }
             };
             fSortByUnknown.setToolTipText("Differential");
@@ -718,16 +747,24 @@ public class FlameGraphView extends TmfView {
         return fInvertion;
     }
 
-    private IAction createTreeSelection(String name, int i) {
+
+    private static IAction createTreeSelection(String name, int i) {
         IAction action = new Action(name, IAction.AS_CHECK_BOX) { // AS_DROP_DOWN_MENU
             @Override
             public void run() {
                 if (i == 1) {
                     // System.out.println("Taking the tree A:" + name);
                     // Call the differential function
-                    Dif[0] = Integer.parseInt(name);
+                    if (Dif == null) {
+                        Dif = new ArrayList<>();
+                        Dif.add(Integer.parseInt(name));
+
+                    } else {
+                        Dif.add(Integer.parseInt(name));
+                    }
+
                 } else {
-                    System.out.println("Taking the tree B:" + name + " " + "(" + Dif[0] + " " + Dif[1] + ") ");
+                    System.out.println("Taking the tree B:" + name + " " + "(" + Dif.get(0) + " " + Dif.get(0) + ") ");
                     // Call the differential function
                 }
             }
@@ -811,10 +848,9 @@ public class FlameGraphView extends TmfView {
                     reset();
                 }
 
-                //Reset mod:
+                // Reset mod:
                 private void reset() {
-                   //Find the longest thread and set it as time range
-
+                    // Find the longest thread and set it as time range
                 }
             };
             fResetScaleAction.setToolTipText("Reset");

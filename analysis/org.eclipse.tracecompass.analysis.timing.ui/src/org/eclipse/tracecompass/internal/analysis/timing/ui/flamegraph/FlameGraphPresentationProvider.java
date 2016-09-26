@@ -47,8 +47,8 @@ public class FlameGraphPresentationProvider extends TimeGraphPresentationProvide
     private Integer fAverageCharWidth;
 
     private enum State {
-        //Change here:
-        MULTIPLE(new RGB(100, 100, 100)), EXEC(new RGB(0, 200, 0)), GRAY(new RGB(100, 100, 100)), GREEN(new RGB(0, 200, 0)), RED(new RGB(100, 0, 0));
+        MULTIPLE(new RGB(100, 100, 100)), EXEC(new RGB(0, 200, 0));
+
         private final RGB rgb;
 
         private State(RGB rgb) {
