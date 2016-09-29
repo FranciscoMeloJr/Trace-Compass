@@ -1051,6 +1051,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
         // Integer
+        //  Range Classification
         public void SimulationI() {
 
             // calculate the mean:
@@ -1075,7 +1076,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
                 Integer previous = array.get(0);
                 Integer temp = previous;
-                double tolerance = 0.5; // 10% tolerance
+                double tolerance = 0.5; //1 = 100%, 0.5 = 200% tolerance,
                 //put the first:
                 addValues(Integer.toString(group), temp,hashGroupNumber);
 
@@ -1100,8 +1101,24 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         }
 
-        //Multimap:
+        //Multimap function 1:
         private static void addValues(String key, Integer value, LinkedHashMap<String, ArrayList<Integer>> hashMap) {
+            ArrayList tempList = null;
+            if (hashMap.containsKey(key)) {
+               tempList = hashMap.get(key);
+               if(tempList == null) {
+                tempList = new ArrayList();
+            }
+               tempList.add(value);
+            } else {
+               tempList = new ArrayList();
+               tempList.add(value);
+            }
+            hashMap.put(key,tempList);
+         }
+
+        //Multimap function 2:
+        private static void addValuesD(String key, Double value, LinkedHashMap<String, ArrayList<Double>> hashMap) {
             ArrayList tempList = null;
             if (hashMap.containsKey(key)) {
                tempList = hashMap.get(key);
@@ -1136,105 +1153,36 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             index = 0;
 
             // Group <-> Integer
-            LinkedHashMap<String, Double> hashGroupNumber = new LinkedHashMap<>();
+            LinkedHashMap<String, ArrayList<Double>> hashGroupNumber = new LinkedHashMap<>();
 
             // First sort:
             Collections.sort(array);
-            // all the array is pointing to group 1:
-            initiateD(array, hashGroupNumber);
 
+            printArrayD(array);
             try {
-                // result will be in groups:
-                ArrayList<ArrayList<Double>> groups = new ArrayList<>();
+                // all the array is pointing to group 1:
+                //initiateI(array, hashGroupNumber);
 
-                while (index < array.size()) {
-                    sumSq += array.get(index) * array.get(index);
-                    index++;
+                int group = 1;
+
+                Double previous = array.get(0);
+                Double temp = previous;
+                double tolerance = 0.5; //1 = 100%, 0.5 = 200% tolerance,
+                //put the first:
+                addValuesD(Integer.toString(group), temp,hashGroupNumber);
+
+                for(int i = 1; i< array.size(); i++){
+                    temp = array.get(i);
+                    System.out.println(temp + " " + previous + " " + group);
+                    if(temp > (previous + (previous/tolerance))){
+                        group++;
+                    }
+                    addValuesD(Integer.toString(group), temp,hashGroupNumber);
+                    previous = temp;
                 }
 
-                meanSq = sumSq / array.size();
-
-                // Variation (mean - sqr(value))
-                index = 0;
-                double result;
-                while (index < array.size()) {
-                    result = (array.get(index) * array.get(index)) - meanSq;
-                    meanDistance.add(result);
-                    index++;
-                }
-
-                index = 0;
-
-                int limit = 100;
-                System.out.println("Simulation:");
-                index = 1;
-                int size = 100;
-                int X = 0;
-                while (3 < size) {
-                    resultArray = new ArrayList<>();
-                    groups = new ArrayList<>();
-                    index = 1;
-                    resultArray.add(array.get(index));
-                    while (index < meanDistance.size()) {
-                        Double number1 = meanDistance.get(index - 1);
-                        Double number2 = meanDistance.get(index);
-                        if (number1 != 9999) {
-                            Double total = (number1 - number2);
-                            if (Math.abs(total) < limit) {
-                                // System.out.println("in");
-                                resultArray.add(array.get(index));
-                            } else {
-                                // System.out.println("out");
-                                resultArray.add((double) 9999);
-                                resultArray.add(array.get(index));
-                            }
-                        } else {
-                            resultArray.add(array.get(index));
-                        }
-                        index++;
-                    }
-                    resultArray.add((double) 9999);
-
-                    // System.out.println(" \n Result");
-                    int position = 0;
-                    ArrayList<Double> temp = new ArrayList<>();
-                    for (int j = 0; j < resultArray.size(); j++) {
-                        Double each = resultArray.get(j);
-                        if (each == 9999) {
-                            groups.add(temp);
-                            temp = new ArrayList<>();
-                            position++;
-                        } else {
-                            // System.out.print(resultArray.get(j) + " ");
-                            temp.add(each);
-                            hashGroupNumber.put(Integer.toString(position), each);
-                        }
-                    }
-
-                    // Ckmeans implementation:
-
-                    if (groups.size() > 1) {
-                        System.out.print("Final Size " + groups.size());
-                        size = groups.size();
-                        for (int j = 0; j < groups.size(); j++) {
-                            if (groups.get(j).size() > 0) {
-                                System.out.print(" " + j + " " + variationD(groups.get(j)));
-                            }
-
-                        }
-                    }
-                    limit += 100;
-                    System.out.println(" ");
-
-                    X++;
-                    if (X == 1000) {
-                        break;
-                    }
-                }
-
-                System.out.println("Size in " + groups.size() + " groups");
-                printD(groups);
                 showClassification(hashGroupNumber);
+
             } catch (
 
             Exception ex) {
@@ -1388,6 +1336,15 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         // print integer - change this function here:
         public static void printArray(ArrayList<Integer> array) {
+
+            for (int i = 0; i < array.size(); i++) {
+                System.out.print(array.get(i)+ " ");
+            }
+            System.out.println(" ");
+        }
+
+        // print integer - change this function here:
+        public static void printArrayD(ArrayList<Double> array) {
 
             for (int i = 0; i < array.size(); i++) {
                 System.out.print(array.get(i)+ " ");

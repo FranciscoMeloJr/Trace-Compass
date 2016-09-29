@@ -416,7 +416,7 @@ public class SampleView extends AbstractTimeGraphView {
                 System.out.println("Test");
                 // test
                 ArrayList<Integer> A = new ArrayList<>();
-                A.add(10);
+                /*A.add(10);
                 A.add(11);
                 A.add(12);
                 A.add(13);
@@ -428,10 +428,10 @@ public class SampleView extends AbstractTimeGraphView {
                 A.add(1003);
                 A.add(1003);
                 A.add(1003);
-                CCTAnalysisModule.variationClassification(A, null);
+                CCTAnalysisModule.variationClassification(A, null);*/
 
                 // Run over the tree:
-                // CCTAnalysisModule.RunClassification();
+                CCTAnalysisModule.RunClassification();
 
             }
         };
