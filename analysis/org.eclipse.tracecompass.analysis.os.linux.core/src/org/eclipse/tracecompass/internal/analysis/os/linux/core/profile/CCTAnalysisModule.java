@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileTraversal.KeyTree;
-import org.eclipse.tracecompass.internal.analysis.timing.core.callgraph.ThreadNode;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
@@ -1062,79 +1061,37 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             index = 0;
 
             // Group <-> Integer
-            LinkedHashMap<String, Integer> hashGroupNumber = new LinkedHashMap<>();
+            LinkedHashMap<String, ArrayList<Integer>> hashGroupNumber = new LinkedHashMap<>();
 
             // First sort:
             Collections.sort(array);
 
+            printArray(array);
             try {
-
-                hashGroupNumber = new LinkedHashMap<>();
                 // all the array is pointing to group 1:
-                initiateI(array, hashGroupNumber);
+                //initiateI(array, hashGroupNumber);
 
-                int group = 0;
+                int group = 1;
 
-                //convert the group in a string to put in the hash:
-                hashGroupNumber.put(String.valueOf(group), array.get(i));
-                showClassification(hashGroupNumber);
+                Integer previous = array.get(0);
+                Integer temp = previous;
+                double tolerance = 0.5; // 10% tolerance
+                //put the first:
+                addValues(Integer.toString(group), temp,hashGroupNumber);
 
-                /*
-                // result will be in groups:
-                ArrayList<ArrayList<Integer>> groups = new ArrayList<>();
-
-                while (index < array.size()) {
-                    sumSq += array.get(index) * array.get(index);
-                    index++;
-                }
-
-                meanSq = sumSq / array.size();
-
-                // Variation (mean - sqr(value))
-                index = 0;
-                double result;
-                while (index < array.size()) {
-                    result = (array.get(index) * array.get(index)) - meanSq;
-                    meanDistance.add(result);
-                    index++;
-                }
-
-                int limit = 10;
-
-                System.out.println("Simulation:");
-                int i = 0;
-                while (limit < 1000) {
-                    hashGroupNumber = new LinkedHashMap<>();
-                    // all the array is pointing to group 1:
-                    initiateI(array, hashGroupNumber);
-
-                    int group = 0;
-                    resultArray = new ArrayList<>();
-                    groups = new ArrayList<>();
-                    resultArray.add(array.get(0));
-                    i = 1;
-                    while (i < meanDistance.size()) {
-
-                        Double current = meanDistance.get(i);
-                        Double previous = meanDistance.get(i - 1);
-                        // Double calculated = current + previous;
-                        if (current > previous && current > previous * ((100 + limit) / 100)) {
-                            group++;
-                        }
-                        if (current < previous && current < previous * ((100 - limit) / 100)) {
-                            group++;
-                        }
-                        // System.out.println("Group"+ group + array.get(i));
-                        hashGroupNumber.put(String.valueOf(group), array.get(i));
-                        i++;
+                for(int i = 1; i< array.size(); i++){
+                    temp = array.get(i);
+                    System.out.println(temp + " " + previous + " " + group);
+                    if(temp > (previous + (previous/tolerance))){
+                        group++;
                     }
-
-                    limit += 10;
-                    System.out.println("groups" + group);
+                    addValues(Integer.toString(group), temp,hashGroupNumber);
+                    previous = temp;
                 }
-                printI(groups);
+
                 showClassification(hashGroupNumber);
-                */
+
+
             } catch (
 
             Exception ex) {
@@ -1143,12 +1100,27 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         }
 
+        //Multimap:
+        private static void addValues(String key, Integer value, LinkedHashMap<String, ArrayList<Integer>> hashMap) {
+            ArrayList tempList = null;
+            if (hashMap.containsKey(key)) {
+               tempList = hashMap.get(key);
+               if(tempList == null) {
+                tempList = new ArrayList();
+            }
+               tempList.add(value);
+            } else {
+               tempList = new ArrayList();
+               tempList.add(value);
+            }
+            hashMap.put(key,tempList);
+         }
         // initiation for integers
         private static void initiateI(ArrayList<Integer> array, LinkedHashMap<String, Integer> hashGroupNumber) {
             int each;
             for (int i = 0; i < array.size(); i++) {
                 each = array.get(i);
-                hashGroupNumber.put("1", each);
+                hashGroupNumber.put("0", each);
             }
 
         }
@@ -1272,12 +1244,12 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
         // This initiate a classification array:
-        private static void showClassification(LinkedHashMap<String, ?> hashGroupNumber) {
+        private static void showClassification(LinkedHashMap<String, ?> hash) {
 
             // run through the array:
             System.out.println("Classification");
-            for (String key : hashGroupNumber.keySet()) {
-                System.out.println(key + " " + hashGroupNumber.get(key));
+            for (String key : hash.keySet()) {
+                System.out.println(key + " " + hash.get(key));
             }
         }
 
@@ -1414,6 +1386,14 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             return max - min;
         }
 
+        // print integer - change this function here:
+        public static void printArray(ArrayList<Integer> array) {
+
+            for (int i = 0; i < array.size(); i++) {
+                System.out.print(array.get(i)+ " ");
+            }
+            System.out.println(" ");
+        }
         // print integer - change this function here:
         public static void printI(ArrayList<ArrayList<Integer>> groups) {
             System.out.println("\n");
