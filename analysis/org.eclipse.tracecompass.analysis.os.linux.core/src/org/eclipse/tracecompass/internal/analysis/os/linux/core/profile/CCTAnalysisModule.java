@@ -895,6 +895,35 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     }
 
+    // This function Classify a hash called by SampleView:
+    public static void variationClassificationF() {
+        // Can be Integer or Double:
+
+        LinkedHashMap<KeyTree, Node<ProfileData>> eachHashECCT = new LinkedHashMap<>();
+        // duration <-> function of all them:
+        LinkedHashMap<Node<ProfileData>, Long> durationNodeHash = new LinkedHashMap<>();
+
+        // For each tree:
+        for (int i = 0; i < hashECCTs.length; i++) {
+            eachHashECCT = hashECCTs[i];
+
+            // for each function:
+            for (KeyTree key : eachHashECCT.keySet()) {
+
+                Node<ProfileData> temp = eachHashECCT.get(key);
+                if (temp != null) {
+                    durationNodeHash.put(temp, temp.getDur());
+                }
+            }
+        }
+
+        System.out.print("Size" + durationNodeHash.size());
+        Classification temp = new Classification(durationNodeHash);
+        temp.doSimulation();
+
+    }
+
+    // This function Classify a hash called by SampleView:
     public static void variationClassification(Object parameter, LinkedHashMap<Double, Node<ProfileData>> hash) {
         // Can be Integer or Double:
         Classification temp = null;
@@ -943,7 +972,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     // Necessary for tests and simulations at the same time:
     static class Classification {
         double meanSq = 0;
-        boolean isInteger = false;
+        boolean isFunction;
+        boolean isInteger;
         ArrayList<Integer> arrayIntegers;
         ArrayList<Double> arrayDouble;
         ArrayList<Double> meanDistance = new ArrayList<>();
@@ -958,6 +988,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         static LinkedHashMap<String, Integer> hashGroupInteger = null;
         // hash: String <-> Integer:
         static LinkedHashMap<String, Double> hashGroupDouble = null;
+
+        // hash: node <-> duration:
+        LinkedHashMap<Node<ProfileData>, Long> durationNodeHash = null;
 
         // hash: Double <-> Node:
         LinkedHashMap<Double, Node<ProfileData>> hashDoubleNode = new LinkedHashMap<>();
@@ -977,7 +1010,12 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     arrayDouble = new ArrayList<>();
                     arrayDouble = arrayD;
                     groups2 = new ArrayList<>();
+                    isInteger = false;
                 }
+            } else {
+                LinkedHashMap<Node<ProfileData>, Long> durationNode = (LinkedHashMap<Node<ProfileData>, Long>) parameter;
+                durationNodeHash = durationNode;
+                isFunction = true;
             }
 
         }
@@ -989,11 +1027,16 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
         public void doSimulation() {
-            if (isInteger) {
-                SimulationI();
+            if (isFunction) {
+                System.out.println("Function classification");
+                SimulationF();
             } else {
-                System.out.println("Double simulation");
-                SimulationD();
+                if (isInteger) {
+                    SimulationI();
+                } else {
+                    System.out.println("Double classification");
+                    SimulationD();
+                }
             }
         }
 
@@ -1004,25 +1047,17 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             if (isInteger) {
 
                 // run the keys: <String, Integer>
-                for (String key : hashGroupInteger.keySet()) { // iterate over 1
-                                                               // and take the
-                                                               // integer
+                for (String key : hashGroupInteger.keySet()) {
                     System.out.println(key + " " + hashGroupInteger.get(key));
 
                     Integer in = hashGroupInteger.get(key);
                     String string = key;
-                    Node<ProfileData> node = hashIntegerNode.get(in); // get the
-                                                                      // node
-                                                                      // from
-                                                                      // the
-                                                                      // integer
+                    Node<ProfileData> node = hashIntegerNode.get(in);
                     System.out.println(key + " " + in);
-                    resultNodeGroup.put(node, string); // put node and the
-                                                       // result
+                    // put node and the result
+                    resultNodeGroup.put(node, string);
                 }
-
             }
-
             return resultNodeGroup;
         }
 
@@ -1050,16 +1085,69 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
         }
 
+        public void SimulationF() {
+
+            // function <-> duration
+            LinkedHashMap<String, ArrayList<Long>> durationFunction = new LinkedHashMap<>();
+
+            System.out.println("SimulationF");
+            // run over the durationHash:
+            for (Node<ProfileData> key : durationNodeHash.keySet()) {
+                @Nullable
+                Long duration = durationNodeHash.get(key);
+                String label = key.getNodeLabel();
+                System.out.println(key.getNodeLabel() + " " + durationNodeHash.get(key));
+                addValuesL(label, duration, durationFunction);
+            }
+
+            LinkedHashMap<String, ArrayList<Long>> result;
+            for(String eachFunction : durationFunction.keySet()){
+                System.out.println("Function " + eachFunction);
+                result = rangeClassification(durationFunction.get(eachFunction));
+                showClassification(result);
+            }
+        }
+        //RangeClassification:
+        public  LinkedHashMap<String, ArrayList<Long>> rangeClassification(ArrayList<Long> arrayD) {
+            // calculate the mean:
+            ArrayList<Long> array = arrayD;
+
+            // Group <-> Integer
+            LinkedHashMap<String, ArrayList<Long>> hashGroupNumber = new LinkedHashMap<>();
+
+            // First sort:
+            Collections.sort(array);
+
+            printArrayL(array);
+            // all the array is pointing to group 1:
+            // initiateI(array, hashGroupNumber);
+
+            int group = 1;
+
+            Long previous = array.get(0);
+            Long temp = previous;
+            double tolerance = 0.5; // 1 = 100%, 0.5 = 200% tolerance,
+            // put the first:
+            addValuesL(Integer.toString(group), temp, hashGroupNumber);
+
+            for (int i = 1; i < array.size(); i++) {
+                temp = array.get(i);
+                //System.out.println(temp + " " + previous + " " + group);
+                if (temp > (previous + (previous / tolerance))) {
+                    group++;
+                }
+                addValuesL(Integer.toString(group), temp, hashGroupNumber);
+                previous = temp;
+            }
+
+            return hashGroupNumber;
+        }
+
         // Integer
-        //  Range Classification
+        // Range Classification
         public void SimulationI() {
 
-            // calculate the mean:
-            int index = 0;
-            int sumSq = 0;
-            ArrayList<Integer> resultArray = new ArrayList<>();
             ArrayList<Integer> array = arrayIntegers;
-            index = 0;
 
             // Group <-> Integer
             LinkedHashMap<String, ArrayList<Integer>> hashGroupNumber = new LinkedHashMap<>();
@@ -1070,28 +1158,27 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             printArray(array);
             try {
                 // all the array is pointing to group 1:
-                //initiateI(array, hashGroupNumber);
+                // initiateI(array, hashGroupNumber);
 
                 int group = 1;
 
                 Integer previous = array.get(0);
                 Integer temp = previous;
-                double tolerance = 0.5; //1 = 100%, 0.5 = 200% tolerance,
-                //put the first:
-                addValues(Integer.toString(group), temp,hashGroupNumber);
+                double tolerance = 0.5; // 1 = 100%, 0.5 = 200% tolerance,
+                // put the first:
+                addValues(Integer.toString(group), temp, hashGroupNumber);
 
-                for(int i = 1; i< array.size(); i++){
+                for (int i = 1; i < array.size(); i++) {
                     temp = array.get(i);
                     System.out.println(temp + " " + previous + " " + group);
-                    if(temp > (previous + (previous/tolerance))){
+                    if (temp > (previous + (previous / tolerance))) {
                         group++;
                     }
-                    addValues(Integer.toString(group), temp,hashGroupNumber);
+                    addValues(Integer.toString(group), temp, hashGroupNumber);
                     previous = temp;
                 }
 
                 showClassification(hashGroupNumber);
-
 
             } catch (
 
@@ -1101,56 +1188,59 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         }
 
-        //Multimap function 1:
+        // Multimap function 1:
         private static void addValues(String key, Integer value, LinkedHashMap<String, ArrayList<Integer>> hashMap) {
             ArrayList tempList = null;
             if (hashMap.containsKey(key)) {
-               tempList = hashMap.get(key);
-               if(tempList == null) {
-                tempList = new ArrayList();
-            }
-               tempList.add(value);
+                tempList = hashMap.get(key);
+                if (tempList == null) {
+                    tempList = new ArrayList();
+                }
+                tempList.add(value);
             } else {
-               tempList = new ArrayList();
-               tempList.add(value);
+                tempList = new ArrayList();
+                tempList.add(value);
             }
-            hashMap.put(key,tempList);
-         }
+            hashMap.put(key, tempList);
+        }
 
-        //Multimap function 2:
+        // Multimap function 3:
+        private static void addValuesL(String key, Long temp, LinkedHashMap<String, ArrayList<Long>> hashMap) {
+            ArrayList tempList = null;
+            if (hashMap.containsKey(key)) {
+                tempList = hashMap.get(key);
+                if (tempList == null) {
+                    tempList = new ArrayList();
+                }
+                tempList.add(temp);
+            } else {
+                tempList = new ArrayList();
+                tempList.add(temp);
+            }
+            hashMap.put(key, tempList);
+        }
+
+        // Multimap function 2:
         private static void addValuesD(String key, Double value, LinkedHashMap<String, ArrayList<Double>> hashMap) {
             ArrayList tempList = null;
             if (hashMap.containsKey(key)) {
-               tempList = hashMap.get(key);
-               if(tempList == null) {
-                tempList = new ArrayList();
-            }
-               tempList.add(value);
+                tempList = hashMap.get(key);
+                if (tempList == null) {
+                    tempList = new ArrayList();
+                }
+                tempList.add(value);
             } else {
-               tempList = new ArrayList();
-               tempList.add(value);
+                tempList = new ArrayList();
+                tempList.add(value);
             }
-            hashMap.put(key,tempList);
-         }
-        // initiation for integers
-        private static void initiateI(ArrayList<Integer> array, LinkedHashMap<String, Integer> hashGroupNumber) {
-            int each;
-            for (int i = 0; i < array.size(); i++) {
-                each = array.get(i);
-                hashGroupNumber.put("0", each);
-            }
-
+            hashMap.put(key, tempList);
         }
 
         // Double:
         public void SimulationD() {
 
             // calculate the mean:
-            int index = 0;
-            int sumSq = 0;
-            ArrayList<Double> resultArray = new ArrayList<>();
             ArrayList<Double> array = arrayDouble;
-            index = 0;
 
             // Group <-> Integer
             LinkedHashMap<String, ArrayList<Double>> hashGroupNumber = new LinkedHashMap<>();
@@ -1161,23 +1251,23 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             printArrayD(array);
             try {
                 // all the array is pointing to group 1:
-                //initiateI(array, hashGroupNumber);
+                // initiateI(array, hashGroupNumber);
 
                 int group = 1;
 
                 Double previous = array.get(0);
                 Double temp = previous;
-                double tolerance = 0.5; //1 = 100%, 0.5 = 200% tolerance,
-                //put the first:
-                addValuesD(Integer.toString(group), temp,hashGroupNumber);
+                double tolerance = 0.5; // 1 = 100%, 0.5 = 200% tolerance,
+                // put the first:
+                addValuesD(Integer.toString(group), temp, hashGroupNumber);
 
-                for(int i = 1; i< array.size(); i++){
+                for (int i = 1; i < array.size(); i++) {
                     temp = array.get(i);
                     System.out.println(temp + " " + previous + " " + group);
-                    if(temp > (previous + (previous/tolerance))){
+                    if (temp > (previous + (previous / tolerance))) {
                         group++;
                     }
-                    addValuesD(Integer.toString(group), temp,hashGroupNumber);
+                    addValuesD(Integer.toString(group), temp, hashGroupNumber);
                     previous = temp;
                 }
 
@@ -1198,17 +1288,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             System.out.println("Classification");
             for (String key : hash.keySet()) {
                 System.out.println(key + " " + hash.get(key));
-            }
-        }
-
-        // This initiate a classification array:
-        private static void initiateD(ArrayList<Double> array, LinkedHashMap<String, Double> hashGroupNumber) {
-
-            // run through the array:
-            double each;
-            for (int i = 0; i < array.size(); i++) {
-                each = array.get(i);
-                hashGroupNumber.put("1", each);
             }
         }
 
@@ -1338,19 +1417,28 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         public static void printArray(ArrayList<Integer> array) {
 
             for (int i = 0; i < array.size(); i++) {
-                System.out.print(array.get(i)+ " ");
+                System.out.print(array.get(i) + " ");
+            }
+            System.out.println(" ");
+        }
+        // print long - change this function here:
+        public static void printArrayL(ArrayList<Long> array) {
+
+            for (int i = 0; i < array.size(); i++) {
+                System.out.print(array.get(i) + " ");
             }
             System.out.println(" ");
         }
 
-        // print integer - change this function here:
+        // print double - change this function here:
         public static void printArrayD(ArrayList<Double> array) {
 
             for (int i = 0; i < array.size(); i++) {
-                System.out.print(array.get(i)+ " ");
+                System.out.print(array.get(i) + " ");
             }
             System.out.println(" ");
         }
+
         // print integer - change this function here:
         public static void printI(ArrayList<ArrayList<Integer>> groups) {
             System.out.println("\n");
@@ -1553,28 +1641,33 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         System.out.println(" ");
     }
 
-    // Run the Classification:
-    public static void RunClassification() {
+    // Run the Classification - 1 for the whole tree, 2 for each function:
+    public static void RunClassification(int kind) {
 
         // Getting the data:
-        Node<ProfileData> temp;
+        Node<ProfileData> eachECCTs;
         double duration;
 
         ArrayList<Double> durationList = new ArrayList<>();
         LinkedHashMap<Double, Node<ProfileData>> hash = new LinkedHashMap<>();
 
         if (hashECCTs.length > 1) {
-            for (int j = 0; j < hashECCTs.length; j++) {
-                temp = ArrayECCTs.get(j);
-                duration = temp.getProfileData().getDuration();
-                durationList.add(Double.valueOf(duration));
+            if (kind == 1) {
+                for (int i = 0; i < hashECCTs.length; i++) {
+                    eachECCTs = ArrayECCTs.get(i);
+                    duration = eachECCTs.getProfileData().getDuration();
+                    durationList.add(Double.valueOf(duration));
 
-                // link between node x duration:
-                hash.put(duration, temp);
+                    // link between node x duration:
+                    hash.put(duration, eachECCTs);
+                }
+
+                // Run the classification method for the whole duration:
+                variationClassification(durationList, hash);
+            } else {
+                variationClassificationF();
             }
 
-            // Run the classification method:
-            variationClassification(durationList, hash);
         } else {
             System.out.println("At least more than one group");
         }

@@ -427,11 +427,12 @@ public class SampleView extends AbstractTimeGraphView {
                 A.add(1003);
                 A.add(1003);
                 A.add(1003);
-                A.add(1003);
-                CCTAnalysisModule.variationClassification(A, null);*/
+                A.add(1003);*/
+                //CCTAnalysisModule.variationClassification(A, null);
 
                 // Run over the tree:
-                CCTAnalysisModule.RunClassification();
+                //CCTAnalysisModule.RunClassification(1);
+                CCTAnalysisModule.RunClassification(2);
 
             }
         };
