@@ -387,10 +387,10 @@ public class SampleView extends AbstractTimeGraphView {
         fKDEAction = new Action() {
             @Override
             public void run() {
-                System.out.println("Apply KDE");
+                System.out.println("Apply KDE Test");
 
                 // Run over the tree:
-                // CCTAnalysisModule.RunKDE();
+                CCTAnalysisModule.RunKDE();
 
             }
         };

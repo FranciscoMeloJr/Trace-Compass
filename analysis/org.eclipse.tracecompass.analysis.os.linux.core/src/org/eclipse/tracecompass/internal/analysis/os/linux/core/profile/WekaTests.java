@@ -1,81 +1,83 @@
 package org.eclipse.tracecompass.internal.analysis.os.linux.core.profile;
 
-//Weka:
-import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
-import weka.core.Attribute;
-import weka.core.FastVector;
-import weka.core.Instance;
+import weka.classifiers.functions.SMO;
+import weka.classifiers.trees.J48;
 import weka.core.Instances;
-
+import weka.core.converters.ConverterUtils.DataSource;
+import weka.estimators.KernelEstimator;
 
 public class WekaTests {
-    public static void main(String[] args) throws Exception{
-        return;
+    public static void main(String args[]) throws Exception {
+        System.out.println("wekatests");
+        Classifier();
     }
-/*
-    public static void main(String[] args) throws Exception{
 
-         // Declare two numeric attributes
-         Attribute Attribute1 = new Attribute("firstNumeric");
-         Attribute Attribute2 = new Attribute("secondNumeric");
+    public static void Classifier() {
+        System.out.println("Classifier");
+        // load dataset
+        try {
+            DataSource source = new DataSource("/home/frank/Desktop/TraceCompare/iris.arff");
+            Instances dataset = source.getDataSet();
+            // set class index to the last attribute
+            dataset.setClassIndex(dataset.numAttributes() - 1);
+            // create and build the classifier!
+            NaiveBayes nb = new NaiveBayes();
+            nb.buildClassifier(dataset);
+            // print out capabilities
+            System.out.println(nb.getCapabilities().toString());
 
-         // Declare a nominal attribute along with its values
-         FastVector fvNominalVal = new FastVector(3);
-         fvNominalVal.addElement("blue");
-         fvNominalVal.addElement("gray");
-         fvNominalVal.addElement("black");
-         Attribute Attribute3 = new Attribute("aNominal", fvNominalVal);
+            SMO svm = new SMO();
+            svm.buildClassifier(dataset);
+            System.out.println(svm.getCapabilities().toString());
 
-         // Declare the class attribute along with its values
-         FastVector fvClassVal = new FastVector(2);
-         fvClassVal.addElement("positive");
-         fvClassVal.addElement("negative");
-         Attribute ClassAttribute = new Attribute("theClass", fvClassVal);
-
-         // Declare the feature vector
-         FastVector fvWekaAttributes = new FastVector(4);
-         fvWekaAttributes.addElement(Attribute1);
-         fvWekaAttributes.addElement(Attribute2);
-         fvWekaAttributes.addElement(Attribute3);
-         fvWekaAttributes.addElement(ClassAttribute);
-
-         // Create an empty training set
-         Instances isTrainingSet = new Instances("Rel", fvWekaAttributes, 10);
-
-         // Set class index
-         isTrainingSet.setClassIndex(3);
-
-         // Create the instance
-         Instance iExample = new Instance(4);
-         iExample.setValue((Attribute)fvWekaAttributes.elementAt(0), 1.0);
-         iExample.setValue((Attribute)fvWekaAttributes.elementAt(1), 0.5);
-         iExample.setValue((Attribute)fvWekaAttributes.elementAt(2), "gray");
-         iExample.setValue((Attribute)fvWekaAttributes.elementAt(3), "positive");
-
-         // add the instance
-         isTrainingSet.add(iExample);
-         Classifier cModel = new NaiveBayes();
-         cModel.buildClassifier(isTrainingSet);
-
-         // Test the model
-         Evaluation eTest = new Evaluation(isTrainingSet);
-         eTest.evaluateModel(cModel, isTrainingSet);
-
-         // Print the result à la Weka explorer:
-         String strSummary = eTest.toSummaryString();
-         System.out.println(strSummary);
-
-         // Get the confusion matrix
-         double[][] cmMatrix = eTest.confusionMatrix();
-         for(int row_i=0; row_i<cmMatrix.length; row_i++){
-             for(int col_i=0; col_i<cmMatrix.length; col_i++){
-                 System.out.print(cmMatrix[row_i][col_i]);
-                 System.out.print("|");
-             }
-             System.out.println();
-         }
+            String[] options = new String[4];
+            options[0] = "-C";
+            options[1] = "0.11";
+            options[2] = "-M";
+            options[3] = "3";
+            J48 tree = new J48();
+            tree.setOptions(options);
+            tree.buildClassifier(dataset);
+            System.out.println(tree.getCapabilities().toString());
+            System.out.println(tree.graph());
+        } catch (Exception ex) {
+            System.out.println("Exception Classifier");
+        }
     }
-*/
+
+    //KDE
+    public static void KDE() {
+        System.out.println("KDE");
+        // load dataset
+        try {
+            DataSource source = new DataSource("/home/frank/Desktop/TraceCompare/iris.arff");
+            Instances dataset = source.getDataSet();
+            // set class index to the last attribute
+            dataset.setClassIndex(dataset.numAttributes() - 1);
+            // create and build the classifier!
+            KernelEstimator nb = new KernelEstimator(0.1);
+
+            nb.addValues(dataset); //nb.buildClassifier(dataset);
+            // print out capabilities
+            System.out.println(nb.getCapabilities().toString());
+
+            SMO svm = new SMO();
+            svm.buildClassifier(dataset);
+            System.out.println(svm.getCapabilities().toString());
+
+            String[] options = new String[4];
+            options[0] = "-C";
+            options[1] = "0.11";
+            options[2] = "-M";
+            options[3] = "3";
+            J48 tree = new J48();
+            tree.setOptions(options);
+            tree.buildClassifier(dataset);
+            System.out.println(tree.getCapabilities().toString());
+            System.out.println(tree.graph());
+        } catch (Exception ex) {
+            System.out.println("Exception Classifier");
+        }
+    }
 }

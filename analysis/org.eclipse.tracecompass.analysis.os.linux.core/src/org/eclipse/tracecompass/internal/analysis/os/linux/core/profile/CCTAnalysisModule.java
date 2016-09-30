@@ -1103,12 +1103,12 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             LinkedHashMap<String, ArrayList<Long>> result;
             for(String eachFunction : durationFunction.keySet()){
                 System.out.println("Function " + eachFunction);
-                result = rangeClassification(durationFunction.get(eachFunction));
+                result = rangeClassification(durationFunction.get(eachFunction), 0.5);
                 showClassification(result);
             }
         }
         //RangeClassification:
-        public  LinkedHashMap<String, ArrayList<Long>> rangeClassification(ArrayList<Long> arrayD) {
+        public  LinkedHashMap<String, ArrayList<Long>> rangeClassification(ArrayList<Long> arrayD, double tolerance) {
             // calculate the mean:
             ArrayList<Long> array = arrayD;
 
@@ -1126,7 +1126,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             Long previous = array.get(0);
             Long temp = previous;
-            double tolerance = 0.5; // 1 = 100%, 0.5 = 200% tolerance,
+            //double tolerance = 0.5; // 1 = 100%, 0.5 = 200% tolerance,
             // put the first:
             addValuesL(Integer.toString(group), temp, hashGroupNumber);
 
@@ -1672,5 +1672,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             System.out.println("At least more than one group");
         }
 
+    }
+
+    //CAll Weka Tests:
+    public static void RunKDE() {
+        WekaTests.Classifier();
     }
 }

@@ -11,5 +11,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="/home/frank/Desktop/Progress Meeting/weka/weka-3-8-0/weka.jar"/>
+	<classpathentry kind="lib" path="/home/frank/Desktop/Progress Meeting/weka/weka-3-8-0/weka-src.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
