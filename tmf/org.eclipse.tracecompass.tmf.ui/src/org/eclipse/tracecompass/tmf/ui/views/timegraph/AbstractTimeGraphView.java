@@ -292,7 +292,7 @@ public abstract class AbstractTimeGraphView extends TmfView implements ITmfTimeA
 
     /**
      * @author frank
-     * @since 2.0
+     * @since 2.1
      *
      */
     // ------------------------------------------------------------------------

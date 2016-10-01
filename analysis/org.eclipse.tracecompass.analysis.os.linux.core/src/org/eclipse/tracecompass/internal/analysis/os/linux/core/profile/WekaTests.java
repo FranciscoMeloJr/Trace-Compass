@@ -10,7 +10,8 @@ import weka.estimators.KernelEstimator;
 public class WekaTests {
     public static void main(String args[]) throws Exception {
         System.out.println("wekatests");
-        Classifier();
+        //Classifier();
+        KDE();
     }
 
     public static void Classifier() {
@@ -56,26 +57,11 @@ public class WekaTests {
             // set class index to the last attribute
             dataset.setClassIndex(dataset.numAttributes() - 1);
             // create and build the classifier!
-            KernelEstimator nb = new KernelEstimator(0.1);
+            KernelEstimator kde = new KernelEstimator(0.1);
 
-            nb.addValues(dataset); //nb.buildClassifier(dataset);
             // print out capabilities
-            System.out.println(nb.getCapabilities().toString());
+            System.out.println(kde.getCapabilities().toString());
 
-            SMO svm = new SMO();
-            svm.buildClassifier(dataset);
-            System.out.println(svm.getCapabilities().toString());
-
-            String[] options = new String[4];
-            options[0] = "-C";
-            options[1] = "0.11";
-            options[2] = "-M";
-            options[3] = "3";
-            J48 tree = new J48();
-            tree.setOptions(options);
-            tree.buildClassifier(dataset);
-            System.out.println(tree.getCapabilities().toString());
-            System.out.println(tree.graph());
         } catch (Exception ex) {
             System.out.println("Exception Classifier");
         }

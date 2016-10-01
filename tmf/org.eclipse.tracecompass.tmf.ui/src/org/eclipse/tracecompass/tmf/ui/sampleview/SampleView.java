@@ -416,7 +416,7 @@ public class SampleView extends AbstractTimeGraphView {
                 System.out.println("Test");
                 // test
                 ArrayList<Integer> A = new ArrayList<>();
-                /*A.add(10);
+                A.add(10);
                 A.add(11);
                 A.add(12);
                 A.add(13);
@@ -427,12 +427,13 @@ public class SampleView extends AbstractTimeGraphView {
                 A.add(1003);
                 A.add(1003);
                 A.add(1003);
-                A.add(1003);*/
-                //CCTAnalysisModule.variationClassification(A, null);
+                A.add(1003);
+                // CCTAnalysisModule.variationClassification(A, null);
+                //CCTAnalysisModule.callJNB(A);
 
                 // Run over the tree:
-                //CCTAnalysisModule.RunClassification(1);
-                CCTAnalysisModule.RunClassification(2);
+                // CCTAnalysisModule.RunClassification(1);
+                 CCTAnalysisModule.RunClassification(2);
 
             }
         };
@@ -494,7 +495,7 @@ public class SampleView extends AbstractTimeGraphView {
                     } else {
                         EndDelimiter = label;
                     }
-                    if(kind == -1) {
+                    if (kind == -1) {
                         DelimiterString = label;
                     }
                     resetAnalysis(BeginDelimiter, EndDelimiter, DelimiterString);
@@ -544,9 +545,8 @@ public class SampleView extends AbstractTimeGraphView {
                 // module.waitForCompletion();
                 rebuild();
                 redraw();
-            }
-            else {
-                module.setParameters(entry, exit,stringInterval);
+            } else {
+                module.setParameters(entry, exit, stringInterval);
                 // module.schedule();
                 // module.waitForCompletion();
                 rebuild();

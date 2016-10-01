@@ -918,6 +918,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
         System.out.print("Size" + durationNodeHash.size());
+        System.out.print("Range Classification");
         Classification temp = new Classification(durationNodeHash);
         temp.doSimulation();
 
@@ -1101,14 +1102,16 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
 
             LinkedHashMap<String, ArrayList<Long>> result;
-            for(String eachFunction : durationFunction.keySet()){
-                System.out.println("Function " + eachFunction);
+            for (String eachFunction : durationFunction.keySet()) {
                 result = rangeClassification(durationFunction.get(eachFunction), 0.5);
-                showClassification(result);
+                int nKeys = showClassification(result);
+                System.out.println("Function " + eachFunction + " Groups:" + nKeys);
+                // Display the classification:
             }
         }
-        //RangeClassification:
-        public  LinkedHashMap<String, ArrayList<Long>> rangeClassification(ArrayList<Long> arrayD, double tolerance) {
+
+        // RangeClassification:
+        public LinkedHashMap<String, ArrayList<Long>> rangeClassification(ArrayList<Long> arrayD, double tolerance) {
             // calculate the mean:
             ArrayList<Long> array = arrayD;
 
@@ -1126,13 +1129,13 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             Long previous = array.get(0);
             Long temp = previous;
-            //double tolerance = 0.5; // 1 = 100%, 0.5 = 200% tolerance,
+            // double tolerance = 0.5; // 1 = 100%, 0.5 = 200% tolerance,
             // put the first:
             addValuesL(Integer.toString(group), temp, hashGroupNumber);
 
             for (int i = 1; i < array.size(); i++) {
                 temp = array.get(i);
-                //System.out.println(temp + " " + previous + " " + group);
+                // System.out.println(temp + " " + previous + " " + group);
                 if (temp > (previous + (previous / tolerance))) {
                     group++;
                 }
@@ -1271,6 +1274,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     previous = temp;
                 }
 
+                //Display the classification:
                 showClassification(hashGroupNumber);
 
             } catch (
@@ -1282,13 +1286,16 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
         // This initiate a classification array:
-        private static void showClassification(LinkedHashMap<String, ?> hash) {
+        private static int showClassification(LinkedHashMap<String, ?> hash) {
 
             // run through the array:
             System.out.println("Classification");
+            int nKeys = 0;
             for (String key : hash.keySet()) {
                 System.out.println(key + " " + hash.get(key));
+                nKeys++;
             }
+            return nKeys;
         }
 
         public void calculateMeanArray() {
@@ -1421,6 +1428,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
             System.out.println(" ");
         }
+
         // print long - change this function here:
         public static void printArrayL(ArrayList<Long> array) {
 
@@ -1674,8 +1682,19 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     }
 
-    //CAll Weka Tests:
+    // CAll Weka Tests:
     public static void RunKDE() {
         WekaTests.Classifier();
+    }
+
+    //Call the JNB:
+    public static void callJNB(ArrayList<Integer> a) {
+
+        int n = 10;
+        for (int i = 1; i < n; i++) {
+            System.out.println("With " + i + "group");
+            Classification.getJenksBreaks(a, i);
+        }
+
     }
 }
