@@ -13,6 +13,7 @@ public class Node<T extends IProfileData> {
     private int fColor = 0;
     private long fPointer = 0;
     private long fDur = 0;
+    private String fGroup = new String(Integer.toString(0));
 
     public Node() {
         fChildren = new ArrayList<>();
@@ -131,6 +132,15 @@ public class Node<T extends IProfileData> {
 
     public long getDur() {
         return fDur;
+
+    }
+
+    //Set and get for group:
+    public void setGroup(String newGr) {
+        fGroup = newGr;
+    }
+    public String getGroup() {
+        return fGroup;
 
     }
 }

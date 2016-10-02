@@ -390,8 +390,8 @@ public class SampleView extends AbstractTimeGraphView {
                 System.out.println("Apply KDE Test");
 
                 // Run over the tree:
-                CCTAnalysisModule.RunKDE();
-
+                //CCTAnalysisModule.RunKDE();
+                CCTAnalysisModule.RunKMean();
             }
         };
         fKDEAction.setText("KDE");
@@ -434,7 +434,7 @@ public class SampleView extends AbstractTimeGraphView {
                 // Run over the tree:
                 // CCTAnalysisModule.RunClassification(1);
                  CCTAnalysisModule.RunClassification(2);
-
+                 redraw();
             }
         };
         fClassificationAction.setText("Classification");
@@ -968,6 +968,7 @@ public class SampleView extends AbstractTimeGraphView {
         String fLabel;
         int fValue, fLevel;
         int fColor; // change to enum Color; grey, green and red
+        String fGroup; // change according to the group
 
         /** TimeGraphEntry matching this time event */
         protected ITimeGraphEntry fEntry;
@@ -976,6 +977,9 @@ public class SampleView extends AbstractTimeGraphView {
         private static final int NOVALUE = Integer.MIN_VALUE;
 
         public EventNode(ITimeGraphEntry entry, String label, int nodeId, long time, long duration, int value, int level, int color) {
+            this(entry, label, nodeId, time, duration, value, level, color, null);
+        }
+        public EventNode(ITimeGraphEntry entry, String label, int nodeId, long time, long duration, int value, int level, int color, String Gr) {
             fEntry = entry;
             fNodeId = nodeId;
             fTime = time;
@@ -984,6 +988,7 @@ public class SampleView extends AbstractTimeGraphView {
             fValue = value;
             fLevel = level;
             fColor = color;
+            fGroup = Integer.toString(0); //test
         }
 
         public boolean hasValue() {
@@ -1040,6 +1045,13 @@ public class SampleView extends AbstractTimeGraphView {
 
         public int getColor() {
             return fColor;
+        }
+
+        public String getGroup() {
+            return fGroup;
+        }
+        public void setGroup(String G) {
+            fGroup = G;
         }
     }
 

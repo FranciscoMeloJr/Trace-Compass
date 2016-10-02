@@ -34,6 +34,9 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
 
     private Integer fAverageCharWidth;
 
+    // Type:
+    Type type = Type.NAME;
+
     private enum State {
         // Gray:
         GRAY(new RGB(100, 100, 100)), GREEN(new RGB(0, 200, 0)), RED(new RGB(100, 0, 0));
@@ -43,6 +46,10 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
         private State(RGB rgb) {
             this.rgb = rgb;
         }
+    }
+
+    private enum Type {
+        NAME, GROUP
     }
 
     /**
@@ -109,11 +116,11 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
                 return State.GRAY.ordinal();
             }
         }
-        // Changes for CallGraph:
 
-        if (event instanceof ThreadNode){
+        // Changes for CallGraph:
+        if (event instanceof ThreadNode) {
             ThreadNode eventNode = (ThreadNode) event;
-            //Gray:
+            // Gray:
             return State.GRAY.ordinal();
         }
 
@@ -163,7 +170,12 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
         }
         if (event instanceof EventNode) {
             EventNode entry = (EventNode) event;
-            String label = entry.toString();
+            String label;
+            if (type.equals(Type.NAME)) {
+                label = entry.toString();
+            } else {
+                label = entry.getGroup();
+            }
 
             gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
             Utils.drawText(gc, label, bounds.x, bounds.y, bounds.width, bounds.height, true, true);
@@ -174,13 +186,9 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
         EventEntry entry = (EventEntry) event.getEntry();
         // ITmfStateSystem ss = entry.getStateSystem();
         try {
-            // ITmfStateValue value = ss.querySingleState(event.getTime(),
-            // entry.getQuark()).getStateValue();
-            // if (!value.isNull()) {
             String name = fSampleView.getFunctionName();
             gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
             Utils.drawText(gc, name, bounds.x, bounds.y, bounds.width, bounds.height, true, true);
-            // }
         } catch (TimeRangeException e) {
             Activator.getDefault().logError("Error", e); //$NON-NLS-1$
         }

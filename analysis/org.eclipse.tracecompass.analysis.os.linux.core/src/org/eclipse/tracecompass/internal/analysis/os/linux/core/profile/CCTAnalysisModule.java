@@ -895,12 +895,13 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     }
 
-    // This function Classify a hash called by SampleView:
+    // This function Classify a hash called by SampleView, for each function
+    // there is a classification:
     public static void variationClassificationF() {
-        // Can be Integer or Double:
 
+        // each hash in the array:
         LinkedHashMap<KeyTree, Node<ProfileData>> eachHashECCT = new LinkedHashMap<>();
-        // duration <-> function of all them:
+        // node <-> duration:
         LinkedHashMap<Node<ProfileData>, Long> durationNodeHash = new LinkedHashMap<>();
 
         // For each tree:
@@ -990,7 +991,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         // hash: String <-> Integer:
         static LinkedHashMap<String, Double> hashGroupDouble = null;
 
-        // hash: node <-> duration:
+        static // hash: node <-> duration:
         LinkedHashMap<Node<ProfileData>, Long> durationNodeHash = null;
 
         // hash: Double <-> Node:
@@ -1090,27 +1091,54 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             // function <-> duration
             LinkedHashMap<String, ArrayList<Long>> durationFunction = new LinkedHashMap<>();
+            // group <-> duration:
+            LinkedHashMap<String, ArrayList<Long>> result;
 
             System.out.println("SimulationF");
-            // run over the durationHash:
+            // run over the durationHash, with all the nodes:
             for (Node<ProfileData> key : durationNodeHash.keySet()) {
                 @Nullable
                 Long duration = durationNodeHash.get(key);
-                String label = key.getNodeLabel();
+                String functionLabel = key.getNodeLabel();
                 System.out.println(key.getNodeLabel() + " " + durationNodeHash.get(key));
-                addValuesL(label, duration, durationFunction);
+                addValuesL(functionLabel, duration, durationFunction);
             }
 
-            LinkedHashMap<String, ArrayList<Long>> result;
+            //Function addr=0x400baa Groups:1
+            //1 [3240015, 3273372, 3336086, 3357447, 3381480, 3413221, 3421644, 3435595, 3435714, 3435715]
             for (String eachFunction : durationFunction.keySet()) {
                 result = rangeClassification(durationFunction.get(eachFunction), 0.5);
                 int nKeys = showClassification(result);
                 System.out.println("Function " + eachFunction + " Groups:" + nKeys);
-                // Display the classification:
+                //function+<node, arrayDuration>+<group, arrayList>
+                putFunctionGroup(eachFunction, result);
             }
+
         }
 
-        // RangeClassification:
+        //Function to put the result in the nodes:
+        private static void putFunctionGroup(String function, LinkedHashMap<String, ArrayList<Long>> result) {
+
+            //Put the result in the nodes iterating over the result:
+            for (Node<ProfileData> keyNode : durationNodeHash.keySet()) {
+                String label = keyNode.getNodeLabel();
+                if(function == label){
+                    //Find the duration in the array:
+                    for ( String key : result.keySet()) {
+                        for(int i = 0; i< result.get(key).size();i++){
+                            Long duration = result.get(key).get(i);
+                            if(duration == keyNode.getDur()){
+                                keyNode.setGroup(key);
+                                System.out.println("Node" + keyNode.getNodeId() + "group" + keyNode.getGroup());
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
+        // RangeClassification: method
         public LinkedHashMap<String, ArrayList<Long>> rangeClassification(ArrayList<Long> arrayD, double tolerance) {
             // calculate the mean:
             ArrayList<Long> array = arrayD;
@@ -1274,7 +1302,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     previous = temp;
                 }
 
-                //Display the classification:
+                // Display the classification:
                 showClassification(hashGroupNumber);
 
             } catch (
@@ -1687,7 +1715,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         WekaTests.Classifier();
     }
 
-    //Call the JNB:
+    // Call the JNB:
     public static void callJNB(ArrayList<Integer> a) {
 
         int n = 10;
@@ -1696,5 +1724,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             Classification.getJenksBreaks(a, i);
         }
 
+    }
+
+    // Call the KMean:
+    public static void RunKMean() {
+       KMean.execute();
+       KMean.ElbowMethod();
     }
 }
