@@ -1728,7 +1728,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     // Call the KMean:
     public static void RunKMean() {
-       KMean.execute();
-       KMean.ElbowMethod();
+       KMean.test();
     }
 }
