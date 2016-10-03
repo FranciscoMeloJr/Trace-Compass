@@ -542,6 +542,89 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     /**
+     * This function merges an arraylist of trees, updating the tree in the
+     * final part
+     *
+     * @param: the
+     *             position of the two trees
+     *
+     * @return void: because the hash is updated
+     */
+    public static void mergeArray(ArrayList<Integer> positions) {
+
+        int j, i, k = 0;
+        LinkedHashMap<KeyTree, Node<ProfileData>> result;
+        LinkedHashMap<KeyTree, Node<ProfileData>> temp;
+
+        LinkedHashMap<KeyTree, Node<ProfileData>> finalResult[] = hashECCTs;
+
+        // temp is the first tree:
+        if (positions.size() > 2) {
+            System.out.println("merging " + positions.size());
+            temp = hashECCTs[positions.get(0)];
+            result = hashECCTs[positions.get(1)];
+            for (j = 1; j < positions.size(); j++) {
+                k = positions.get(j);
+                if (hashECCTs[k] != null) {
+                    temp = hashECCTs[k];
+                    result = mergeSimilarTree(result, temp);
+                }
+            }
+        }
+        else{
+            if (positions.size() == 2) {
+                temp = hashECCTs[positions.get(0)];
+                result = hashECCTs[positions.get(1)];
+                result = mergeSimilarTree(result, temp);
+            }
+            else{
+                System.out.println("merging nothing");
+            }
+        }
+        for (j = 0, i = 0; i < hashECCTs.length; i++) {
+            if (hashECCTs[i] != null) {
+                finalResult[j] = hashECCTs[i];
+                j++;
+            }
+
+        }
+
+        hashECCTs = finalResult;
+
+    }
+
+    /**
+     * This function merges two trees, updating the tree
+     *
+     * @param: the
+     *             position of the two trees
+     *
+     * @return void: because the hash is updated
+     */
+    public static void mergeTwoTrees(int position1, int position2) {
+        LinkedHashMap<KeyTree, Node<ProfileData>> tree1 = hashECCTs[position1];
+        LinkedHashMap<KeyTree, Node<ProfileData>> tree2 = hashECCTs[position2];
+        LinkedHashMap<KeyTree, Node<ProfileData>> result;
+
+        LinkedHashMap<KeyTree, Node<ProfileData>> finalResult[] = hashECCTs;
+
+        result = mergeSimilarTree(tree1, tree2);
+        hashECCTs[position1] = result;
+        hashECCTs[position2] = null;
+
+        int j, i;
+        for (j = 0, i = 0; i < hashECCTs.length; i++) {
+            if (hashECCTs[i] != null) {
+                finalResult[j] = hashECCTs[i];
+                j++;
+            }
+
+        }
+
+        hashECCTs = finalResult;
+    }
+
+    /**
      * This function creates a meanTree with the array of Trees
      *
      * @param root1:
@@ -1104,30 +1187,31 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 addValuesL(functionLabel, duration, durationFunction);
             }
 
-            //Function addr=0x400baa Groups:1
-            //1 [3240015, 3273372, 3336086, 3357447, 3381480, 3413221, 3421644, 3435595, 3435714, 3435715]
+            // Function addr=0x400baa Groups:1
+            // 1 [3240015, 3273372, 3336086, 3357447, 3381480, 3413221, 3421644,
+            // 3435595, 3435714, 3435715]
             for (String eachFunction : durationFunction.keySet()) {
                 result = rangeClassification(durationFunction.get(eachFunction), 0.5);
                 int nKeys = showClassification(result);
                 System.out.println("Function " + eachFunction + " Groups:" + nKeys);
-                //function+<node, arrayDuration>+<group, arrayList>
+                // function+<node, arrayDuration>+<group, arrayList>
                 putFunctionGroup(eachFunction, result);
             }
 
         }
 
-        //Function to put the result in the nodes:
+        // Function to put the result in the nodes:
         private static void putFunctionGroup(String function, LinkedHashMap<String, ArrayList<Long>> result) {
 
-            //Put the result in the nodes iterating over the result:
+            // Put the result in the nodes iterating over the result:
             for (Node<ProfileData> keyNode : durationNodeHash.keySet()) {
                 String label = keyNode.getNodeLabel();
-                if(function == label){
-                    //Find the duration in the array:
-                    for ( String key : result.keySet()) {
-                        for(int i = 0; i< result.get(key).size();i++){
+                if (function == label) {
+                    // Find the duration in the array:
+                    for (String key : result.keySet()) {
+                        for (int i = 0; i < result.get(key).size(); i++) {
                             Long duration = result.get(key).get(i);
-                            if(duration == keyNode.getDur()){
+                            if (duration == keyNode.getDur()) {
                                 keyNode.setGroup(key);
                                 System.out.println("Node" + keyNode.getNodeId() + "group" + keyNode.getGroup());
                             }
@@ -1688,7 +1772,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         LinkedHashMap<Double, Node<ProfileData>> hash = new LinkedHashMap<>();
 
         if (hashECCTs.length > 1) {
-            if (kind == 1) {
+            if (kind != 2) {
                 for (int i = 0; i < hashECCTs.length; i++) {
                     eachECCTs = ArrayECCTs.get(i);
                     duration = eachECCTs.getProfileData().getDuration();
@@ -1699,7 +1783,12 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 }
 
                 // Run the classification method for the whole duration:
-                variationClassification(durationList, hash);
+                if (kind == 1) {
+                    variationClassification(durationList, hash);
+                } else {
+                    RunKMean(durationList, hash);
+                }
+
             } else {
                 variationClassificationF();
             }
@@ -1727,7 +1816,49 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     // Call the KMean:
-    public static void RunKMean() {
-       KMean.test();
+    public static void RunKMean(ArrayList<Double> durationList, LinkedHashMap<Double, Node<ProfileData>> hash) {
+        ArrayList<Integer> positionMerge = new ArrayList<>();
+        if (durationList != null) {
+            // Classification with arrayDouble
+            // This test all the combinations:
+            KMean.test(durationList);
+            // Execute with 2, which is the best k:
+            ArrayList<ArrayList<Double>> result = KMean.executeD(2, durationList.size(), durationList);
+            System.out.println("Result " + result);
+            Node<ProfileData> temp;
+            // Put the solution:
+            for (int i = 0; i < result.size(); i++) {
+                ArrayList<Double> eachGroup = result.get(i);
+                positionMerge = new ArrayList<>();
+                for (int j = 0; j < eachGroup.size(); j++) {
+                    Double duration = eachGroup.get(j);
+                    temp = hash.get(duration);
+                    // set the duration <-> group
+                    temp.setGroup(Integer.toString(i + 1));
+                    //Merge the trees within this group:
+                    positionMerge.add(findPositionInHash(duration));
+                }
+                //Merge the positions:
+                mergeArray(positionMerge);
+            }
+
+        } else {
+            // Test:
+            KMean.test();
+        }
+    }
+
+    // Find the position in the hash:
+    public static int findPositionInHash(Double Duration) {
+        double duration;
+        for (int i = 0; i < hashECCTs.length; i++) {
+            Node<ProfileData> eachECCTs = ArrayECCTs.get(i);
+            duration = eachECCTs.getProfileData().getDuration();
+
+            if (Duration == duration) {
+                return i;
+            }
+        }
+        return 0;
     }
 }

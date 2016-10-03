@@ -391,7 +391,7 @@ public class SampleView extends AbstractTimeGraphView {
 
                 // Run over the tree:
                 //CCTAnalysisModule.RunKDE();
-                CCTAnalysisModule.RunKMean();
+                CCTAnalysisModule.RunKMean(null,null);
             }
         };
         fKDEAction.setText("KDE");
@@ -415,25 +415,13 @@ public class SampleView extends AbstractTimeGraphView {
                 // Calling the Variation Classification
                 System.out.println("Test");
                 // test
-                ArrayList<Integer> A = new ArrayList<>();
-                A.add(10);
-                A.add(11);
-                A.add(12);
-                A.add(13);
-                A.add(100);
-                A.add(101);
-                A.add(102);
-                A.add(103);
-                A.add(1003);
-                A.add(1003);
-                A.add(1003);
-                A.add(1003);
                 // CCTAnalysisModule.variationClassification(A, null);
                 //CCTAnalysisModule.callJNB(A);
 
                 // Run over the tree:
                 // CCTAnalysisModule.RunClassification(1);
-                 CCTAnalysisModule.RunClassification(2);
+                 CCTAnalysisModule.RunClassification(3);
+                 refresh();
                  redraw();
             }
         };
