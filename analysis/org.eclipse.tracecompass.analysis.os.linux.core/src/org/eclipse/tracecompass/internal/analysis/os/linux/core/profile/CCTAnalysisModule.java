@@ -556,40 +556,47 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         LinkedHashMap<KeyTree, Node<ProfileData>> result;
         LinkedHashMap<KeyTree, Node<ProfileData>> temp;
 
-        LinkedHashMap<KeyTree, Node<ProfileData>> finalResult[] = hashECCTs;
+        LinkedHashMap<KeyTree, Node<ProfileData>> finalResult[];
 
         // temp is the first tree:
+        if (positions.size() == 2) {
+            mergeTwoTrees(positions.get(0), positions.get(1));
+            return;
+        }
+
         if (positions.size() > 2) {
             System.out.println("merging " + positions.size());
-            temp = hashECCTs[positions.get(0)];
-            result = hashECCTs[positions.get(1)];
+            result = hashECCTs[positions.get(0)];
             for (j = 1; j < positions.size(); j++) {
                 k = positions.get(j);
                 if (hashECCTs[k] != null) {
                     temp = hashECCTs[k];
                     result = mergeSimilarTree(result, temp);
                 }
+                hashECCTs[k] = null;
             }
-        }
-        else{
-            if (positions.size() == 2) {
-                temp = hashECCTs[positions.get(0)];
-                result = hashECCTs[positions.get(1)];
-                result = mergeSimilarTree(result, temp);
+            hashECCTs[positions.get(0)] = result;
+
+            for (j = 0, i = 0; i < hashECCTs.length; i++) {
+                if (hashECCTs[i] != null) {
+                    j++;
+                }
             }
-            else{
-                System.out.println("merging nothing");
-            }
-        }
-        for (j = 0, i = 0; i < hashECCTs.length; i++) {
-            if (hashECCTs[i] != null) {
-                finalResult[j] = hashECCTs[i];
-                j++;
+            finalResult = new LinkedHashMap[j];
+
+            for (j = 0, i = 0; i < hashECCTs.length; i++) {
+                if (hashECCTs[i] != null) {
+                    finalResult[j] = hashECCTs[i];
+                    j++;
+                }
             }
 
+            hashECCTs = null;
+            hashECCTs = finalResult;
+            System.out.println("New size" + hashECCTs.length);
+        } else {
+            System.out.println("merging nothing");
         }
-
-        hashECCTs = finalResult;
 
     }
 
@@ -1835,10 +1842,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     temp = hash.get(duration);
                     // set the duration <-> group
                     temp.setGroup(Integer.toString(i + 1));
-                    //Merge the trees within this group:
+                    // Merge the trees within this group:
                     positionMerge.add(findPositionInHash(duration));
                 }
-                //Merge the positions:
+                // Merge the positions:
                 mergeArray(positionMerge);
             }
 

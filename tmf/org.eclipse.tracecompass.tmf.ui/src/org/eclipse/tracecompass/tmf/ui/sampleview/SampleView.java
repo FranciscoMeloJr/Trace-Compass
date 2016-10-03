@@ -421,6 +421,8 @@ public class SampleView extends AbstractTimeGraphView {
                 // Run over the tree:
                 // CCTAnalysisModule.RunClassification(1);
                  CCTAnalysisModule.RunClassification(3);
+                 // default:
+                 rebuild();
                  refresh();
                  redraw();
             }
