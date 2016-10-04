@@ -353,6 +353,7 @@ public class SampleView extends AbstractTimeGraphView {
         itemCla.add(getClassificationAction(2));
         itemCla.add(getClassificationAction(3));
         itemCla.add(getClassificationAction(4));
+        itemCla.add(getClassificationAction(5));
 
         manager.add(itemCla);
         // Kernel Density Estimation
@@ -371,9 +372,6 @@ public class SampleView extends AbstractTimeGraphView {
             @Override
             public void run() {
                 System.out.println("Inversion");
-
-                // Run over the tree:
-                // CCTAnalysisModule.RunKDE();
 
             }
         };
@@ -396,7 +394,7 @@ public class SampleView extends AbstractTimeGraphView {
 
                 // Run over the tree:
                 // CCTAnalysisModule.RunKDE();
-                CCTAnalysisModule.RunKMean(null, null);
+                CCTAnalysisModule.RunClassification(4);
             }
         };
         fKDEAction.setText("KDE");
@@ -437,13 +435,16 @@ public class SampleView extends AbstractTimeGraphView {
             }
         };
         if (i == 3) {
-            fClassificationAction.setText("k-means");
+            fClassificationAction.setText("Opk-means");
         }
         if (i == 2) {
             fClassificationAction.setText("function");
         }
         if (i == 1) {
             fClassificationAction.setText("variation");
+        }
+        if (i == 5) {
+            fClassificationAction.setText("JNB");
         }
         fClassificationAction.setToolTipText("Classification using variation method");
         fClassificationAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_NODE_START));

@@ -7,6 +7,12 @@ import java.util.Collections;
 
 //from:https://radixcode.com/k-mean-clustering-algorithm-implementation-in-c-java/
 
+/**
+ * @author francisco
+ * This Class defines the k-means + Elbow method + max gap heuristic
+ * This heuristic does not guarantee the best k
+ */
+
 public class KMean {
 
     int k;
@@ -145,7 +151,8 @@ public class KMean {
 
         return calculateBestK(resultSSE);
     }
-    // Function to test the Kmeans + elbow:
+
+    // Function to test the OpK-means: k-means + elbow + max gap heuristic
     public static void test() {
         ArrayList<Integer> testValues = new ArrayList<>();
         ArrayList<Double> resultSSE = new ArrayList<>();
@@ -266,7 +273,7 @@ public class KMean {
         return SSE;
     }
 
-    //Double:
+    //This function calculates the ElbowMethod:
     public static Double ElbowMethodD(ArrayList<ArrayList<Double>> ClassificationGroup){
             Double SSE = (double) 0;
             // Calculate the SSE for each cluster and then sum them:
@@ -300,9 +307,11 @@ public class KMean {
                 }
             }
             System.out.println("K : " + ClassificationGroup.size() + " SSE " + SSE);
+
         return SSE;
     }
-    // Function to select the biggest gap using the elbow technique:
+
+    // Heuristic to get the best k: maximum gap distance
     public static int calculateBestK(ArrayList<Double> resultSSE) {
 
         Double gap = (double) 0;

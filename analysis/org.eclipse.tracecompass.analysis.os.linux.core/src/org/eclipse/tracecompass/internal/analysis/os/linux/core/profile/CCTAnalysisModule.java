@@ -850,9 +850,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
          *
          * // JNB int x[]; // for(int j = 1; j<=10; j++){ int j = 10;
          */
-        Gaussian(arrayTest1, 10, 100, 3);
-        Gaussian(arrayTest2, 10, 1000, 3);
-        Gaussian(arrayTest3, 10, 500, 3);
+        Classification.Gaussian(arrayTest1, 10, 100, 3);
+        Classification.Gaussian(arrayTest2, 10, 1000, 3);
+        Classification.Gaussian(arrayTest3, 10, 500, 3);
         //
         // getJenksBreaks(array, j);
 
@@ -944,7 +944,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         return sum / list.size();
     }
 
-    // Necessary for tests and simulations at the same time:
+    /**
+     * @author francisco
+     * This Class is used to classify the data in several ways: JNB, KDE, variation and Opk-means
+     */
     static class Classification {
         double meanSq = 0;
         boolean isFunction;
@@ -1575,8 +1578,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         // This function calculates the groups of an arrayList of doubles:
         public static ArrayList<ArrayList<Double>> executeD(ArrayList<Double> durationList) {
-            // 1 [6582278.0, 6686686.0, 6693044.0, 6701650.0, 6727494.0,
-            // 6727693.0, 6783227.0, 6849659.0, 6852335.0, 6866692.0]
 
             ArrayList<ArrayList<Double>> result = new ArrayList<>();
             ArrayList<Double> miniGroups = new ArrayList<>();
@@ -1597,7 +1598,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             Double temp = previous;
             double tolerance = 0.5; // 1 = 100%, 0.5 = 200% tolerance,
             miniGroups = new ArrayList<>();
-
+            miniGroups.add(temp);
             for (int i = 1; i < array.size(); i++) {
                 temp = array.get(i);
                 System.out.println(temp + " " + previous + " " + group);
@@ -1700,27 +1701,36 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             LinkedHashMap<Double, Node<ProfileData>> hash = new LinkedHashMap<>();
 
             if (hashECCTs.length > 1) {
-                if (kind != 2) {
-                    for (int i = 0; i < hashECCTs.length; i++) {
-                        eachECCTs = ArrayECCTs.get(i);
-                        duration = eachECCTs.getProfileData().getDuration();
-                        durationList.add(Double.valueOf(duration));
 
-                        // link between node x duration:
-                        hash.put(duration, eachECCTs);
-                    }
+                for (int i = 0; i < hashECCTs.length; i++) {
+                    eachECCTs = ArrayECCTs.get(i);
+                    duration = eachECCTs.getProfileData().getDuration();
+                    durationList.add(Double.valueOf(duration));
 
-                    // Run the classification method for the whole duration:
-                    if (kind == 1) {
-                        RunVariationClassifier(durationList, hash);
-                    } else {
-                        RunKMean(durationList, hash);
-                    }
-
-                } else {
-                    variationClassificationF();
+                    // link between node x duration:
+                    hash.put(duration, eachECCTs);
                 }
 
+                // Run the classification method for the whole duration:
+                if (kind == 1) {
+                    RunVariationClassifier(durationList, hash);
+                }
+                // Run the classification method for functions separately
+                if (kind == 2) {
+                    variationClassificationF();
+                }
+                // Run the OptimazedK-Means method for functions separately
+                if (kind == 3) {
+                    RunKMean(durationList, hash);
+                }
+                // Run the KDE method for functions separately
+                if (kind == 4) {
+                    RunKDE(durationList, hash);
+                }
+                else {
+                 // Run the Jenks Natural Breaks method for functions separately
+                    callJNB(durationList);
+                }
             } else {
                 System.out.println("At least more than one group");
             }
@@ -1728,17 +1738,24 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
         // CAll Weka Tests:
-        public static void RunKDE() {
-            WekaTests.Classifier();
+        public static void RunKDE(ArrayList<Double> durationList, LinkedHashMap<Double, Node<ProfileData>> hash) {
+            if (durationList == null) {
+                WekaTests.Classifier();
+            }
         }
 
         // Call the JNB:
-        public static void callJNB(ArrayList<Integer> a) {
+        public static void callJNB(ArrayList<Double> durationList) {
 
             int n = 10;
+            ArrayList<Integer> durationInteger = new ArrayList<>();
+
+            for (int i = 1; i < n; i++) {
+                durationInteger.add(durationList.get(i).intValue());
+            }
             for (int i = 1; i < n; i++) {
                 System.out.println("With " + i + "group");
-                Classification.getJenksBreaks(a, i);
+                Classification.getJenksBreaks(durationInteger, i);
             }
 
         }
@@ -1769,7 +1786,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         }
 
-        // This function Call the KMean and update the Tree:
+        // This function Call the OptimazedK-means and update the Tree:
         public static void RunKMean(ArrayList<Double> durationList, LinkedHashMap<Double, Node<ProfileData>> hash) {
             ArrayList<Integer> positionMerge = new ArrayList<>();
             if (durationList != null) {
@@ -1826,4 +1843,5 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     public static void RunClassification(int i) {
         Classification.RunClassification(i);
     }
+
 }
