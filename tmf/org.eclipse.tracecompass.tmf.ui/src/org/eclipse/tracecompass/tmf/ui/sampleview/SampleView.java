@@ -395,8 +395,8 @@ public class SampleView extends AbstractTimeGraphView {
                 System.out.println("Apply KDE Test");
 
                 // Run over the tree:
-                //CCTAnalysisModule.RunKDE();
-                CCTAnalysisModule.RunKMean(null,null);
+                // CCTAnalysisModule.RunKDE();
+                CCTAnalysisModule.RunKMean(null, null);
             }
         };
         fKDEAction.setText("KDE");
@@ -411,7 +411,7 @@ public class SampleView extends AbstractTimeGraphView {
      * @return The Action object
      */
     public Action getClassificationAction(int i) {
-        if(i == 4){
+        if (i == 4) {
             return getKDEAction();
         }
         // resetScale
@@ -425,24 +425,24 @@ public class SampleView extends AbstractTimeGraphView {
 
                 // test
                 // CCTAnalysisModule.variationClassification(A, null);
-                //CCTAnalysisModule.callJNB(A);
+                // CCTAnalysisModule.callJNB(A);
 
                 // Run over the tree:
                 // CCTAnalysisModule.RunClassification(1);
-                 CCTAnalysisModule.RunClassification(i);
-                 // default:
-                 rebuild();
-                 refresh();
-                 redraw();
+                CCTAnalysisModule.RunClassification(i);
+                // default:
+                rebuild();
+                refresh();
+                redraw();
             }
         };
-        if(i == 3){
+        if (i == 3) {
             fClassificationAction.setText("k-means");
         }
-        if(i == 2){
+        if (i == 2) {
             fClassificationAction.setText("function");
         }
-        if(i == 1){
+        if (i == 1) {
             fClassificationAction.setText("variation");
         }
         fClassificationAction.setToolTipText("Classification using variation method");
@@ -986,6 +986,7 @@ public class SampleView extends AbstractTimeGraphView {
         public EventNode(ITimeGraphEntry entry, String label, int nodeId, long time, long duration, int value, int level, int color) {
             this(entry, label, nodeId, time, duration, value, level, color, null);
         }
+
         public EventNode(ITimeGraphEntry entry, String label, int nodeId, long time, long duration, int value, int level, int color, String Gr) {
             fEntry = entry;
             fNodeId = nodeId;
@@ -995,7 +996,7 @@ public class SampleView extends AbstractTimeGraphView {
             fValue = value;
             fLevel = level;
             fColor = color;
-            fGroup = Integer.toString(0); //test
+            fGroup = Integer.toString(0); // test
         }
 
         public boolean hasValue() {
@@ -1057,6 +1058,7 @@ public class SampleView extends AbstractTimeGraphView {
         public String getGroup() {
             return fGroup;
         }
+
         public void setGroup(String G) {
             fGroup = G;
         }

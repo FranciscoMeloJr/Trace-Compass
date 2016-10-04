@@ -2,10 +2,6 @@ package org.eclipse.tracecompass.internal.analysis.os.linux.core.profile;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -742,119 +738,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     @Override
     public String toString() {
         return "CCT Analysis Module";
-    }
-
-    /**
-     * @author francisco This class implements IProfileData to be implemented on
-     *         the tests related with Profiling and ECCT
-     */
-
-    public class GraphvizVisitor implements IProfileVisitor<ProfileData> {
-        /**
-         * result ArrayList of Nodes, which are ProfileData
-         */
-        public ArrayList<Node<ProfileData>> result = new ArrayList<>();
-
-        @Override
-        public void visit(Node<ProfileData> node) {
-            result.add(node);
-        }
-
-        /**
-         * This function reset the visit
-         */
-        public void reset() {
-            result = new ArrayList<>();
-        }
-
-        /**
-         * This function print on the console the tree
-         *
-         * @throws Exception
-         */
-        public void print(String name, Mode mode) throws Exception {
-
-            String content = new String("digraph G { \n");
-            if (mode != Mode.COLOR_) {
-                if (mode != Mode.ID_) {
-                    // Edges and nodes:
-                    for (Node<ProfileData> n : result) {
-                        if (n.getParent() != null) {
-                            // System.out.print(n.getNodeLabel() + " -> " +
-                            // n.getParent().getNodeLabel() + "; \n");
-                            content = content.concat(n.getParent().getNodeLabel() + " -> " + n.getNodeLabel() + "; \n");
-                        } else {
-                            // System.out.print(n.getNodeLabel() + "; \n");
-                            content = content.concat(n.getNodeLabel() + "; \n");
-                        }
-                    }
-                    for (Node<ProfileData> n : result) {
-                        content = content.concat(n.getNodeLabel() + " " + "[label = \"" + n.getNodeLabel() + "[" + n.getProfileData().getWeight() + "]\" ]; \n");
-                    }
-                } else {
-                    // Edges and nodes:
-                    for (Node<ProfileData> n : result) {
-                        if (n.getParent() != null) {
-                            // System.out.print(n.getNodeId() + " -> " +
-                            // n.getParent().getNodeId() + "; \n");
-                            content = content.concat(n.getParent().getNodeId() + " -> " + n.getNodeId() + "; \n");
-                        } else {
-                            System.out.print(n.getNodeId() + "; \n");
-                            content = content.concat(n.getNodeId() + "; \n");
-                        }
-                    }
-                    for (Node<ProfileData> n : result) {
-                        content = content.concat(n.getNodeId() + " " + "[label = \"" + n.getNodeId() + "[" + n.getProfileData().getWeight() + "]\" ]; \n");
-                    }
-                }
-            } else {
-                for (Node<ProfileData> n : result) {
-                    if (n.getParent() != null) {
-                        // System.out.print(n.getNodeLabel() + " -> " +
-                        // n.getParent().getNodeLabel() + "; \n");
-                        content = content.concat(n.getParent().getNodeLabel() + " -> " + n.getNodeLabel() + "; \n");
-                    } else {
-                        // System.out.print(n.getNodeLabel() + "; \n");
-                        content = content.concat(n.getNodeLabel() + "; \n");
-                    }
-                }
-                for (Node<ProfileData> n : result) {
-                    content = content.concat(n.getNodeLabel() + " " + "[label = \"" + n.getNodeLabel() + "[" + n.getProfileData() + "]\" ]; \n"); // tirei
-                                                                                                                                                  // o
-                                                                                                                                                  // color
-                }
-            }
-            content = content.concat("\n }\n");
-            writeToFile(name, content);
-        }
-
-        /**
-         * This function print on a file the output of the tree:
-         */
-        public void writeToFile(String name, String content) throws Exception {
-            try {
-
-                // String content = "This is the content to write into file";
-                String fileName = new String("/tmp/"); //$NON-NLS-1$
-                fileName = fileName.concat(name); //
-                File file = new File(fileName); // "/home/frank/Desktop/tree.gv");
-
-                // if file doesnt exists, then create it
-                if (!file.exists()) {
-                    file.createNewFile();
-                }
-
-                try (FileWriter fw = new FileWriter(file.getAbsoluteFile())) {
-                    try (BufferedWriter bw = new BufferedWriter(fw)) {
-                        bw.write(content);
-                        bw.close();
-                    }
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     public int getNumberLevels() {
@@ -1690,189 +1573,257 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
         }
 
-    }
+        // This function calculates the groups of an arrayList of doubles:
+        public static ArrayList<ArrayList<Double>> executeD(ArrayList<Double> durationList) {
+            // 1 [6582278.0, 6686686.0, 6693044.0, 6701650.0, 6727494.0,
+            // 6727693.0, 6783227.0, 6849659.0, 6852335.0, 6866692.0]
 
-    // Insertion standard deviation, this function goes through the array
-    public static int standardGroupInsertion(ArrayList<Integer> list) {
+            ArrayList<ArrayList<Double>> result = new ArrayList<>();
+            ArrayList<Double> miniGroups = new ArrayList<>();
 
-        // compare the standard deviation and insert in the array.
-        double mean = 0;
-        double arraySTD = 0;
-        int tolerance = 10;
+            // calculate the mean:
+            ArrayList<Double> array = durationList;
 
-        ArrayList<Integer> temp = new ArrayList<>();
-        ArrayList<ArrayList<Integer>> groups = new ArrayList<>();
+            // First sort:
+            Collections.sort(array);
 
-        for (int i = 0; i < list.size(); i++) {
-            if ((arraySTD + mean + tolerance) < list.get(i)) {
-                groups.add(temp);
-                temp = new ArrayList<>();
-                temp.add(list.get(i));
-                mean = calculateMean(temp);
-                arraySTD = mean - list.get(i);
-                arraySTD *= arraySTD;
+            printArrayD(array);
+            // all the array is pointing to group 1:
+            // initiateI(array, hashGroupNumber);
 
-            } else {
-                temp.add(list.get(i));
-                mean = list.get(i);
-                arraySTD = 0;
-            }
-        }
+            int group = 1;
 
-        return groups.size();
-    }
+            Double previous = array.get(0);
+            Double temp = previous;
+            double tolerance = 0.5; // 1 = 100%, 0.5 = 200% tolerance,
+            miniGroups = new ArrayList<>();
 
-    private static double calculateMean(ArrayList<Integer> temp) {
-
-        double sum = 0;
-        double mean = 0;
-        for (int i = 0; i < temp.size(); i++) {
-            sum += temp.get(i);
-        }
-        mean = sum / temp.size();
-        return mean;
-    }
-
-    // this function is the Kernel Density Estimation
-    /**
-     * @return int[]
-     * @param list
-     */
-    /*
-     * public int[] KDE(ArrayList<Integer> temp) { System.out.println("KDE");
-     * return null; }
-     */
-
-    // Generating a set of normal distritubion
-    public static void Gaussian(ArrayList<Integer> array, int tam, double mean, double SD) {
-
-        System.out.println("Gaussian");
-
-        Random r = new Random();
-
-        for (int i = 0; i < tam; i++) {
-            // double mySample = r.nextGaussian();
-            // array.add(mySample);
-
-            double val = r.nextGaussian() * SD + mean;
-            int randonNumber = (int) Math.round(val);
-            array.add(randonNumber);
-        }
-
-        int index = 0;
-        while (index < array.size()) {
-            // System.out.format("%.3f ", array.get(index));
-            System.out.print(array.get(index) + " ");
-            index++;
-        }
-        System.out.println(" ");
-    }
-
-    // Run the Classification - 1 for the whole tree, 2 for each function:
-    public static void RunClassification(int kind) {
-
-        // Getting the data:
-        Node<ProfileData> eachECCTs;
-        double duration;
-
-        ArrayList<Double> durationList = new ArrayList<>();
-        LinkedHashMap<Double, Node<ProfileData>> hash = new LinkedHashMap<>();
-
-        if (hashECCTs.length > 1) {
-            if (kind != 2) {
-                for (int i = 0; i < hashECCTs.length; i++) {
-                    eachECCTs = ArrayECCTs.get(i);
-                    duration = eachECCTs.getProfileData().getDuration();
-                    durationList.add(Double.valueOf(duration));
-
-                    // link between node x duration:
-                    hash.put(duration, eachECCTs);
+            for (int i = 1; i < array.size(); i++) {
+                temp = array.get(i);
+                System.out.println(temp + " " + previous + " " + group);
+                if (temp > (previous + (previous / tolerance))) {
+                    result.add(miniGroups);
+                    miniGroups = new ArrayList<>();
                 }
+                miniGroups.add(temp);
+                previous = temp;
+            }
+            result.add(miniGroups);
 
-                // Run the classification method for the whole duration:
-                if (kind == 1) {
-                    variationClassification(durationList, hash);
+            return result;
+        }
+
+        // Insertion standard deviation, this function goes through the array
+        public static int standardGroupInsertion(ArrayList<Integer> list) {
+
+            // compare the standard deviation and insert in the array.
+            double mean = 0;
+            double arraySTD = 0;
+            int tolerance = 10;
+
+            ArrayList<Integer> temp = new ArrayList<>();
+            ArrayList<ArrayList<Integer>> groups = new ArrayList<>();
+
+            for (int i = 0; i < list.size(); i++) {
+                if ((arraySTD + mean + tolerance) < list.get(i)) {
+                    groups.add(temp);
+                    temp = new ArrayList<>();
+                    temp.add(list.get(i));
+                    mean = calculateMean(temp);
+                    arraySTD = mean - list.get(i);
+                    arraySTD *= arraySTD;
+
                 } else {
-                    RunKMean(durationList, hash);
+                    temp.add(list.get(i));
+                    mean = list.get(i);
+                    arraySTD = 0;
+                }
+            }
+
+            return groups.size();
+        }
+
+        private static double calculateMean(ArrayList<Integer> temp) {
+
+            double sum = 0;
+            double mean = 0;
+            for (int i = 0; i < temp.size(); i++) {
+                sum += temp.get(i);
+            }
+            mean = sum / temp.size();
+            return mean;
+        }
+
+        // this function is the Kernel Density Estimation
+        /**
+         * @return int[]
+         * @param list
+         */
+        /*
+         * public int[] KDE(ArrayList<Integer> temp) {
+         * System.out.println("KDE"); return null; }
+         */
+
+        // Generating a set of normal distritubion
+        public static void Gaussian(ArrayList<Integer> array, int tam, double mean, double SD) {
+
+            System.out.println("Gaussian");
+
+            Random r = new Random();
+
+            for (int i = 0; i < tam; i++) {
+                // double mySample = r.nextGaussian();
+                // array.add(mySample);
+
+                double val = r.nextGaussian() * SD + mean;
+                int randonNumber = (int) Math.round(val);
+                array.add(randonNumber);
+            }
+
+            int index = 0;
+            while (index < array.size()) {
+                // System.out.format("%.3f ", array.get(index));
+                System.out.print(array.get(index) + " ");
+                index++;
+            }
+            System.out.println(" ");
+        }
+
+        // Run the Classification - 1 for the whole tree, 2 for each function:
+        public static void RunClassification(int kind) {
+
+            // Getting the data:
+            Node<ProfileData> eachECCTs;
+            double duration;
+
+            ArrayList<Double> durationList = new ArrayList<>();
+            LinkedHashMap<Double, Node<ProfileData>> hash = new LinkedHashMap<>();
+
+            if (hashECCTs.length > 1) {
+                if (kind != 2) {
+                    for (int i = 0; i < hashECCTs.length; i++) {
+                        eachECCTs = ArrayECCTs.get(i);
+                        duration = eachECCTs.getProfileData().getDuration();
+                        durationList.add(Double.valueOf(duration));
+
+                        // link between node x duration:
+                        hash.put(duration, eachECCTs);
+                    }
+
+                    // Run the classification method for the whole duration:
+                    if (kind == 1) {
+                        RunVariationClassifier(durationList, hash);
+                    } else {
+                        RunKMean(durationList, hash);
+                    }
+
+                } else {
+                    variationClassificationF();
                 }
 
             } else {
-                variationClassificationF();
+                System.out.println("At least more than one group");
             }
 
-        } else {
-            System.out.println("At least more than one group");
         }
 
-    }
-
-    // CAll Weka Tests:
-    public static void RunKDE() {
-        WekaTests.Classifier();
-    }
-
-    // Call the JNB:
-    public static void callJNB(ArrayList<Integer> a) {
-
-        int n = 10;
-        for (int i = 1; i < n; i++) {
-            System.out.println("With " + i + "group");
-            Classification.getJenksBreaks(a, i);
+        // CAll Weka Tests:
+        public static void RunKDE() {
+            WekaTests.Classifier();
         }
 
-    }
+        // Call the JNB:
+        public static void callJNB(ArrayList<Integer> a) {
 
-    // This function Call the KMean and update the Tree:
-    public static void RunKMean(ArrayList<Double> durationList, LinkedHashMap<Double, Node<ProfileData>> hash) {
-        ArrayList<Integer> positionMerge = new ArrayList<>();
-        if (durationList != null) {
-            // Classification with arrayDouble
-            // This test all the combinations:
-            int bestK = KMean.test(durationList);
-            if(bestK > 0){
-                // Execute with 2, which is the best k:
-                ArrayList<ArrayList<Double>> result = KMean.executeD(bestK, durationList);
-                System.out.println("Result " + result);
-                Node<ProfileData> temp;
-                // Put the solution:
-                for (int i = 0; i < result.size(); i++) {
-                    ArrayList<Double> eachGroup = result.get(i);
-                    positionMerge = new ArrayList<>();
-                    for (int j = 0; j < eachGroup.size(); j++) {
-                        Double duration = eachGroup.get(j);
-                        temp = hash.get(duration);
-                        // set the duration <-> group
-                        temp.setGroup(Integer.toString(i + 1));
-                        // Merge the trees within this group:
-                        positionMerge.add(findPositionInHash(duration));
+            int n = 10;
+            for (int i = 1; i < n; i++) {
+                System.out.println("With " + i + "group");
+                Classification.getJenksBreaks(a, i);
+            }
+
+        }
+
+        // This function Call the Variation classification and update the Tree:
+        public static void RunVariationClassifier(ArrayList<Double> durationList, LinkedHashMap<Double, Node<ProfileData>> hash) {
+            ArrayList<Integer> positionMerge = new ArrayList<>();
+
+            ArrayList<ArrayList<Double>> result = Classification.executeD(durationList);
+
+            System.out.println("Result " + result);
+            Node<ProfileData> temp;
+            // Put the solution:
+            for (int i = 0; i < result.size(); i++) {
+                ArrayList<Double> eachGroup = result.get(i);
+                positionMerge = new ArrayList<>();
+                for (int j = 0; j < eachGroup.size(); j++) {
+                    Double duration = eachGroup.get(j);
+                    temp = hash.get(duration);
+                    // set the duration <-> group
+                    temp.setGroup(Integer.toString(i + 1));
+                    // Merge the trees within this group:
+                    positionMerge.add(findPositionInHash(duration));
+                }
+                // Merge the positions:
+                mergeArray(positionMerge);
+            }
+
+        }
+
+        // This function Call the KMean and update the Tree:
+        public static void RunKMean(ArrayList<Double> durationList, LinkedHashMap<Double, Node<ProfileData>> hash) {
+            ArrayList<Integer> positionMerge = new ArrayList<>();
+            if (durationList != null) {
+                // Classification with arrayDouble
+                // This test all the combinations:
+                int bestK = KMean.test(durationList);
+                if (bestK > 0) {
+                    // Execute with 2, which is the best k:
+                    ArrayList<ArrayList<Double>> result = KMean.executeD(bestK, durationList);
+                    System.out.println("Result " + result);
+                    Node<ProfileData> temp;
+                    // Put the solution:
+                    for (int i = 0; i < result.size(); i++) {
+                        ArrayList<Double> eachGroup = result.get(i);
+                        positionMerge = new ArrayList<>();
+                        for (int j = 0; j < eachGroup.size(); j++) {
+                            Double duration = eachGroup.get(j);
+                            temp = hash.get(duration);
+                            // set the duration <-> group
+                            temp.setGroup(Integer.toString(i + 1));
+                            // Merge the trees within this group:
+                            positionMerge.add(findPositionInHash(duration));
+                        }
+                        // Merge the positions:
+                        mergeArray(positionMerge);
                     }
-                    // Merge the positions:
-                    mergeArray(positionMerge);
+
+                } else {
+                    mergeTrees();
+                    System.out.println("Not enough groups ");
                 }
 
+            } else {
+                // Test:
+                KMean.test();
             }
-            else{
-                mergeTrees();
-                System.out.println("Not enough groups ");
-            }
+        }
 
-        } else {
-            // Test:
-            KMean.test();
+        // Find the position in the hash:
+        public static int findPositionInHash(Double Duration) {
+            double duration;
+            for (int i = 0; i < hashECCTs.length; i++) {
+                Node<ProfileData> eachECCTs = ArrayECCTs.get(i);
+                duration = eachECCTs.getProfileData().getDuration();
+
+                if (Duration == duration) {
+                    return i;
+                }
+            }
+            return 0;
         }
     }
 
-    // Find the position in the hash:
-    public static int findPositionInHash(Double Duration) {
-        double duration;
-        for (int i = 0; i < hashECCTs.length; i++) {
-            Node<ProfileData> eachECCTs = ArrayECCTs.get(i);
-            duration = eachECCTs.getProfileData().getDuration();
-
-            if (Duration == duration) {
-                return i;
-            }
-        }
-        return 0;
+    public static void RunClassification(int i) {
+        Classification.RunClassification(i);
     }
 }
