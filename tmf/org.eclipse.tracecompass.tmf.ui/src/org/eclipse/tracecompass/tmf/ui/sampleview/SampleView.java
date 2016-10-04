@@ -348,10 +348,15 @@ public class SampleView extends AbstractTimeGraphView {
         manager.add(getMergeAction());
 
         // Classification
-        manager.add(getClassificationAction());
+        MenuManager itemCla = new MenuManager("Classifier");
+        itemCla.add(getClassificationAction(1));
+        itemCla.add(getClassificationAction(2));
+        itemCla.add(getClassificationAction(3));
+        itemCla.add(getClassificationAction(4));
 
+        manager.add(itemCla);
         // Kernel Density Estimation
-        manager.add(getKDEAction());
+
         manager.add(getInversionAction());
     }
 
@@ -405,7 +410,10 @@ public class SampleView extends AbstractTimeGraphView {
      *
      * @return The Action object
      */
-    public Action getClassificationAction() {
+    public Action getClassificationAction(int i) {
+        if(i == 4){
+            return getKDEAction();
+        }
         // resetScale
         fClassificationAction = new Action() {
             @Override
@@ -414,20 +422,29 @@ public class SampleView extends AbstractTimeGraphView {
                 // CCTAnalysisModule.classificationTest();
                 // Calling the Variation Classification
                 System.out.println("Test");
+
                 // test
                 // CCTAnalysisModule.variationClassification(A, null);
                 //CCTAnalysisModule.callJNB(A);
 
                 // Run over the tree:
                 // CCTAnalysisModule.RunClassification(1);
-                 CCTAnalysisModule.RunClassification(3);
+                 CCTAnalysisModule.RunClassification(i);
                  // default:
                  rebuild();
                  refresh();
                  redraw();
             }
         };
-        fClassificationAction.setText("Classification");
+        if(i == 3){
+            fClassificationAction.setText("k-means");
+        }
+        if(i == 2){
+            fClassificationAction.setText("function");
+        }
+        if(i == 1){
+            fClassificationAction.setText("variation");
+        }
         fClassificationAction.setToolTipText("Classification using variation method");
         fClassificationAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_NODE_START));
         return fClassificationAction;
