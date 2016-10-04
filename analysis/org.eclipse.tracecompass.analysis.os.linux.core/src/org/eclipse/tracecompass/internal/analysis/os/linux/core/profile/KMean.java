@@ -130,7 +130,7 @@ public class KMean {
 
     }
     // Function to with a given array of doubles:
-    public static void test(ArrayList<Double> numbers) {
+    public static int test(ArrayList<Double> numbers) {
         ArrayList<Double> resultSSE = new ArrayList<>();
         ArrayList<ArrayList<Double>> group;
         // testing all the ks:
@@ -140,7 +140,10 @@ public class KMean {
             //Elbow method:
             resultSSE.add(KMean.ElbowMethodD(group));
         }
+
         System.out.println(resultSSE);
+
+        return calculateBestK(resultSSE);
     }
     // Function to test the Kmeans + elbow:
     public static void test() {
@@ -169,7 +172,7 @@ public class KMean {
             resultSSE.add(KMean.ElbowMethod(group));
         }
         // biggest gap:
-        System.out.println("Best number of groups: " + calculateGap(resultSSE));
+        System.out.println("Best number of groups: " + calculateBestK(resultSSE));
 
         // test 2
         ArrayList<Double> testDouble = new ArrayList<>();
@@ -201,7 +204,7 @@ public class KMean {
         new KMean(k, noOfItems, numbers);
     }
     //Execute and returns the groups:
-    public static ArrayList<ArrayList<Double>> executeD(int givenK, int nItems, ArrayList<Double> numbers) {
+    public static ArrayList<ArrayList<Double>> executeD(int givenK, ArrayList<Double> numbers) {
         // K and number of items:
         return KMean.KMeanD(givenK, numbers.size(), numbers);
     }
@@ -300,12 +303,12 @@ public class KMean {
         return SSE;
     }
     // Function to select the biggest gap using the elbow technique:
-    public static int calculateGap(ArrayList<Double> resultSSE) {
+    public static int calculateBestK(ArrayList<Double> resultSSE) {
 
         Double gap = (double) 0;
         Double current;
-        int maxp1 = 0, maxp2 = 1;
-        int minp1 = 0, minp2 = 1;
+        int maxp1 = 0;
+        int minp1 = 0;
         int i;
 
         // Heuristic max:
@@ -314,7 +317,6 @@ public class KMean {
             if (current > gap) {
                 gap = current;
                 maxp1 = i;
-                maxp2 = i - 1;
             }
         }
         // Heuristic min:
@@ -324,12 +326,11 @@ public class KMean {
             if (current < gap) {
                 gap = current;
                 minp1 = i;
-                minp2 = i - 1;
             }
         }
         // return minp1;
 
-        System.out.println("gap" + gap);
+        System.out.println("best k " + maxp1);
         return maxp1;
     }
 }

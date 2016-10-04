@@ -1822,31 +1822,38 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     }
 
-    // Call the KMean:
+    // This function Call the KMean and update the Tree:
     public static void RunKMean(ArrayList<Double> durationList, LinkedHashMap<Double, Node<ProfileData>> hash) {
         ArrayList<Integer> positionMerge = new ArrayList<>();
         if (durationList != null) {
             // Classification with arrayDouble
             // This test all the combinations:
-            KMean.test(durationList);
-            // Execute with 2, which is the best k:
-            ArrayList<ArrayList<Double>> result = KMean.executeD(2, durationList.size(), durationList);
-            System.out.println("Result " + result);
-            Node<ProfileData> temp;
-            // Put the solution:
-            for (int i = 0; i < result.size(); i++) {
-                ArrayList<Double> eachGroup = result.get(i);
-                positionMerge = new ArrayList<>();
-                for (int j = 0; j < eachGroup.size(); j++) {
-                    Double duration = eachGroup.get(j);
-                    temp = hash.get(duration);
-                    // set the duration <-> group
-                    temp.setGroup(Integer.toString(i + 1));
-                    // Merge the trees within this group:
-                    positionMerge.add(findPositionInHash(duration));
+            int bestK = KMean.test(durationList);
+            if(bestK > 0){
+                // Execute with 2, which is the best k:
+                ArrayList<ArrayList<Double>> result = KMean.executeD(bestK, durationList);
+                System.out.println("Result " + result);
+                Node<ProfileData> temp;
+                // Put the solution:
+                for (int i = 0; i < result.size(); i++) {
+                    ArrayList<Double> eachGroup = result.get(i);
+                    positionMerge = new ArrayList<>();
+                    for (int j = 0; j < eachGroup.size(); j++) {
+                        Double duration = eachGroup.get(j);
+                        temp = hash.get(duration);
+                        // set the duration <-> group
+                        temp.setGroup(Integer.toString(i + 1));
+                        // Merge the trees within this group:
+                        positionMerge.add(findPositionInHash(duration));
+                    }
+                    // Merge the positions:
+                    mergeArray(positionMerge);
                 }
-                // Merge the positions:
-                mergeArray(positionMerge);
+
+            }
+            else{
+                mergeTrees();
+                System.out.println("Not enough groups ");
             }
 
         } else {
