@@ -1,5 +1,7 @@
 package org.eclipse.tracecompass.internal.analysis.os.linux.core.profile;
 
+import java.util.ArrayList;
+
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfileData;
 
 /**
@@ -11,10 +13,11 @@ public class ProfileData implements IProfileData {
 
     private String fLabel;
     int fWeight;
-    int fX;
+    int fTestValue;
     long fstartTime;
     long fendTime;
     long fDuration = 0; // endTime - startTime
+    ArrayList<Long> eachRun;
 
     // Constructor:
     public ProfileData(int weight, String label) {
@@ -25,6 +28,7 @@ public class ProfileData implements IProfileData {
         }
         fLabel = label;
         fDuration = 0;
+        eachRun = new ArrayList<>();
     }
 
     // Constructor:
@@ -43,7 +47,8 @@ public class ProfileData implements IProfileData {
         }
         fDuration = 0;
         // test:
-        fX = x;
+        fTestValue = x;
+        eachRun = new ArrayList<>();
     }
 
     // Constructor:
@@ -51,6 +56,7 @@ public class ProfileData implements IProfileData {
         fWeight = (int) weight;
         fLabel = label;
         fDuration = 0;
+        eachRun = new ArrayList<>();
     }
 
     // Add to the weight:
@@ -67,6 +73,8 @@ public class ProfileData implements IProfileData {
         if (fLabel.equals(data.getLabel())) {
             this.fDuration += data.getDuration();
             this.fWeight += data.getDuration();
+            //Test to merge and save the infor
+            this.eachRun.add(data.getDuration());
         }
 
     }
@@ -152,11 +160,11 @@ public class ProfileData implements IProfileData {
     }
 
     public void setMetric(int nextInt) {
-        fX = nextInt;
+        fTestValue = nextInt;
     }
 
     public int getX() {
-        return fX;
+        return fTestValue;
     }
 
     public void setDuration(long l) {

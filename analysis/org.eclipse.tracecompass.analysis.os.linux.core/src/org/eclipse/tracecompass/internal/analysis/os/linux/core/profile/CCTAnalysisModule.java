@@ -338,12 +338,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
                         int nchildren = childrenGaps(eachNode);
                         if (nchildren > 0) {
-                            newDuration = data.getDuration();// + (fGap *
-                                                             // (nchildren -
-                                                             // 1));
+                            // + (fGap * (nchildren - 1));
+                            newDuration = data.getDuration();
                         } else {
-                            newDuration = data.getDuration(); // + (fGap *
-                                                              // (nchildren));
+                            // (fGap * (nchildren));
+                            newDuration = data.getDuration();
                         }
                         end = data.getDuration() + fGap;
                         // updates:
@@ -411,7 +410,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     /**
-     * This function creates a HashMap of <level x label> x Node
+     * This function creates a HashMap of <(level x label) x Node>
      *
      * @param root
      *            a tree first node to be traversed to create the hash
@@ -730,8 +729,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
             temp[EcctSize] = treeDif;
             hashECCTs = temp;
-            //The diff:
-            //EcctSize +=1;
+            // The diff:
+            // EcctSize +=1;
         }
 
         return result;
@@ -761,10 +760,12 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         return numberLevels;
 
     }
+
     public int getEcctSize() {
         return EcctSize;
 
     }
+
     // This function returns the fRoots - ArrayList of fRoots;
     public LinkedHashMap<KeyTree, Node<ProfileData>>[] getHashECCTs() {
         return hashECCTs;
@@ -961,8 +962,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     /**
-     * @author francisco
-     * This Class is used to classify the data in several ways: JNB, KDE, variation and Opk-means
+     * @author francisco This Class is used to classify the data in several
+     *         ways: JNB, KDE, variation and Opk-means
      */
     static class Classification {
         double meanSq = 0;
@@ -1742,9 +1743,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 // Run the KDE method for functions separately
                 if (kind == 4) {
                     RunKDE(durationList, hash);
-                }
-                else {
-                 // Run the Jenks Natural Breaks method for functions separately
+                } else {
+                    // Run the Jenks Natural Breaks method for functions
+                    // separately
                     callJNB(durationList);
                 }
             } else {
@@ -1756,8 +1757,13 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         // CAll Weka Tests:
         public static void RunKDE(ArrayList<Double> durationList, LinkedHashMap<Double, Node<ProfileData>> hash) {
+            // test
             if (durationList == null) {
                 WekaTests.Classifier();
+            } else {
+                // Use KDE with the real data:
+                WekaTests.Classifier(durationList, hash);
+
             }
         }
 
@@ -1845,7 +1851,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         // Find the position in the hash:
         public static int findPositionInHash(Double Duration) {
             double duration;
-            for (int i = 0; i < hashECCTs.length; i++) {
+            for (int i = 0; i < EcctSize; i++) {
                 Node<ProfileData> eachECCTs = ArrayECCTs.get(i);
                 duration = eachECCTs.getProfileData().getDuration();
 
@@ -1854,6 +1860,27 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 }
             }
             return 0;
+        }
+    }
+
+    // Calculate the Quartiles of the functions to be displayed as variation:
+    public static void calculateQuartiles() {
+        LinkedHashMap<KeyTree, Node<ProfileData>> eachECCTs;
+        System.out.println("calculateQuartiles");
+        //Run through the nodes and display them:
+        for (int i = 0; i < EcctSize; i++) {
+            eachECCTs = hashECCTs[i];
+            for ( KeyTree key : eachECCTs.keySet()) {
+
+                Node<ProfileData> eachNode = eachECCTs.get(key);
+                ArrayList<Long> runsNode = eachNode.fProfileData.eachRun;
+                System.out.print(eachNode.getNodeLabel()+ " " + eachNode.getDur());
+                //run through the information in eachNode:
+                for(int j = 0; j< runsNode.size(); j++){
+                    System.out.print(" " + runsNode.get(j));
+                }
+                System.out.println(" ");
+            }
         }
     }
 

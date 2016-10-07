@@ -1,6 +1,7 @@
 package org.eclipse.tracecompass.internal.analysis.os.linux.core.profile;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.SMO;
@@ -139,5 +140,11 @@ public class WekaTests {
         }
 
         return kclass;
+    }
+
+    //Use the KDE according to the Classifier:
+    public static void Classifier(ArrayList<Double> durationList, LinkedHashMap<Double, Node<ProfileData>> hash) {
+        System.out.println(durationList + " " + hash);
+
     }
 }

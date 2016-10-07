@@ -372,7 +372,7 @@ public class SampleView extends AbstractTimeGraphView {
             @Override
             public void run() {
                 System.out.println("Inversion");
-
+                CCTAnalysisModule.calculateQuartiles();
             }
         };
         fInversion.setText("Inversion");
