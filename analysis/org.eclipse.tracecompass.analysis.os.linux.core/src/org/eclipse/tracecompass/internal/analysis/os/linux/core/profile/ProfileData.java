@@ -169,17 +169,16 @@ public class ProfileData implements IProfileData {
 
     public void setDuration(long l) {
         fDuration = l;
-
+        eachRun.add(l);
     }
 
     public long getDuration() {
         return fDuration;
-
     }
 
     public void addDuration(long duration) {
         fDuration += duration;
-
+        eachRun.add(duration);
     }
     @Override
     public int minus(IProfileData other) {

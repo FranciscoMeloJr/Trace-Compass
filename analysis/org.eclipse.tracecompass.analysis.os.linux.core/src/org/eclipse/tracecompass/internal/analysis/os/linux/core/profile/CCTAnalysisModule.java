@@ -1863,8 +1863,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
     }
 
-    // Calculate the Quartiles of the functions to be displayed as variation:
-    public static void calculateQuartiles() {
+    // Calculate the Coefficiente of Variation of the functions to be displayed as variation:
+    // CV = STd / Mean
+    public static void calculateCV() {
         LinkedHashMap<KeyTree, Node<ProfileData>> eachECCTs;
         System.out.println("calculateQuartiles");
         //Run through the nodes and display them:
