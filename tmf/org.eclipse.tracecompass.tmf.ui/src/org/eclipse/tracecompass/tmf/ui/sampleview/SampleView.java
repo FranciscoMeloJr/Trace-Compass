@@ -46,7 +46,6 @@ import org.eclipse.tracecompass.tmf.core.signal.TmfWindowRangeUpdatedSignal;
 import org.eclipse.tracecompass.tmf.core.timestamp.ITmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
-import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestampDelta;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.symbols.ISymbolProvider;
@@ -82,6 +81,7 @@ public class SampleView extends AbstractTimeGraphView {
     public static final String ID1 = "org.eclipse.tracecompass.tmf.ui.views.SampleView";
     private ArrayList<Node<ProfileData>> fRoots; // Array of roots
     private static ArrayList<Integer> numberLevels; // there are several trees
+    private static int fEcctSize;
 
     // therefore,
     private static int Tree;// several levels
@@ -108,9 +108,7 @@ public class SampleView extends AbstractTimeGraphView {
     // Messages:
     private static final String[] COLUMN_NAMES1 = new String[] {
             Messages.SampleView_FunctionColumn,
-            Messages.SampleView_DepthColumn,
             Messages.SampleView_RepetitionTimesColumn,
-            Messages.SampleView_A
     };
 
     private static final String[] FILTER_COLUMN_NAMES = new String[] {
@@ -143,6 +141,7 @@ public class SampleView extends AbstractTimeGraphView {
         fRoots = null;
         numberLevels = null;
         Tree = 0;
+        fEcctSize = 0;
 
         Dif = new int[2];
         fMap = null;
@@ -188,6 +187,7 @@ public class SampleView extends AbstractTimeGraphView {
             // put the maps and the roots as properties:
             fMap = map;
             fRoots = roots;
+            fEcctSize = module.getEcctSize();
 
             TraceEntry traceEntry = null;
             Map<ITmfTrace, LevelEntry> levelEntryMap = new HashMap<>();
@@ -289,8 +289,8 @@ public class SampleView extends AbstractTimeGraphView {
         // super.fillLocalMenu(manager);
 
         // MenuManager itemEx = new MenuManager("Execute");
-        IAction x = getExecute();
-        manager.add(x);
+        IAction exe = getExecute();
+        manager.add(exe);
 
         MenuManager itemA = new MenuManager("Select Execution A: ");
         // fFlatAction = createFlatAction();
@@ -300,7 +300,7 @@ public class SampleView extends AbstractTimeGraphView {
         // System.out.println(FUNCTION_NAMES.size());
         int size = 10;
         if (fRoots != null) {
-            size = fRoots.size();
+            size = fEcctSize;
         }
         for (int i = 0; i < size; i++) {
             itemA.add(createTreeSelection(Integer.toString(i), 1));
@@ -427,11 +427,13 @@ public class SampleView extends AbstractTimeGraphView {
 
                 // Run over the tree:
                 // CCTAnalysisModule.RunClassification(1);
-                CCTAnalysisModule.RunClassification(i);
-                // default:
-                rebuild();
-                refresh();
-                redraw();
+                if (CCTAnalysisModule.RunClassification(i)) {
+                    // default:
+                    rebuild();
+                    refresh();
+                    redraw();
+                }
+
             }
         };
         if (i == 3) {
@@ -572,7 +574,7 @@ public class SampleView extends AbstractTimeGraphView {
         IAction action = new Action("Execute", IAction.AS_PUSH_BUTTON) { // AS_DROP_DOWN_MENU
             @Override
             public void run() {
-                System.out.println("threshold" + threshold);
+                System.out.println("threshold %" + threshold);
                 CCTAnalysisModule.diffTrees(fMap[Dif[0]], fMap[Dif[1]], threshold);
                 rebuild(); // update(); //rebuild();//
                 refresh();
@@ -997,7 +999,9 @@ public class SampleView extends AbstractTimeGraphView {
             fValue = value;
             fLevel = level;
             fColor = color;
-            fGroup = Integer.toString(0); // test
+            if (Gr == null) {
+                fGroup = Integer.toString(0); // test
+            }
         }
 
         public boolean hasValue() {
@@ -1063,6 +1067,11 @@ public class SampleView extends AbstractTimeGraphView {
         public void setGroup(String G) {
             fGroup = G;
         }
+
+        //This function will show the Quartiles of the function:
+        public Long getVariation() {
+            return (long) 1;
+        }
     }
 
     // getFunctionName:
@@ -1115,28 +1124,32 @@ public class SampleView extends AbstractTimeGraphView {
 
         @Override
         public String getColumnText(Object element, int columnIndex) {
+            // EventNode:
+            System.out.println("getColumnText");
+            if (element instanceof EventNode) {
+                System.out.println("EventNode");
+                EventNode entry = (EventNode) element;
+                return entry.getLabel();
+            }
+
             if (element instanceof EventEntry) {
+                System.out.println("EventEntry");
                 EventEntry entry = (EventEntry) element;
-                if (columnIndex == 0) {
-                    return entry.getName();
-                } else if (columnIndex == 1 && entry.getName().length() > 0) {
-                    int depth = entry.getDepth();
-                    return Integer.toString(depth);
-                } else if (columnIndex == 2 && entry.getName().length() > 0) {
-                    ITmfTimestamp ts = TmfTimestamp.fromNanos(entry.getStartTime());
-                    return ts.toString();
-                } else if (columnIndex == 3 && entry.getName().length() > 0) {
-                    ITmfTimestamp ts = TmfTimestamp.fromNanos(entry.getEndTime());
-                    return ts.toString();
-                } else if (columnIndex == 4 && entry.getName().length() > 0) {
-                    ITmfTimestamp ts = new TmfTimestampDelta(entry.getEndTime() - entry.getStartTime(), ITmfTimestamp.NANOSECOND_SCALE);
-                    return ts.toString();
+                String result = null;
+                if (columnIndex == 0) { //name
+                    result = entry.getName();
+                } else if (columnIndex == 2 && entry.getName().length() > 0) { // start
+                    ITmfTimestamp ts = TmfTimestamp.fromNanos(entry.getDepth());
+                    result = ts.toString();
                 }
+                System.out.println(result);
+                return result;
             } else if (element instanceof ITimeGraphEntry) {
                 if (columnIndex == 0) {
                     return ((ITimeGraphEntry) element).getName();
                 }
             }
+
             return ""; //$NON-NLS-1$
         }
 

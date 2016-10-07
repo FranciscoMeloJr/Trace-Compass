@@ -40,6 +40,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     // ArrayList of ECCTs, which are delimited by static implementation
     private static ArrayList<Node<ProfileData>> ArrayECCTs;
     private static LinkedHashMap<KeyTree, Node<ProfileData>> hashECCTs[];
+    private static int EcctSize;
 
     Node<ProfileData> aux = null;
     Node<ProfileData> fRoot = Node.create(new ProfileData(0, "root"));
@@ -67,6 +68,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         hashECCTs = null;
         diff = false;
         statistics = null;
+        EcctSize = 0;
     }
 
     @Override
@@ -197,12 +199,15 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             if (ArrayECCTs.size() == 0) {
                 ArrayECCTs.add(fRoot);
                 hashECCTs = new LinkedHashMap[ArrayECCTs.size()];
+                EcctSize = hashECCTs.length;
             } else {
                 // Array:
                 if (diff) {
                     hashECCTs = new LinkedHashMap[ArrayECCTs.size() + 1];
+                    EcctSize = hashECCTs.length;
                 } else {
                     hashECCTs = new LinkedHashMap[ArrayECCTs.size()];
+                    EcctSize = hashECCTs.length;
                 }
             }
             int i;
@@ -535,6 +540,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         hashECCTs = null;
         hashECCTs = new LinkedHashMap[1];
         hashECCTs[0] = finalResult;
+        EcctSize = 1;
     }
 
     /**
@@ -590,6 +596,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             hashECCTs = null;
             hashECCTs = finalResult;
             System.out.println("New size" + hashECCTs.length);
+            EcctSize = hashECCTs.length;
+
         } else {
             System.out.println("merging nothing");
         }
@@ -625,6 +633,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
         hashECCTs = finalResult;
+        EcctSize = hashECCTs.length;
     }
 
     /**
@@ -669,6 +678,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 }
             }
         }
+        EcctSize = hashECCTs.length;
         return result;
 
     }
@@ -714,13 +724,16 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         numberLevels.add(max);
         treeDif = result;
         if (diff) {
-            LinkedHashMap[] temp = new LinkedHashMap[ArrayECCTs.size() + 1];
-            for (int i = 0; i < ArrayECCTs.size(); i++) {
+            LinkedHashMap[] temp = new LinkedHashMap[EcctSize + 1];
+            for (int i = 0; i < EcctSize; i++) {
                 temp[i] = hashECCTs[i];
             }
-            temp[ArrayECCTs.size()] = treeDif;
+            temp[EcctSize] = treeDif;
             hashECCTs = temp;
+            //The diff:
+            //EcctSize +=1;
         }
+
         return result;
     }
 
@@ -748,7 +761,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         return numberLevels;
 
     }
+    public int getEcctSize() {
+        return EcctSize;
 
+    }
     // This function returns the fRoots - ArrayList of fRoots;
     public LinkedHashMap<KeyTree, Node<ProfileData>>[] getHashECCTs() {
         return hashECCTs;
@@ -1691,7 +1707,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
         // Run the Classification - 1 for the whole tree, 2 for each function:
-        public static void RunClassification(int kind) {
+        public static boolean RunClassification(int kind) {
 
             // Getting the data:
             Node<ProfileData> eachECCTs;
@@ -1702,7 +1718,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             if (hashECCTs.length > 1) {
 
-                for (int i = 0; i < hashECCTs.length; i++) {
+                for (int i = 0; i < EcctSize; i++) {
                     eachECCTs = ArrayECCTs.get(i);
                     duration = eachECCTs.getProfileData().getDuration();
                     durationList.add(Double.valueOf(duration));
@@ -1733,8 +1749,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 }
             } else {
                 System.out.println("At least more than one group");
+                return false;
             }
-
+            return true;
         }
 
         // CAll Weka Tests:
@@ -1840,8 +1857,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
     }
 
-    public static void RunClassification(int i) {
-        Classification.RunClassification(i);
+    public static boolean RunClassification(int i) {
+        Boolean answer = Classification.RunClassification(i);
+
+        return answer;
     }
 
 }

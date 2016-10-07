@@ -1,5 +1,8 @@
 package org.eclipse.tracecompass.tmf.ui.sampleview;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.RGB;
@@ -178,6 +181,9 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
             }
 
             gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
+            System.out.println(gc.toString() + "Bounds" + bounds.x + " " + bounds.y + " " + bounds.width + " " + bounds.height);
+            // test:
+            // bounds.height *= 1.2;
             Utils.drawText(gc, label, bounds.x, bounds.y, bounds.width, bounds.height, true, true);
         }
         if (!(event instanceof EventEntry)) {
@@ -194,4 +200,26 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
         }
     }
 
+    @Override
+    public Map<String, String> getEventHoverToolTipInfo(ITimeEvent event) {
+        Map<String, String> retMap = new LinkedHashMap<>();
+
+        if (event instanceof EventNode) {
+            EventNode entryNode = (EventNode) event;
+            String a = "Variation";
+            Long dur = entryNode.getVariation();
+            retMap.put(a, dur.toString());
+        } else {
+            if (event instanceof EventEntry) {
+
+                EventEntry entry = (EventEntry) event.getEntry();
+                String a = "Name";
+                String name = entry.getName();
+
+                retMap.put(a, name);
+            }
+        }
+
+        return retMap;
+    }
 }
