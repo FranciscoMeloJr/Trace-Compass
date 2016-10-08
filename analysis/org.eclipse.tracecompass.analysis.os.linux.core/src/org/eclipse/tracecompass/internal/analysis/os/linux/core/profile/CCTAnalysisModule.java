@@ -1863,26 +1863,59 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
     }
 
-    // Calculate the Coefficiente of Variation of the functions to be displayed as variation:
+    // Calculate the STD for each function in the executions:
     // CV = STd / Mean
     public static void calculateCV() {
         LinkedHashMap<KeyTree, Node<ProfileData>> eachECCTs;
         System.out.println("calculateQuartiles");
-        //Run through the nodes and display them:
+        // Run through the nodes and display them:
         for (int i = 0; i < EcctSize; i++) {
             eachECCTs = hashECCTs[i];
-            for ( KeyTree key : eachECCTs.keySet()) {
+            for (KeyTree key : eachECCTs.keySet()) {
 
                 Node<ProfileData> eachNode = eachECCTs.get(key);
                 ArrayList<Long> runsNode = eachNode.fProfileData.eachRun;
-                System.out.print(eachNode.getNodeLabel()+ " " + eachNode.getDur());
-                //run through the information in eachNode:
-                for(int j = 0; j< runsNode.size(); j++){
+                System.out.print(eachNode.getNodeLabel() + " " + eachNode.getDur());
+                // run through the information in eachNode:
+                for (int j = 0; j < runsNode.size(); j++) {
                     System.out.print(" " + runsNode.get(j));
                 }
                 System.out.println(" ");
+                // STD:
+                System.out.print("STD " + calculateSTDandCV(runsNode, 2));
             }
         }
+    }
+
+    // Calculate the Standard Deviation
+    public static Long calculateSTDandCV(ArrayList<Long> array, int type) {
+
+        Long total = (long) 0;
+        Long sumTotal = (long) 0;
+        Long result = (long) 0;
+
+        for (int j = 0; j < array.size(); j++) {
+            total += array.get(j);
+        }
+
+        Long mean = total / array.size();
+        for (int j = 0; j < array.size(); j++) {
+            sumTotal += (array.get(j) - mean) * (array.get(j) - mean);
+        }
+
+        Long Variance = (long) (sumTotal / array.size());
+
+        // In case of STD:
+        result = (long) Math.sqrt(Variance);
+        if (type == 1) {
+            return result;
+        }
+        // In case of Coefficient of Variation:
+        if (type == 2) {
+            result = (long) (result /mean);
+            return result;
+        }
+        return result;
     }
 
     public static boolean RunClassification(int i) {
@@ -1891,4 +1924,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         return answer;
     }
 
+    // Calculate the Correlation Coeficient, r, for each function and the
+    // duration of the execution
+    public static Long calculateCorrelation(ArrayList<Long> array) {
+        return (long) 0;
+    }
 }

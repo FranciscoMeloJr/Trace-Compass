@@ -372,7 +372,7 @@ public class SampleView extends AbstractTimeGraphView {
             @Override
             public void run() {
                 System.out.println("Inversion");
-                CCTAnalysisModule.calculateQuartiles();
+                CCTAnalysisModule.calculateCV();
             }
         };
         fInversion.setText("Inversion");
@@ -1125,15 +1125,12 @@ public class SampleView extends AbstractTimeGraphView {
         @Override
         public String getColumnText(Object element, int columnIndex) {
             // EventNode:
-            System.out.println("getColumnText");
             if (element instanceof EventNode) {
-                System.out.println("EventNode");
                 EventNode entry = (EventNode) element;
                 return entry.getLabel();
             }
 
             if (element instanceof EventEntry) {
-                System.out.println("EventEntry");
                 EventEntry entry = (EventEntry) element;
                 String result = null;
                 if (columnIndex == 0) { //name

@@ -181,8 +181,8 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
             }
 
             gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
-            System.out.println(gc.toString() + "Bounds" + bounds.x + " " + bounds.y + " " + bounds.width + " " + bounds.height);
             // test:
+            //System.out.println(gc.toString() + "Bounds" + bounds.x + " " + bounds.y + " " + bounds.width + " " + bounds.height);
             // bounds.height *= 1.2;
             Utils.drawText(gc, label, bounds.x, bounds.y, bounds.width, bounds.height, true, true);
         }
