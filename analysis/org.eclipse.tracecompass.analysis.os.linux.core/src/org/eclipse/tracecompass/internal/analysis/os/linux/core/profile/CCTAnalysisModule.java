@@ -48,6 +48,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     Node<ProfileData> parent = fRoot;
     // String used to split the tree:
     static String Sdelimiter = new String("interval:tracepoint");
+    static String SInfo = new String("getinfo:tracepoint");
     static String fEntry = new String("lttng_ust_cyg_profile:func_entry");
     static String fExit = new String("lttng_ust_cyg_profile:func_exit");
     long fGap;
@@ -151,6 +152,16 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 }
             }
 
+            // This is used for putting additional information:
+            if (eventName.equals(SInfo)) {
+
+                ITmfEventField content = event.getContent();
+                for (ITmfEventField field : content.getFields()) {
+                    if (field.getValue().equals("cache")) {
+                        System.out.println("Cache" + field.getValue()); // $NON-NLS-1$
+                    }
+                }
+            }
             if (eventName.equals(fEntry)) {
                 first = Iterables.get(event.getContent().getFields(), 0);
                 String label = first.toString();
