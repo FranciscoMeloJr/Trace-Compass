@@ -358,7 +358,7 @@ public class SampleView extends AbstractTimeGraphView {
         manager.add(itemCla);
         // Kernel Density Estimation
 
-        manager.add(getInversionAction());
+        manager.add(getTestAction());
     }
 
     /**
@@ -371,15 +371,32 @@ public class SampleView extends AbstractTimeGraphView {
         fInversion = new Action() {
             @Override
             public void run() {
-                System.out.println("Inversion");
-                CCTAnalysisModule.calculateCV();
+                System.out.println("getInversionAction");
+//                CCTAnalysisModule.calculateCV();
             }
         };
         fInversion.setText("Inversion");
         fInversion.setToolTipText("Use the inversion");
         return fInversion;
     }
-
+    /**
+     * Button used to test algorithms
+     *
+     * @return The Action object
+     */
+    public Action getTestAction() {
+        // resetScale
+        fInversion = new Action() {
+            @Override
+            public void run() {
+                System.out.println("Tests");
+                //CCTAnalysisModule.calculateCV();
+            }
+        };
+        fInversion.setText("Test");
+        fInversion.setToolTipText("Used to test");
+        return fInversion;
+    }
     /**
      * Get the KDE action
      *
@@ -771,7 +788,6 @@ public class SampleView extends AbstractTimeGraphView {
     // Need to know the resolution:
     @Override
     protected List<ITimeEvent> getEventList(TimeGraphEntry entry, long startTime, long endTime, long resolution, IProgressMonitor monitor) {
-        System.out.println("resolution" + resolution);
         List<ITimeEvent> eventList = null;
         if (entry instanceof EventEntry) {
             // Event List:

@@ -163,6 +163,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     }
                     if (field.toString().contains("my_integer_field")) {
                         System.out.println("Value " + field.getValue()); // $NON-NLS-1$
+                        // put as a children on a call graph:
+                        if (parent != null) {
+                            String info = field.getValue().toString();
+                            parent.getProfileData().fTestValue = Integer.parseInt(info);
+                        }
                     }
                 }
             }
@@ -458,7 +463,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     level++;
                 }
             }
-            System.out.println("current:" + current + " level " + level + " parent " + current.getParent());
+            if(current.fProfileData.fTestValue > 0){
+                System.out.println("Label " + current.getNodeLabel() + current.fProfileData.fTestValue);
+            }
+            //System.out.println("current:" + current + " level " + level + " parent " + current.getParent());
             String label = current.getNodeLabel();
             KeyTree aux1 = new KeyTree(label, level);
             if (current.getParent() != null) {
@@ -490,7 +498,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         for (KeyTree key : hmapZ.keySet()) {
             @Nullable
             Node<ProfileData> nodex = hmapZ.get(key);
-            System.out.println("level " + key.getLevel() + nodex);
+            //System.out.println("level " + key.getLevel() + nodex);
         }
         numberLevels.add(level);
         return hmapZ;// hmap;
@@ -728,7 +736,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 copy.setDur(value.getDur());
                 if ((root2.get(key) != null)) {
                     Node<ProfileData> compare = root2.get(key);
-                    System.out.println("newTh" + newTh);
+                    //System.out.println("newTh" + newTh);
                     copy.diff(compare, newTh);
                 }
                 if (key.getLevel() > max) {

@@ -13,7 +13,7 @@ public class ProfileData implements IProfileData {
 
     private String fLabel;
     int fWeight;
-    int fTestValue;
+    int fTestValue = -1;
     long fstartTime;
     long fendTime;
     long fDuration = 0; // endTime - startTime
@@ -49,6 +49,10 @@ public class ProfileData implements IProfileData {
         // test:
         fTestValue = x;
         eachRun = new ArrayList<>();
+    }
+    // Constructor:
+    public ProfileData(int weight, String label, Long start, Long end ) {
+        this(weight, label, start, end, null);
     }
 
     // Constructor:
