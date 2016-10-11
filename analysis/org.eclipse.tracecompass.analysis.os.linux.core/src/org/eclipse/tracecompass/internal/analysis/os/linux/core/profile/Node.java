@@ -12,8 +12,11 @@ public class Node<T extends IProfileData> {
     T fProfileData;
     private int fColor = 0;
     private long fPointer = 0;
+    //Used for displaying purposes
     private long fDur = 0;
+    //Used for grouping nodes:
     private String fGroup = new String(Integer.toString(0));
+    private Long fVariation = (long) 0;
 
     public Node() {
         fChildren = new ArrayList<>();
@@ -142,5 +145,13 @@ public class Node<T extends IProfileData> {
     public String getGroup() {
         return fGroup;
 
+    }
+
+    //Viration
+    public void setVariation(Long var) {
+        fVariation = var;
+    }
+    public Long getVariation() {
+        return fVariation;
     }
 }

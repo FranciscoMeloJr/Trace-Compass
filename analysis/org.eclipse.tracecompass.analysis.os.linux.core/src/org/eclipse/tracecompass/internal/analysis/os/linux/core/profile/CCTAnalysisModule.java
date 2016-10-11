@@ -48,7 +48,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     Node<ProfileData> parent = fRoot;
     // String used to split the tree:
     static String Sdelimiter = new String("interval:tracepoint");
-    static String SInfo = new String("getinfo:tracepoint");
+    static String SInfo = new String("interval:getinfo");
     static String fEntry = new String("lttng_ust_cyg_profile:func_entry");
     static String fExit = new String("lttng_ust_cyg_profile:func_exit");
     long fGap;
@@ -157,8 +157,12 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
                 ITmfEventField content = event.getContent();
                 for (ITmfEventField field : content.getFields()) {
+                    System.out.println(field + " " + field.getValue());
                     if (field.getValue().equals("cache")) {
                         System.out.println("Cache" + field.getValue()); // $NON-NLS-1$
+                    }
+                    if (field.toString().contains("my_integer_field")) {
+                        System.out.println("Value " + field.getValue()); // $NON-NLS-1$
                     }
                 }
             }
@@ -1878,7 +1882,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     // CV = STd / Mean
     public static void calculateCV() {
         LinkedHashMap<KeyTree, Node<ProfileData>> eachECCTs;
-        System.out.println("calculateQuartiles");
+        System.out.println("calculateCV");
         // Run through the nodes and display them:
         for (int i = 0; i < EcctSize; i++) {
             eachECCTs = hashECCTs[i];
@@ -1893,7 +1897,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 }
                 System.out.println(" ");
                 // STD:
-                System.out.print("STD " + calculateSTDandCV(runsNode, 2));
+                long var = calculateSTDandCV(runsNode, 2);
+                eachNode.setVariation(var);
             }
         }
     }

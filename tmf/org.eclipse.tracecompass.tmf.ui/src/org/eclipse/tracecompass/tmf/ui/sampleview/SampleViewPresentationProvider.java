@@ -182,7 +182,8 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
 
             gc.setForeground(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
             // test:
-            //System.out.println(gc.toString() + "Bounds" + bounds.x + " " + bounds.y + " " + bounds.width + " " + bounds.height);
+            // System.out.println(gc.toString() + "Bounds" + bounds.x + " " +
+            // bounds.y + " " + bounds.width + " " + bounds.height);
             // bounds.height *= 1.2;
             Utils.drawText(gc, label, bounds.x, bounds.y, bounds.width, bounds.height, true, true);
         }
@@ -207,8 +208,11 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
         if (event instanceof EventNode) {
             EventNode entryNode = (EventNode) event;
             String a = "Variation";
-            Long dur = entryNode.getVariation();
-            retMap.put(a, dur.toString());
+            if (entryNode.fnode != null) {
+                Long dur = entryNode.fnode.getVariation();
+
+                retMap.put(a, dur.toString());
+            }
         } else {
             if (event instanceof EventEntry) {
 
@@ -221,5 +225,10 @@ public class SampleViewPresentationProvider extends TimeGraphPresentationProvide
         }
 
         return retMap;
+    }
+
+    @Override
+    public Map<String, String> getEventHoverToolTipInfo(ITimeEvent event, long hoverTime) {
+        return getEventHoverToolTipInfo(event);
     }
 }

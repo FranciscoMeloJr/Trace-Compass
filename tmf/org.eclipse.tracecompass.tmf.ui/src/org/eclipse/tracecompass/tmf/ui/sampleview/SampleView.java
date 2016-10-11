@@ -717,7 +717,7 @@ public class SampleView extends AbstractTimeGraphView {
                     long start = ((ProfileData) node.getProfileData()).getStartTime();
                     long duration = node.getDur();
                     System.out.println("Node: " + label + " start " + start + " duration " + duration + " level " + level);
-                    tempNode = new EventNode(arrayEventEntry.get(level), label, id, start, duration, 1, level, color);
+                    tempNode = new EventNode(arrayEventEntry.get(level), label, id, start, duration, 1, level, color, node);
 
                     arrayEvent.add(tempNode);
                     if (level > max) {
@@ -979,6 +979,7 @@ public class SampleView extends AbstractTimeGraphView {
         int fValue, fLevel;
         int fColor; // change to enum Color; grey, green and red
         String fGroup; // change according to the group
+        Node<ProfileData> fnode; // new version change
 
         /** TimeGraphEntry matching this time event */
         protected ITimeGraphEntry fEntry;
@@ -987,10 +988,18 @@ public class SampleView extends AbstractTimeGraphView {
         private static final int NOVALUE = Integer.MIN_VALUE;
 
         public EventNode(ITimeGraphEntry entry, String label, int nodeId, long time, long duration, int value, int level, int color) {
-            this(entry, label, nodeId, time, duration, value, level, color, null);
+            this(entry, label, nodeId, time, duration, value, level, color, null, null);
         }
 
         public EventNode(ITimeGraphEntry entry, String label, int nodeId, long time, long duration, int value, int level, int color, String Gr) {
+            this(entry, label, nodeId, time, duration, value, level, color, Gr, null);
+        }
+
+        public EventNode(ITimeGraphEntry entry, String label, int nodeId, long time, long duration, int value, int level, int color, Node node) {
+            this(entry, label, nodeId, time, duration, value, level, color, null, node);
+        }
+
+        public EventNode(ITimeGraphEntry entry, String label, int nodeId, long time, long duration, int value, int level, int color, String Gr, Node nd) {
             fEntry = entry;
             fNodeId = nodeId;
             fTime = time;
@@ -1001,6 +1010,9 @@ public class SampleView extends AbstractTimeGraphView {
             fColor = color;
             if (Gr == null) {
                 fGroup = Integer.toString(0); // test
+            }
+            if (fnode == null) {
+                fnode = nd;
             }
         }
 
