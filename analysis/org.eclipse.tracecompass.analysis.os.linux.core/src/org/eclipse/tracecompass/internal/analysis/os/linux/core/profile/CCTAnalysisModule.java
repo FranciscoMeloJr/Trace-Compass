@@ -249,6 +249,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             // create statistics:
             createStatistics(arrayDuration);
+
+            //Calculate the CV:
+            calculateCV();
         }
 
         // This function returns the fRoot
@@ -555,6 +558,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         hashECCTs = new LinkedHashMap[1];
         hashECCTs[0] = finalResult;
         EcctSize = 1;
+
+        calculateCV();
     }
 
     /**
@@ -1892,12 +1897,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 ArrayList<Long> runsNode = eachNode.fProfileData.eachRun;
                 System.out.print(eachNode.getNodeLabel() + " " + eachNode.getDur());
                 // run through the information in eachNode:
-                for (int j = 0; j < runsNode.size(); j++) {
+                /*for (int j = 0; j < runsNode.size(); j++) {
                     System.out.print(" " + runsNode.get(j));
-                }
-                System.out.println(" ");
+                }*/
                 // STD:
-                long var = calculateSTDandCV(runsNode, 2);
+                long var = calculateSTDandCV(runsNode, 1);
                 eachNode.setVariation(var);
             }
         }
@@ -1909,6 +1913,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         Long total = (long) 0;
         Long sumTotal = (long) 0;
         Long result = (long) 0;
+        Long cov = (long) 0;
 
         for (int j = 0; j < array.size(); j++) {
             total += array.get(j);
@@ -1919,7 +1924,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             sumTotal += (array.get(j) - mean) * (array.get(j) - mean);
         }
 
-        Long Variance = (long) (sumTotal / array.size());
+        Long Variance = (long) (sumTotal / (double) array.size());
 
         // In case of STD:
         result = (long) Math.sqrt(Variance);
@@ -1928,8 +1933,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
         // In case of Coefficient of Variation:
         if (type == 2) {
-            result = (long) (result /mean);
-            return result;
+            cov = (long) (result /mean);
+            return cov;
         }
         return result;
     }
