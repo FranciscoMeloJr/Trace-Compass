@@ -9,9 +9,10 @@ import java.util.ArrayList;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.CCTAnalysisModule.Mode;
 
 /**
- *  This class implements IProfileData to be implemented on the
- *  tests related with Profiling and ECCT
- *  @author francisco
+ * This class implements IProfileData to be implemented on the tests related
+ * with Profiling and ECCT
+ *
+ * @author francisco
  */
 
 class GraphvizVisitor implements IProfileVisitor<ProfileData> {

@@ -59,7 +59,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     static int threshold = 10;
 
     // This is for the correlation part:
-    static ArrayList<Double> traceInfo = new ArrayList<>();
+    static ArrayList<Double> traceInfo;
 
     /**
      * Default constructor
@@ -71,6 +71,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         diff = false;
         statistics = null;
         EcctSize = 0;
+        traceInfo = new ArrayList<>();
     }
 
     @Override
@@ -1855,48 +1856,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 Node<ProfileData> eachNode = eachECCTs.get(key);
                 ArrayList<Long> runsNode = eachNode.fProfileData.eachRun;
                 System.out.print(eachNode.getNodeLabel() + " " + eachNode.getDur());
-                // run through the information in eachNode:
-                /*
-                 * for (int j = 0; j < runsNode.size(); j++) { System.out.print(
-                 * " " + runsNode.get(j)); }
-                 */
                 // STD:
-                long var = calculateSTDandCV(runsNode, 1);
+                long var = TestStatistic.calculateSTDandCV(runsNode, 1);
                 eachNode.setVariation(var);
             }
         }
-    }
-
-    // Calculate the Standard Deviation
-    public static Long calculateSTDandCV(ArrayList<Long> array, int type) {
-
-        Long total = (long) 0;
-        Long sumTotal = (long) 0;
-        Long result = (long) 0;
-        Long cov = (long) 0;
-
-        for (int j = 0; j < array.size(); j++) {
-            total += array.get(j);
-        }
-
-        Long mean = total / array.size();
-        for (int j = 0; j < array.size(); j++) {
-            sumTotal += (array.get(j) - mean) * (array.get(j) - mean);
-        }
-
-        Long Variance = (long) (sumTotal / (double) array.size());
-
-        // In case of STD:
-        result = (long) Math.sqrt(Variance);
-        if (type == 1) {
-            return result;
-        }
-        // In case of Coefficient of Variation:
-        if (type == 2) {
-            cov = (long) (result / mean);
-            return cov;
-        }
-        return result;
     }
 
     public static boolean RunClassification(int i) {
@@ -1908,13 +1872,20 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     // Correlates the the second tracepoint with the duration:
     public static void correlationInfoTrace() {
         System.out.println("Correlation");
-        //Reading the values:
+        // Reading the values:
         LinkedHashMap<KeyTree, Node<ProfileData>> eachECCTs;
         LinkedHashMap<Node<ProfileData>, Double> infoNodeHash = new LinkedHashMap<>();
         Double value;
 
+        // To calculate the duration:
+        double duration;
+        ArrayList<Double> durationList = new ArrayList<>();
+        traceInfo = new ArrayList<>();
+
+        // Tracepoint info:
         for (int i = 0; i < EcctSize; i++) {
             eachECCTs = hashECCTs[i];
+
             for (KeyTree key : eachECCTs.keySet()) {
                 Node<ProfileData> node = eachECCTs.get(key);
                 int testedValue = node.fProfileData.fTestValue;
@@ -1925,9 +1896,85 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 }
             }
         }
-        for(int i =0; i< traceInfo.size(); i++){
+
+        // Duration:
+        Node<ProfileData> eachTree;
+        for (int i = 0; i < EcctSize; i++) {
+            eachTree = ArrayECCTs.get(i);
+            duration = eachTree.getProfileData().getDuration();
+            durationList.add(Double.valueOf(duration));
+        }
+
+        for (int i = 0; i < traceInfo.size(); i++) {
             System.out.print(traceInfo.get(i) + " ");
         }
+
+        //call the correlation:
+        calculateCorrelation(durationList, traceInfo);
+    }
+
+    // Calculates the correlation of two distributions:
+    public static void calculateCorrelation(ArrayList<Double> data1, ArrayList<Double> data2) {
+
+        //Ordering:
+        Collections.sort(data1);
+        Collections.sort(data2);
+
+        ArrayList<Double> x = new ArrayList<>();
+        ArrayList<Double> xx = new ArrayList<>();
+        ArrayList<Double> y = new ArrayList<>();
+        ArrayList<Double> yy = new ArrayList<>();
+
+        ArrayList<Double> xy = new ArrayList<>();
+
+        Double mean1 = (double) 0;
+        Double mean2 = (double) 0;
+        Double value = (double) 0;
+        Double value2 = (double) 0;
+
+        // total:
+        Double total1 = (double) 0;
+        Double total2 = (double) 0;
+        Double total3 = (double) 0;
+
+        int minSize = (data1.size() < data2.size()) ? data1.size() : data2.size();
+
+        for (int j = 0; j < minSize; j++) {
+            mean1 += data1.get(j);
+        }
+        mean1 /= data1.size();
+        for (int j = 0; j < minSize; j++) {
+            value = data1.get(j) - mean1;
+            x.add(value);
+            value2 = value * value;
+            xx.add(value2);
+            total2 += value2;
+        }
+
+        for (int j = 0; j < minSize; j++) {
+            mean2 += data2.get(j);
+        }
+        mean2 /= data2.size();
+
+        for (int j = 0; j < minSize; j++) {
+            value = data2.get(j) - mean2;
+            y.add(value);
+            value2 = value * value;
+            yy.add(value2);
+            total3 += value2;
+        }
+
+
+        for (int j = 0; j < minSize; j++) {
+            xy.add(x.get(j) * y.get(j));
+        }
+        for (int j = 0; j < xy.size(); j++) {
+            total1 += xy.get(j);
+        }
+
+        //Showing Pearson correlation:
+        Double result = (total1 / (total2 * total3));
+        System.out.format(" Correlation %.10f%n", result);
 
     }
 }

@@ -56,4 +56,35 @@ public class TestStatistic implements ITmfStatistics {
         return arrayList.size();
     }
 
+    // Calculate the Standard Deviation
+    public static Long calculateSTDandCV(ArrayList<Long> array, int type) {
+
+        Long total = (long) 0;
+        Long sumTotal = (long) 0;
+        Long result = (long) 0;
+        Long cov = (long) 0;
+
+        for (int j = 0; j < array.size(); j++) {
+            total += array.get(j);
+        }
+
+        Long mean = total / array.size();
+        for (int j = 0; j < array.size(); j++) {
+            sumTotal += (array.get(j) - mean) * (array.get(j) - mean);
+        }
+
+        Long Variance = (long) (sumTotal / (double) array.size());
+
+        // In case of STD:
+        result = (long) Math.sqrt(Variance);
+        if (type == 1) {
+            return result;
+        }
+        // In case of Coefficient of Variation:
+        if (type == 2) {
+            cov = (long) (result / mean);
+            return cov;
+        }
+        return result;
+    }
 }
