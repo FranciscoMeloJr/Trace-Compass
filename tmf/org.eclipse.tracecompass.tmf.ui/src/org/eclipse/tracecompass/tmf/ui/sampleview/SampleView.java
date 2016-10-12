@@ -347,16 +347,15 @@ public class SampleView extends AbstractTimeGraphView {
         manager.add(new Separator());
         manager.add(getMergeAction());
 
-        // Classification
+        // Classification Methods
         MenuManager itemCla = new MenuManager("Classifier");
         itemCla.add(getClassificationAction(1));
         itemCla.add(getClassificationAction(2));
         itemCla.add(getClassificationAction(3));
         itemCla.add(getClassificationAction(4));
         itemCla.add(getClassificationAction(5));
-
+        itemCla.add(getCorrelationActionDialog("Person Correlation", 0));//itemCla.add(getCorrelationAction());
         manager.add(itemCla);
-        // Kernel Density Estimation
 
         manager.add(getTestAction());
     }
@@ -378,6 +377,28 @@ public class SampleView extends AbstractTimeGraphView {
         fInversion.setText("Inversion");
         fInversion.setToolTipText("Use the inversion");
         return fInversion;
+    }
+    /**
+     * Button used to correlation evaluation
+     *
+     * @return The Action object
+     */
+    public Action getCorrelationAction() {
+        // resetScale
+        Action correlationButton = null;
+        correlationButton = new Action("xis", IAction.AS_DROP_DOWN_MENU) {
+            @Override
+            public void run() {
+                System.out.println("Tests");
+                CCTAnalysisModule.correlationInfoTrace();
+            }
+        };
+
+        correlationButton.setText("Correlation");
+        correlationButton.setToolTipText("Select the delimiters");
+        correlationButton.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_CONFLICT));
+
+        return correlationButton;
     }
     /**
      * Button used to test algorithms
@@ -497,7 +518,7 @@ public class SampleView extends AbstractTimeGraphView {
     }
 
     /**
-     * Get the reset scale action. kind depends on each type of button
+     * Get the delimitation button. kind depends on each type of button
      *
      * @param initialLabel
      *            label of the button
@@ -505,8 +526,8 @@ public class SampleView extends AbstractTimeGraphView {
      */
 
     public Action getDelimitationActionDialog(String labelText, String initialLabel, int kind) {
-        Action fToggleBookmarkAction = null;
-        fToggleBookmarkAction = new Action() {
+        Action fDelimitationAction = null;
+        fDelimitationAction = new Action() {
 
             @Override
             public void runWithEvent(Event event) {
@@ -530,13 +551,40 @@ public class SampleView extends AbstractTimeGraphView {
                 }
             }
         };
-        fToggleBookmarkAction.setText(labelText);
-        fToggleBookmarkAction.setToolTipText(Messages.TmfTimeGraphViewer_DelimitationText);
+        fDelimitationAction.setText(labelText);
+        fDelimitationAction.setToolTipText(Messages.TmfTimeGraphViewer_DelimitationText);
         // fToggleBookmarkAction.setImageDescriptor(ADD_BOOKMARK);
 
-        return fToggleBookmarkAction;
+        return fDelimitationAction;
     }
+    /**
+     * Get the correlation button
+     *
+     * @param initialLabel
+     *            label of the button
+     * @return The Action object
+     */
 
+    public Action getCorrelationActionDialog(String initialLabel) {
+        Action fCorrelationAction = null;
+        String labelText = initialLabel; //CCTAnalysisModule.correlationInfoTrace();
+        String resultText =  ("The duration and the tracepoint is "+ CCTAnalysisModule.correlationInfoTrace());
+        fCorrelationAction = new Action() {
+
+            @Override
+            public void runWithEvent(Event event) {
+                final AddDelimiterDialog dialog = new AddDelimiterDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), resultText);
+                if (dialog.open() == Window.OK) {
+                    final String label = CCTAnalysisModule.correlationInfoTrace();
+                }
+            }
+        };
+        fCorrelationAction.setText(labelText);
+        fCorrelationAction.setToolTipText(Messages.TmfTimeGraphViewer_DelimitationText);
+        // fToggleBookmarkAction.setImageDescriptor(ADD_BOOKMARK);
+
+        return fCorrelationAction;
+    }
     /**
      * Get the Merge Action
      *

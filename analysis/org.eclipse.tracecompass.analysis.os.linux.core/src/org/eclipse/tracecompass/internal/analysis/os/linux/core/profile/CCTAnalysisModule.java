@@ -1870,7 +1870,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     // Correlates the the second tracepoint with the duration:
-    public static void correlationInfoTrace() {
+    public static String correlationInfoTrace() {
         System.out.println("Correlation");
         // Reading the values:
         LinkedHashMap<KeyTree, Node<ProfileData>> eachECCTs;
@@ -1902,6 +1902,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         for (int i = 0; i < EcctSize; i++) {
             eachTree = ArrayECCTs.get(i);
             duration = eachTree.getProfileData().getDuration();
+            System.out.print(duration + " ");
             durationList.add(Double.valueOf(duration));
         }
 
@@ -1909,8 +1910,23 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             System.out.print(traceInfo.get(i) + " ");
         }
 
-        //call the correlation:
-        TestStatistic.calculateCorrelation(durationList, traceInfo);
+        // call the correlation:
+        Double result = TestStatistic.calculateCorrelation(durationList, traceInfo);
+        String resultString;
+        if (result >= 0.75) {
+            System.out.print("Strong correlated");
+            resultString = ("Strong correlated");
+        } else {
+            if (result <= 0.25) {
+                System.out.print("Not correlated");
+                resultString = ("Not correlated");
+            } else {
+                System.out.print("Weak correlated");
+                resultString = ("Weak correlated");
+            }
+        }
+
+        return resultString;
     }
 
 }

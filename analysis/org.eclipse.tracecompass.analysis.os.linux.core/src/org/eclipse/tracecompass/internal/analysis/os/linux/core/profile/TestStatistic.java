@@ -89,7 +89,7 @@ public class TestStatistic implements ITmfStatistics {
         return result;
     }
     // Calculates the correlation of two distributions:
-    public static void calculateCorrelation(ArrayList<Double> data1, ArrayList<Double> data2) {
+    public static Double calculateCorrelation(ArrayList<Double> data1, ArrayList<Double> data2) {
 
         //Ordering:
         Collections.sort(data1);
@@ -148,8 +148,11 @@ public class TestStatistic implements ITmfStatistics {
         }
 
         //Showing Pearson correlation:
-        Double result = (total1 / (total2 * total3));
+        Double denominator = Math.sqrt((total2 * total3));
+        Double result = (total1 / denominator);
+
         System.out.format(" Correlation %.10f%n", result);
 
+        return result;
     }
 }
