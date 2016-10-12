@@ -7,8 +7,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -57,8 +55,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     // This tree is the differential part:
     static LinkedHashMap<KeyTree, Node<ProfileData>> treeDif;
     static ArrayList<Integer> numberLevels = new ArrayList<>();
-    static testStatistics statistics;
+    static TestStatistic statistics;
     static int threshold = 10;
+
+    // This is for the correlation part:
+    static ArrayList<Double> traceInfo = new ArrayList<>();
 
     /**
      * Default constructor
@@ -131,7 +132,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             System.out.println(fEntry + " " + fExit);
             final String eventName = event.getType().getName();
             ProfileData data;
-            Random rand = new Random();
+
             System.out.println(eventName);
             // This is used for delimiting the tree:
             if (eventName.equals(Sdelimiter)) {
@@ -176,8 +177,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 String label = first.toString();
                 Long start = event.getTimestamp().getValue();
                 // RandomNumber
-                int n = rand.nextInt(100) + 1;
-                aux = Node.create(new ProfileData(0, label, start, null, n));
+                // int n = rand.nextInt(100) + 1;
+                aux = Node.create(new ProfileData(0, label, start, null));
 
                 // put as a children on a call graph:
                 if (parent != null) {
@@ -255,7 +256,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             // create statistics:
             createStatistics(arrayDuration);
 
-            //Calculate the CV:
+            // Calculate the CV:
             calculateCV();
         }
 
@@ -271,7 +272,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         // This function creates the statistic
         public void createStatistics(ArrayList<Long> aux1) {
-            statistics = new testStatistics(aux1);
+            statistics = new TestStatistic(aux1);
         }
 
         // This function method runs through the nodes of the root and calculate
@@ -463,10 +464,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     level++;
                 }
             }
-            if(current.fProfileData.fTestValue > 0){
+            if (current.fProfileData.fTestValue > 0) {
                 System.out.println("Label " + current.getNodeLabel() + current.fProfileData.fTestValue);
             }
-            //System.out.println("current:" + current + " level " + level + " parent " + current.getParent());
+            // System.out.println("current:" + current + " level " + level + "
+            // parent " + current.getParent());
             String label = current.getNodeLabel();
             KeyTree aux1 = new KeyTree(label, level);
             if (current.getParent() != null) {
@@ -498,7 +500,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         for (KeyTree key : hmapZ.keySet()) {
             @Nullable
             Node<ProfileData> nodex = hmapZ.get(key);
-            //System.out.println("level " + key.getLevel() + nodex);
+            // System.out.println("level " + key.getLevel() + nodex);
         }
         numberLevels.add(level);
         return hmapZ;// hmap;
@@ -736,7 +738,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 copy.setDur(value.getDur());
                 if ((root2.get(key) != null)) {
                     Node<ProfileData> compare = root2.get(key);
-                    //System.out.println("newTh" + newTh);
+                    // System.out.println("newTh" + newTh);
                     copy.diff(compare, newTh);
                 }
                 if (key.getLevel() > max) {
@@ -803,57 +805,6 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     public ITmfStatistics getStatistics() {
 
         return statistics;
-    }
-
-    public class testStatistics implements ITmfStatistics {
-
-        ArrayList<Long> arrayList;
-
-        testStatistics(ArrayList<Long> array) {
-            arrayList = array;
-        }
-
-        // returns the arrayList
-        @Override
-        public List<Long> histogramQuery(long start, long end, int nb) {
-
-            return arrayList;
-        }
-
-        @Override
-        public long getEventsTotal() {
-            long nb = arrayList.size();
-            return nb;
-        }
-
-        @Override
-        public Map<@NonNull String, @NonNull Long> getEventTypesTotal() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public long getEventsInRange(long start, long end) {
-            // TODO Auto-generated method stub
-            return 0;
-        }
-
-        @Override
-        public Map<String, Long> getEventTypesInRange(long start, long end) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public void dispose() {
-            // TODO Auto-generated method stub
-
-        }
-
-        public int getSize() {
-            return arrayList.size();
-        }
-
     }
 
     private static void setBeginAndEntry(String begin, String end, String interval) {
@@ -1905,9 +1856,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 ArrayList<Long> runsNode = eachNode.fProfileData.eachRun;
                 System.out.print(eachNode.getNodeLabel() + " " + eachNode.getDur());
                 // run through the information in eachNode:
-                /*for (int j = 0; j < runsNode.size(); j++) {
-                    System.out.print(" " + runsNode.get(j));
-                }*/
+                /*
+                 * for (int j = 0; j < runsNode.size(); j++) { System.out.print(
+                 * " " + runsNode.get(j)); }
+                 */
                 // STD:
                 long var = calculateSTDandCV(runsNode, 1);
                 eachNode.setVariation(var);
@@ -1941,7 +1893,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
         // In case of Coefficient of Variation:
         if (type == 2) {
-            cov = (long) (result /mean);
+            cov = (long) (result / mean);
             return cov;
         }
         return result;
@@ -1953,9 +1905,29 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         return answer;
     }
 
-    // Calculate the Correlation Coeficient, r, for each function and the
-    // duration of the execution
-    public static Long calculateCorrelation(ArrayList<Long> array) {
-        return (long) 0;
+    // Correlates the the second tracepoint with the duration:
+    public static void correlationInfoTrace() {
+        System.out.println("Correlation");
+        //Reading the values:
+        LinkedHashMap<KeyTree, Node<ProfileData>> eachECCTs;
+        LinkedHashMap<Node<ProfileData>, Double> infoNodeHash = new LinkedHashMap<>();
+        Double value;
+
+        for (int i = 0; i < EcctSize; i++) {
+            eachECCTs = hashECCTs[i];
+            for (KeyTree key : eachECCTs.keySet()) {
+                Node<ProfileData> node = eachECCTs.get(key);
+                int testedValue = node.fProfileData.fTestValue;
+                if (testedValue > 0) {
+                    value = (double) testedValue;
+                    traceInfo.add((double) testedValue);
+                    infoNodeHash.put(node, value);
+                }
+            }
+        }
+        for(int i =0; i< traceInfo.size(); i++){
+            System.out.print(traceInfo.get(i) + " ");
+        }
+
     }
 }

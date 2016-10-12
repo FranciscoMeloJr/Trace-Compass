@@ -52,7 +52,7 @@ public class ProfileData implements IProfileData {
     }
     // Constructor:
     public ProfileData(int weight, String label, Long start, Long end ) {
-        this(weight, label, start, end, null);
+        this(weight, label, start, end, -1);
     }
 
     // Constructor:

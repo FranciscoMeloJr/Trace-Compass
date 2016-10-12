@@ -390,7 +390,7 @@ public class SampleView extends AbstractTimeGraphView {
             @Override
             public void run() {
                 System.out.println("Tests");
-                //CCTAnalysisModule.calculateCV();
+                CCTAnalysisModule.correlationInfoTrace();
             }
         };
         fInversion.setText("Test");
