@@ -119,8 +119,8 @@ public class SampleView extends AbstractTimeGraphView {
     List<String> FUNCTION_NAMES = new ArrayList<>();
     private Action fClassificationAction;
     private Action fKDEAction;
-    private Action fInversion;
-
+    private Action fInversion; //not been used in the current tests
+    private Action fTest;
     /**
      * The constructor.
      */
@@ -354,92 +354,13 @@ public class SampleView extends AbstractTimeGraphView {
         itemCla.add(getClassificationAction(3));
         itemCla.add(getClassificationAction(4));
         itemCla.add(getClassificationAction(5));
-        itemCla.add(getCorrelationActionDialog("Person Correlation", 0));//itemCla.add(getCorrelationAction());
+        itemCla.add(getCorrelationActionDialog("Person Correlation"));//itemCla.add(getCorrelationAction());
         manager.add(itemCla);
 
-        manager.add(getTestAction());
+        fTest = Actions.getTestAction();
+        manager.add(fTest);
     }
 
-    /**
-     * Get the Inversion action
-     *
-     * @return The Action object
-     */
-    public Action getInversionAction() {
-        // resetScale
-        fInversion = new Action() {
-            @Override
-            public void run() {
-                System.out.println("getInversionAction");
-//                CCTAnalysisModule.calculateCV();
-            }
-        };
-        fInversion.setText("Inversion");
-        fInversion.setToolTipText("Use the inversion");
-        return fInversion;
-    }
-    /**
-     * Button used to correlation evaluation
-     *
-     * @return The Action object
-     */
-    public Action getCorrelationAction() {
-        // resetScale
-        Action correlationButton = null;
-        correlationButton = new Action("xis", IAction.AS_DROP_DOWN_MENU) {
-            @Override
-            public void run() {
-                System.out.println("Tests");
-                CCTAnalysisModule.correlationInfoTrace();
-            }
-        };
-
-        correlationButton.setText("Correlation");
-        correlationButton.setToolTipText("Select the delimiters");
-        correlationButton.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_CONFLICT));
-
-        return correlationButton;
-    }
-    /**
-     * Button used to test algorithms
-     *
-     * @return The Action object
-     */
-    public Action getTestAction() {
-        // resetScale
-        fInversion = new Action() {
-            @Override
-            public void run() {
-                System.out.println("Tests");
-                CCTAnalysisModule.correlationInfoTrace();
-            }
-        };
-        fInversion.setText("Test");
-        fInversion.setToolTipText("Used to test");
-        return fInversion;
-    }
-    /**
-     * Get the KDE action
-     *
-     * @return The Action object
-     */
-    public Action getKDEAction() {
-        // resetScale
-        fKDEAction = new Action() {
-            @Override
-            public void run() {
-                System.out.println("Apply KDE Test");
-
-                // Run over the tree:
-                // CCTAnalysisModule.RunKDE();
-                CCTAnalysisModule.RunClassification(4);
-            }
-        };
-        fKDEAction.setText("KDE");
-        fKDEAction.setToolTipText("Use the KDE method");
-        fKDEAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_PIN_VIEW));
-        return fKDEAction;
-    }
 
     /**
      * Get the invert action - this is used for testing algorithm
@@ -448,7 +369,8 @@ public class SampleView extends AbstractTimeGraphView {
      */
     public Action getClassificationAction(int i) {
         if (i == 4) {
-            return getKDEAction();
+            fKDEAction = Actions.getKDEAction();
+            return fKDEAction;
         }
         // resetScale
         fClassificationAction = new Action() {
@@ -568,7 +490,7 @@ public class SampleView extends AbstractTimeGraphView {
     public Action getCorrelationActionDialog(String initialLabel) {
         Action fCorrelationAction = null;
         String labelText = initialLabel; //CCTAnalysisModule.correlationInfoTrace();
-        String resultText =  ("The duration and the tracepoint is "+ CCTAnalysisModule.correlationInfoTrace());
+        String resultText =  ("The duration and the tracepoint(interval:getinfo) are "+ CCTAnalysisModule.correlationInfoTrace());
         fCorrelationAction = new Action() {
 
             @Override
