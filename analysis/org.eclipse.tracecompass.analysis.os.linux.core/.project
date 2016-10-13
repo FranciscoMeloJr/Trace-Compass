@@ -31,4 +31,31 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.pde.api.tools.apiAnalysisNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>src/org/eclipse/tracecompass/internal/analysis/os/linux/core/profile/MLR/IllegalDimensionException.java</name>
+			<type>1</type>
+			<location>/home/frank/Desktop/Research/MLR/ProjectMLR/IllegalDimensionException.java</location>
+		</link>
+		<link>
+			<name>src/org/eclipse/tracecompass/internal/analysis/os/linux/core/profile/MLR/Matrix.java</name>
+			<type>1</type>
+			<location>/home/frank/Desktop/Research/MLR/src/matrix/Matrix.java</location>
+		</link>
+		<link>
+			<name>src/org/eclipse/tracecompass/internal/analysis/os/linux/core/profile/MLR/MatrixMathematics.java</name>
+			<type>1</type>
+			<location>/home/frank/Desktop/Research/MLR/ProjectMLR/MatrixMathematics.java</location>
+		</link>
+		<link>
+			<name>src/org/eclipse/tracecompass/internal/analysis/os/linux/core/profile/MLR/MultiLinear.java</name>
+			<type>1</type>
+			<location>/home/frank/Desktop/Research/MLR/src/regression/MultiLinear.java</location>
+		</link>
+		<link>
+			<name>src/org/eclipse/tracecompass/internal/analysis/os/linux/core/profile/MLR/NoSquareException.java</name>
+			<type>1</type>
+			<location>/home/frank/Desktop/Research/MLR/src/matrix/NoSquareException.java</location>
+		</link>
+	</linkedResources>
 </projectDescription>

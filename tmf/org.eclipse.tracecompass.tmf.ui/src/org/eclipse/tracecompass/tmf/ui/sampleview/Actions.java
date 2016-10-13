@@ -24,7 +24,7 @@ public class Actions {
             @Override
             public void run() {
                 System.out.println("Tests");
-                CCTAnalysisModule.correlationInfoTrace();
+                CCTAnalysisModule.MRL(0);
             }
         };
         fInversion.setText("Test");
@@ -43,13 +43,14 @@ public class Actions {
             @Override
             public void run() {
                 System.out.println("getInversionAction");
-//                CCTAnalysisModule.calculateCV();
+                // CCTAnalysisModule.calculateCV();
             }
         };
         fInversion.setText("Inversion");
         fInversion.setToolTipText("Use the inversion");
         return fInversion;
     }
+
     /**
      * Button used to correlation evaluation
      *
@@ -95,7 +96,5 @@ public class Actions {
         fKDEAction.setImageDescriptor(Activator.getDefault().getImageDescripterFromPath(ITmfImageConstants.IMG_UI_PIN_VIEW));
         return fKDEAction;
     }
-
-
 
 }

@@ -13,6 +13,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileTraversal.KeyTree;
+import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.MLR.Matrix;
+import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.MLR.MultiLinear;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
@@ -1927,6 +1929,29 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
         return resultString;
+    }
+
+    //Multi Linear Regression:
+    public static void MRL(int i) {
+        //Test:
+        if(i ==0 ){
+        Matrix X = new Matrix(new double[][]{{4,0,1},{7,1,1},{6,1,0},{2,0,0},{3,0,1}});
+        Matrix Y = new Matrix(new double[][]{{27},{29},{23},{20},{21}});
+        MultiLinear ml = new MultiLinear(X, Y);
+        try {
+            Matrix beta = ml.calculate();
+            System.out.println(beta);
+            //BMI =  beta0  +   beta1 * Diet_Score +  beta2  * Male +  beta3  * age
+            //beta0  = 9.25,  beta1 = 4.75, beta2 = -13.5, beta3 = -1.25
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        }
+        //Taking the information:
+        else{
+
+        }
     }
 
 }
