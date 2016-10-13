@@ -1874,43 +1874,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     // Correlates the the second tracepoint with the duration:
     public static String correlationInfoTrace() {
         System.out.println("Correlation");
-        // Reading the values:
-        LinkedHashMap<KeyTree, Node<ProfileData>> eachECCTs;
-        LinkedHashMap<Node<ProfileData>, Double> infoNodeHash = new LinkedHashMap<>();
-        Double value;
 
-        // To calculate the duration:
-        double duration;
-        ArrayList<Double> durationList = new ArrayList<>();
-        traceInfo = new ArrayList<>();
-
-        // Tracepoint info:
-        for (int i = 0; i < EcctSize; i++) {
-            eachECCTs = hashECCTs[i];
-
-            for (KeyTree key : eachECCTs.keySet()) {
-                Node<ProfileData> node = eachECCTs.get(key);
-                int testedValue = node.fProfileData.fTestValue;
-                if (testedValue > 0) {
-                    value = (double) testedValue;
-                    traceInfo.add((double) testedValue);
-                    infoNodeHash.put(node, value);
-                }
-            }
-        }
-
-        // Duration:
-        Node<ProfileData> eachTree;
-        for (int i = 0; i < EcctSize; i++) {
-            eachTree = ArrayECCTs.get(i);
-            duration = eachTree.getProfileData().getDuration();
-            System.out.print(duration + " ");
-            durationList.add(Double.valueOf(duration));
-        }
-
-        for (int i = 0; i < traceInfo.size(); i++) {
-            System.out.print(traceInfo.get(i) + " ");
-        }
+        calculateTraceInfo();
+        ArrayList<Double> durationList = calculateDurationArray();
 
         // call the correlation:
         Double result = TestStatistic.calculateCorrelation(durationList, traceInfo);
@@ -1931,26 +1897,98 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         return resultString;
     }
 
-    //Multi Linear Regression:
-    public static void MRL(int i) {
-        //Test:
-        if(i ==0 ){
-        Matrix X = new Matrix(new double[][]{{4,0,1},{7,1,1},{6,1,0},{2,0,0},{3,0,1}});
-        Matrix Y = new Matrix(new double[][]{{27},{29},{23},{20},{21}});
-        MultiLinear ml = new MultiLinear(X, Y);
-        try {
-            Matrix beta = ml.calculate();
-            System.out.println(beta);
-            //BMI =  beta0  +   beta1 * Diet_Score +  beta2  * Male +  beta3  * age
-            //beta0  = 9.25,  beta1 = 4.75, beta2 = -13.5, beta3 = -1.25
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        }
-        //Taking the information:
-        else{
+    private static ArrayList<Double> calculateDurationArray() {
+        double duration;
+        ArrayList<Double> durationList = new ArrayList<>();
 
+        // Duration:
+        Node<ProfileData> eachTree;
+        for (int i = 0; i < EcctSize; i++) {
+            eachTree = ArrayECCTs.get(i);
+            duration = eachTree.getProfileData().getDuration();
+            System.out.print(duration + " ");
+            durationList.add(Double.valueOf(duration));
+        }
+
+        return durationList;
+    }
+
+    // This function calculates the info from the second tracepoint:
+    private static void calculateTraceInfo() {
+        // Reading the values:
+        LinkedHashMap<KeyTree, Node<ProfileData>> eachECCTs;
+        LinkedHashMap<Node<ProfileData>, Double> infoNodeHash = new LinkedHashMap<>();
+        Double value;
+
+        // To calculate the duration:
+        traceInfo = new ArrayList<>();
+
+        // Tracepoint info:
+        for (int i = 0; i < EcctSize; i++) {
+            eachECCTs = hashECCTs[i];
+
+            for (KeyTree key : eachECCTs.keySet()) {
+                Node<ProfileData> node = eachECCTs.get(key);
+                int testedValue = node.fProfileData.fTestValue;
+                if (testedValue > 0) {
+                    value = (double) testedValue;
+                    traceInfo.add((double) testedValue);
+                    infoNodeHash.put(node, value);
+                }
+            }
+        }
+
+        for (int i = 0; i < traceInfo.size(); i++) {
+            System.out.print(traceInfo.get(i) + " ");
+        }
+    }
+
+    // Multi Linear Regression:
+    public static void MRL(int i) {
+        // Test:
+        try {
+            if (i == 0) {
+                Matrix X = new Matrix(new double[][] { { 4, 0, 1 }, { 7, 1, 1 }, { 6, 1, 0 }, { 2, 0, 0 }, { 3, 0, 1 } });
+                Matrix Y = new Matrix(new double[][] { { 27 }, { 29 }, { 23 }, { 20 }, { 21 } });
+                MultiLinear ml = new MultiLinear(X, Y);
+
+                Matrix beta = ml.calculate();
+                System.out.println(beta);
+                // BMI = beta0 + beta1 * Diet_Score + beta2 * Male + beta3 * age
+                // beta0 = 9.25, beta1 = 4.75, beta2 = -13.5, beta3 = -1.25
+
+            }
+            // Taking the information + test with test array:
+            else {
+                //TraceInfo:
+                calculateTraceInfo();
+
+                // Call the Multi regression Model:
+                calculateTraceInfo();
+                ArrayList<Double> duration = calculateDurationArray();
+                ArrayList<ArrayList<Double>> xList = new ArrayList<>();
+                ArrayList<Double> test = new ArrayList<>();
+                test.add(1.0);
+                test.add(2.0);
+                test.add(3.0);
+                test.add(4.0);
+                test.add(10.0);
+                test.add(4.0);
+                test.add(10.0);
+                test.add(10.0);
+                test.add(4.0);
+                test.add(10.0);
+
+                xList.add(traceInfo);
+                xList.add(test);
+
+                Matrix X = new Matrix(xList, xList.size());
+                Matrix Y = new Matrix(duration);
+
+                MultiLinear ml = new MultiLinear(X, Y);
+            }
+        } catch (Exception e) {
+            System.out.print("Exception in MRL");
         }
     }
 
