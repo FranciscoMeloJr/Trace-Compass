@@ -1986,6 +1986,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 Matrix Y = new Matrix(duration);
 
                 MultiLinear ml = new MultiLinear(X, Y);
+                Matrix beta = ml.calculate();
+                System.out.println(beta);
             }
         } catch (Exception e) {
             System.out.print("Exception in MRL");

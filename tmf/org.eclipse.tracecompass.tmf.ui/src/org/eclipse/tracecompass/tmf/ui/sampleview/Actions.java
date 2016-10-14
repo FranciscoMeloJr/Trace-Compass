@@ -24,7 +24,7 @@ public class Actions {
             @Override
             public void run() {
                 System.out.println("Tests");
-                CCTAnalysisModule.MRL(0);
+                CCTAnalysisModule.MRL(1);
             }
         };
         fInversion.setText("Test");
