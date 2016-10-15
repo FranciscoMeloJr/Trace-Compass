@@ -1881,9 +1881,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         // call the correlation:
         Double result = TestStatistic.calculateCorrelation(durationList, traceInfo);
         String resultString;
+        result = Math.abs(result);
         if (result >= 0.75) {
-            System.out.print("Strong correlated");
-            resultString = ("Strong correlated");
+            System.out.print("Strongly correlated");
+            resultString = ("Strongly correlated");
         } else {
             if (result <= 0.25) {
                 System.out.print("Not correlated");
@@ -1983,6 +1984,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 xList.add(test);
 
                 Matrix X = new Matrix(xList, xList.size());
+
                 Matrix Y = new Matrix(duration);
 
                 MultiLinear ml = new MultiLinear(X, Y);
