@@ -171,6 +171,15 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         if (parent != null) {
                             String info = field.getValue().toString();
                             parent.getProfileData().fTestValue = Integer.parseInt(info);
+                            parent.getProfileData().addInfo(Integer.parseInt(info));
+                        }
+                    }
+                    if (field.toString().contains("my_integer_field2")) {
+                        System.out.println("Value " + field.getValue()); // $NON-NLS-1$
+                        // put as a children on a call graph:
+                        if (parent != null) {
+                            String info = field.getValue().toString();
+                            parent.getProfileData().addInfo(Integer.parseInt(info));
                         }
                     }
                 }

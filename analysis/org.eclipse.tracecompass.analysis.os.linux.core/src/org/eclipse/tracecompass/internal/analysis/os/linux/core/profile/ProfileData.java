@@ -18,6 +18,7 @@ public class ProfileData implements IProfileData {
     long fendTime;
     long fDuration = 0; // endTime - startTime
     ArrayList<Long> eachRun;
+    ArrayList<Long> eachInfo; // cache, instruction and other informations
 
     // Constructor:
     public ProfileData(int weight, String label) {
@@ -29,6 +30,7 @@ public class ProfileData implements IProfileData {
         fLabel = label;
         fDuration = 0;
         eachRun = new ArrayList<>();
+        eachInfo = new ArrayList<>();
     }
 
     // Constructor:
@@ -49,6 +51,7 @@ public class ProfileData implements IProfileData {
         // test:
         fTestValue = x;
         eachRun = new ArrayList<>();
+        eachInfo = new ArrayList<>();
     }
     // Constructor:
     public ProfileData(int weight, String label, Long start, Long end ) {
@@ -61,6 +64,7 @@ public class ProfileData implements IProfileData {
         fLabel = label;
         fDuration = 0;
         eachRun = new ArrayList<>();
+        eachInfo = new ArrayList<>();
     }
 
     // Add to the weight:
@@ -211,5 +215,9 @@ public class ProfileData implements IProfileData {
         }
         //gray:
         return 0;
+    }
+
+    public void addInfo(long info) {
+        eachInfo.add(info);
     }
 }
