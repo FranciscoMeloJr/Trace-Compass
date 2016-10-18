@@ -62,6 +62,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
     // This is for the correlation part:
     static ArrayList<Double> traceInfo;
+    static ArrayList<ArrayList<Double>> traceInfoArray;
 
     /**
      * Default constructor
@@ -1932,6 +1933,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
         // To calculate the duration:
         traceInfo = new ArrayList<>();
+        ArrayList<Double> traceInfo1 = new ArrayList<>();
+        ArrayList<Double> traceInfo2 = new ArrayList<>();
 
         // Tracepoint info:
         for (int i = 0; i < EcctSize; i++) {
@@ -1939,11 +1942,15 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             for (KeyTree key : eachECCTs.keySet()) {
                 Node<ProfileData> node = eachECCTs.get(key);
-                int testedValue = node.fProfileData.fTestValue;
+                // int testedValue = node.fProfileData.fTestValue;
+                int testedValue = node.fProfileData.eachInfo.get(0);
                 if (testedValue > 0) {
                     value = (double) testedValue;
                     traceInfo.add((double) testedValue);
                     infoNodeHash.put(node, value);
+
+                    traceInfo1.add((double) node.fProfileData.eachInfo.get(0));
+                    traceInfo2.add((double) node.fProfileData.eachInfo.get(1));
                 }
             }
         }
@@ -1953,6 +1960,37 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
     }
 
+    //New function for model:
+    private static ArrayList<ArrayList<Double>> calculateTraceInfo(ArrayList<ArrayList<Double>> xList) {
+
+        // Reading the values:
+        LinkedHashMap<KeyTree, Node<ProfileData>> eachECCTs;
+
+        // To calculate the duration:
+        ArrayList<Double> traceInfo1 = new ArrayList<>();
+        ArrayList<Double> traceInfo2 = new ArrayList<>();
+
+        // Tracepoint info:
+        for (int i = 0; i < EcctSize; i++) {
+            eachECCTs = hashECCTs[i];
+
+            for (KeyTree key : eachECCTs.keySet()) {
+                Node<ProfileData> node = eachECCTs.get(key);
+                // int testedValue = node.fProfileData.fTestValue;
+                int testedValue = node.fProfileData.eachInfo.get(0);
+                if (testedValue > 0) {
+                    traceInfo1.add((double) node.fProfileData.eachInfo.get(0));
+                    traceInfo2.add((double) node.fProfileData.eachInfo.get(1));
+                }
+            }
+        }
+
+        xList.add(traceInfo1);
+        xList.add(traceInfo2);
+
+        return xList;
+
+    }
     // Multi Linear Regression:
     public static void MRL(int i) {
         // Test:
@@ -1969,8 +2007,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             }
             // Taking the information + test with test array:
-            else {
-                //TraceInfo:
+            if(i == 1) {
+                // TraceInfo:
                 calculateTraceInfo();
 
                 // Call the Multi regression Model:
@@ -2000,9 +2038,24 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 Matrix beta = ml.calculate();
                 System.out.println(beta);
             }
+            if (i == 2) {
+                ArrayList<ArrayList<Double>> xList = new ArrayList<>();
+                calculateTraceInfo(xList);
+                ArrayList<Double> duration = calculateDurationArray();
+                Matrix X = new Matrix(xList, xList.size());
+
+                Matrix Y = new Matrix(duration);
+
+                MultiLinear ml = new MultiLinear(X, Y);
+                Matrix beta = ml.calculate();
+                System.out.println(beta);
+
+            }
         } catch (Exception e) {
             System.out.print("Exception in MRL");
         }
     }
+
+
 
 }

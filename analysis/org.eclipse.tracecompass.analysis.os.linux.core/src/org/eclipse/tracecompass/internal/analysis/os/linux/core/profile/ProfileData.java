@@ -18,7 +18,7 @@ public class ProfileData implements IProfileData {
     long fendTime;
     long fDuration = 0; // endTime - startTime
     ArrayList<Long> eachRun;
-    ArrayList<Long> eachInfo; // cache, instruction and other informations
+    ArrayList<Integer> eachInfo; // cache, instruction and other informations
 
     // Constructor:
     public ProfileData(int weight, String label) {
@@ -217,7 +217,7 @@ public class ProfileData implements IProfileData {
         return 0;
     }
 
-    public void addInfo(long info) {
+    public void addInfo(Integer info) {
         eachInfo.add(info);
     }
 }
