@@ -47,8 +47,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     ArrayList<Node<ProfileData>> fRoots = new ArrayList<>();
     Node<ProfileData> parent = fRoot;
     // String used to split the tree:
-    static String Sdelimiter = new String("interval:tracepoint");
-    static String SInfo = new String("interval:getinfo");
+    static String Sdelimiter = new String("cct:tracepoint");
+    static String SInfo = new String("cct:getinfo");
     static String fEntry = new String("lttng_ust_cyg_profile:func_entry");
     static String fExit = new String("lttng_ust_cyg_profile:func_exit");
     long fGap;
@@ -1943,14 +1943,16 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             for (KeyTree key : eachECCTs.keySet()) {
                 Node<ProfileData> node = eachECCTs.get(key);
                 // int testedValue = node.fProfileData.fTestValue;
-                int testedValue = node.fProfileData.eachInfo.get(0);
-                if (testedValue > 0) {
-                    value = (double) testedValue;
-                    traceInfo.add((double) testedValue);
-                    infoNodeHash.put(node, value);
+                if (node != null) {
+                    int testedValue = node.fProfileData.eachInfo.get(0);
+                    if (testedValue > 0) {
+                        value = (double) testedValue;
+                        traceInfo.add((double) testedValue);
+                        infoNodeHash.put(node, value);
 
-                    traceInfo1.add((double) node.fProfileData.eachInfo.get(0));
-                    traceInfo2.add((double) node.fProfileData.eachInfo.get(1));
+                        traceInfo1.add((double) node.fProfileData.eachInfo.get(0));
+                        traceInfo2.add((double) node.fProfileData.eachInfo.get(1));
+                    }
                 }
             }
         }
@@ -1960,7 +1962,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
     }
 
-    //New function for model:
+    // New function for model:
     private static ArrayList<ArrayList<Double>> calculateTraceInfo(ArrayList<ArrayList<Double>> xList) {
 
         // Reading the values:
@@ -1977,20 +1979,20 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             for (KeyTree key : eachECCTs.keySet()) {
                 Node<ProfileData> node = eachECCTs.get(key);
                 // int testedValue = node.fProfileData.fTestValue;
-                int testedValue = node.fProfileData.eachInfo.get(0);
-                if (testedValue > 0) {
+                if (node.fProfileData != null) {
                     traceInfo1.add((double) node.fProfileData.eachInfo.get(0));
                     traceInfo2.add((double) node.fProfileData.eachInfo.get(1));
                 }
             }
         }
+    }
 
-        xList.add(traceInfo1);
-        xList.add(traceInfo2);
+    xList.add(traceInfo1);xList.add(traceInfo2);
 
-        return xList;
+    return xList;
 
     }
+
     // Multi Linear Regression:
     public static void MRL(int i) {
         // Test:
@@ -2007,7 +2009,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             }
             // Taking the information + test with test array:
-            if(i == 1) {
+            if (i == 1) {
                 // TraceInfo:
                 calculateTraceInfo();
 
@@ -2049,13 +2051,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 MultiLinear ml = new MultiLinear(X, Y);
                 Matrix beta = ml.calculate();
                 System.out.println(beta);
-
             }
         } catch (Exception e) {
             System.out.print("Exception in MRL");
         }
     }
-
-
 
 }
