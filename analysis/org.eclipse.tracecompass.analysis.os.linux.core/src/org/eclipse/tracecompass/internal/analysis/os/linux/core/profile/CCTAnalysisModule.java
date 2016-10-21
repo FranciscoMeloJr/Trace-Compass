@@ -114,6 +114,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         GraphvizVisitor dot;
 
         private ITmfEventField first;
+        private String[] fContextStrings = { "context._perf_thread_instructions", "cache-misses", "cpu-cycles" };
 
         public RequestTest() {
             super(ITmfEvent.class, TmfTimeRange.ETERNITY, 0, ITmfEventRequest.ALL_DATA, ExecutionType.BACKGROUND);
@@ -203,10 +204,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 // New addition:
                 ITmfEventField content = event.getContent();
                 for (ITmfEventField field : content.getFields()) {
-                    String info = "context._perf_thread_instructions";
+                    String info = fContextStrings[0];
                     String lab = field.toString();
                     if (lab.contains(info)) {
-                        System.out.println("Instructions" + field.getValue()); // $NON-NLS-1$
+                        System.out.println(fContextStrings[0] + field.getValue()); // $NON-NLS-1$
                         Double value = Double.parseDouble(field.getValue().toString());
                         parent.getProfileData().setInfo(info, value);
                         parent.getProfileData().addInfo(value.intValue());
@@ -236,10 +237,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     // New addition:
                     ITmfEventField content = event.getContent();
                     for (ITmfEventField field : content.getFields()) {
-                        String info = "instructions";
+                        String info = fContextStrings[0];
                         String lab = field.getValue().toString();
                         if (lab.contains(info)) {
-                            System.out.println("Instructions" + field.getValue()); // $NON-NLS-1$
+                            System.out.println(fContextStrings[0] + field.getValue()); // $NON-NLS-1$
                             Double value = Double.parseDouble(field.getValue().toString());
                             parent.getProfileData().setInfo(info, value);
                             parent.getProfileData().addInfo(value.intValue());
@@ -1945,6 +1946,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 result = Math.abs(result);
                 if (result >= 0.75) {
                     resultString = ("Strongly correlated");
+                    CCTAnalysisModule.MRL(3);
                 } else {
                     if (result <= 0.25) {
                         resultString = ("Not correlated");
@@ -1966,25 +1968,25 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         ArrayList<Double> infoList = new ArrayList<>();
         ArrayList<Double> eachTreeList = null;
 
-        //private static LinkedHashMap<KeyTree, Node<ProfileData>> hashECCTs[];
+        // private static LinkedHashMap<KeyTree, Node<ProfileData>> hashECCTs[];
         LinkedHashMap<KeyTree, Node<ProfileData>> eachHash;
         for (int i = 0; i < EcctSize; i++) {
             eachHash = hashECCTs[i];
             eachTreeList = new ArrayList<>();
-            for ( KeyTree keyTree : eachHash.keySet()) {
+            for (KeyTree keyTree : eachHash.keySet()) {
                 HashMap<String, Double> each = eachHash.get(keyTree).getProfileData().getInfo();
-                if(each.size() > 0){
+                if (each.size() > 0) {
                     HashMap<String, Double> info = each;
-                            // Iterating over the hash:
-                            for (String key : info.keySet()) {
-                                if (key.contains(specificPerf)) {
-                                    instructions = info.get(key);
-                                    eachTreeList.add(Double.valueOf(instructions));
-                                }
-                            }
+                    // Iterating over the hash:
+                    for (String key : info.keySet()) {
+                        if (key.contains(specificPerf)) {
+                            instructions = info.get(key);
+                            eachTreeList.add(Double.valueOf(instructions));
+                        }
+                    }
                 }
             }
-            //add just the first instruction:
+            // add just the first node:
             infoList.add(eachTreeList.get(0));
         }
 
@@ -2051,7 +2053,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     // New function for model:
-    private static ArrayList<ArrayList<Double>> calculateTraceInfo(ArrayList<ArrayList<Double>> xList) {
+    private static ArrayList<ArrayList<Double>> calculateTraceInfo(ArrayList<ArrayList<Double>> xList, int selectionManual) {
 
         // Reading the values:
         LinkedHashMap<KeyTree, Node<ProfileData>> eachECCTs;
@@ -2070,17 +2072,20 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 if (node.fProfileData != null) {
                     if (node.fProfileData.eachInfo.size() > 0) {
                         traceInfo1.add((double) node.fProfileData.eachInfo.get(0));
-                        traceInfo2.add((double) node.fProfileData.eachInfo.get(1));
+                        if (node.fProfileData.eachInfo.size() > 1) {
+                            traceInfo2.add((double) node.fProfileData.eachInfo.get(1));
+                        }
                     }
                 }
             }
         }
 
         System.out.print(traceInfo1.size());
-        System.out.print(traceInfo2.size());
         xList.add(traceInfo1);
-        xList.add(traceInfo2);
-
+        if (selectionManual > 1) {
+            System.out.print(traceInfo2.size());
+            xList.add(traceInfo2);
+        }
         return xList;
 
     }
@@ -2132,9 +2137,27 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 Matrix beta = ml.calculate();
                 System.out.println(beta);
             }
+            // Taking the 2 probes from the static instrumentation:
             if (i == 2) {
                 ArrayList<ArrayList<Double>> xList = new ArrayList<>();
-                calculateTraceInfo(xList);
+                calculateTraceInfo(xList, 2);
+                ArrayList<Double> duration = calculateDurationArray();
+                Matrix X = new Matrix(xList, xList.size());
+
+                Matrix Y = new Matrix(duration);
+                System.out.println(duration.size());
+                MultiLinear ml = new MultiLinear(X, Y);
+                Matrix beta = ml.calculate();
+                System.out.println(beta);
+            }
+            // Taking the "instructions" + static instrumentation:
+            if (i == 3) {
+                ArrayList<ArrayList<Double>> xList = new ArrayList<>();
+                // take the instructions:
+                ArrayList<Double> hashInfo = calculateHashInfo("instructions");
+                xList.add(hashInfo);
+                // take the manual probe:
+                calculateTraceInfo(xList, 1);
                 ArrayList<Double> duration = calculateDurationArray();
                 Matrix X = new Matrix(xList, xList.size());
 
