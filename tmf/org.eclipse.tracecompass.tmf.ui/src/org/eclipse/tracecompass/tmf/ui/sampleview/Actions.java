@@ -8,7 +8,7 @@ import org.eclipse.tracecompass.internal.tmf.ui.ITmfImageConstants;
 
 /**
  * @author frank
- * @since 2.1
+ * @since 2.2
  *
  */
 public class Actions {
@@ -25,14 +25,32 @@ public class Actions {
             public void run() {
                 System.out.println("Tests");
                 //taking 2 infos from the trace
-                CCTAnalysisModule.MRL(2);
+                CCTAnalysisModule.correlationInfoTrace(2);
             }
         };
         fInversion.setText("Test");
         fInversion.setToolTipText("Used to test");
         return fInversion;
     }
-
+    /**
+     * Button used to call the MRL algorithm
+     *
+     * @return The Action object
+     */
+    public static Action getMRLModel() {
+        // resetScale
+        Action fModel = new Action() {
+            @Override
+            public void run() {
+                System.out.println("MRL");
+                //taking 2 infos from the trace
+                CCTAnalysisModule.MRL(2);
+            }
+        };
+        fModel.setText("MRL");
+        fModel.setToolTipText("Used to test");
+        return fModel;
+    }
     /**
      * Get the Inversion action
      *
@@ -64,7 +82,7 @@ public class Actions {
             @Override
             public void run() {
                 System.out.println("Tests");
-                CCTAnalysisModule.correlationInfoTrace();
+                CCTAnalysisModule.correlationInfoTrace(1);
             }
         };
 

@@ -1,6 +1,7 @@
 package org.eclipse.tracecompass.internal.analysis.os.linux.core.profile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Node<T extends IProfileData> {
@@ -12,20 +13,22 @@ public class Node<T extends IProfileData> {
     T fProfileData;
     private int fColor = 0;
     private long fPointer = 0;
-    //Used for displaying purposes
+    // Used for displaying purposes
     private long fDur = 0;
-    //Used for grouping nodes:
+    // Used for grouping nodes:
     private String fGroup = new String(Integer.toString(0));
     private Long fVariation = (long) 0;
+
+    private HashMap<String, Double> info = new HashMap();
 
     public Node() {
         fChildren = new ArrayList<>();
         fId = fCounter.getAndIncrement();
     }
 
-    //This function veryfies if the node is empty
+    // This function veryfies if the node is empty
     public boolean isEmpty() {
-        if(fProfileData != null) {
+        if (fProfileData != null) {
             return false;
         }
         return true;
@@ -36,12 +39,14 @@ public class Node<T extends IProfileData> {
         node.setProfileData(data);
         return node;
     }
+
     public static <T extends IProfileData> Node<T> create(Node<T> node) {
         Node<T> newNode = new Node<>();
         newNode.setProfileData(node.fProfileData);
         newNode.setParent(node.getParent());
         return newNode;
     }
+
     public void addChild(Node<T> node) {
         fChildren.add(node);
         node.setParent(this);
@@ -54,6 +59,7 @@ public class Node<T extends IProfileData> {
     public ArrayList<Node> getAllChildren() {
         return fChildren;
     }
+
     public Node getParent() {
         return fParent;
     }
@@ -73,9 +79,11 @@ public class Node<T extends IProfileData> {
     public int getNodeId() {
         return fId;
     }
+
     public String getNodeLabel() {
         return fProfileData.getLabel();
     }
+
     public void mergeNode(Node<T> node) {
         fProfileData.merge(node.fProfileData);
     }
@@ -91,6 +99,7 @@ public class Node<T extends IProfileData> {
         }
         return false;
     }
+
     public Node copy() {
         Node<T> newNode = new Node<>();
         newNode.setProfileData(fProfileData);
@@ -100,23 +109,22 @@ public class Node<T extends IProfileData> {
 
     public int diff(Node<T> compare, int threshold) {
         getProfileData().minus(compare.getProfileData());
-        //zero is the same:
+        // zero is the same:
         fColor = getProfileData().minus(compare.getProfileData(), threshold);
         System.out.println("Color " + fColor);
         return fColor;
     }
 
-    //Color properties:
+    // Color properties:
     public int getColor() {
         return fColor;
     }
 
-    public void setColor(int newColor)
-    {
+    public void setColor(int newColor) {
         fColor = newColor;
     }
 
-    //Displaying children:
+    // Displaying children:
     public void setPointer(long l) {
         fPointer += l;
 
@@ -127,7 +135,7 @@ public class Node<T extends IProfileData> {
 
     }
 
-    //Displaying self:
+    // Displaying self:
     public void setDur(long l) {
         fDur += l;
 
@@ -138,20 +146,38 @@ public class Node<T extends IProfileData> {
 
     }
 
-    //Set and get for group:
+    // Set and get for group:
     public void setGroup(String newGr) {
         fGroup = newGr;
     }
+
     public String getGroup() {
         return fGroup;
 
     }
 
-    //Viration
+    // Viration
     public void setVariation(Long var) {
         fVariation = var;
     }
+
     public Long getVariation() {
         return fVariation;
+    }
+
+    public void setInfo(String stringInfo, Double valueNew) {
+        if(!info.containsKey(stringInfo)){
+            info.put(stringInfo,valueNew);
+        }else{
+            Double value = info.get(stringInfo);
+            Double delta = valueNew - value;
+            info.put(stringInfo,delta);
+        }
+    }
+    public  HashMap<String, Double> getInfo() {
+        return info;
+    }
+    public Double getInfo(String stringInfo) {
+        return info.get(stringInfo);
     }
 }

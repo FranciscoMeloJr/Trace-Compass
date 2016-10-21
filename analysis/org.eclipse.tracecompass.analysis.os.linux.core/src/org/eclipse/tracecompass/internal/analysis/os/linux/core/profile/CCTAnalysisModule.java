@@ -5,6 +5,7 @@ import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Random;
@@ -180,7 +181,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         // put as a children on a call graph:
                         if (parent != null) {
                             String info = field.getValue().toString();
-                            parent.getProfileData().addInfo(Integer.parseInt(info));
+                            //parent.getProfileData().addInfo(Integer.parseInt(info));
                         }
                     }
                 }
@@ -199,6 +200,18 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     parent = aux;
                 }
 
+                // New addition:
+                ITmfEventField content = event.getContent();
+                for (ITmfEventField field : content.getFields()) {
+                    String info = "instructions";
+                    String lab = field.getValue().toString();
+                    if (lab.contains(info)) {
+                        System.out.println("Instructions" + field.getValue()); // $NON-NLS-1$
+                        Double value = Double.parseDouble(field.getValue().toString());
+                        parent.setInfo(info, value);
+                        parent.getProfileData().addInfo(value.intValue());
+                    }
+                }
             } else {
                 if (eventName.contains(fExit)) {
                     first = Iterables.get(event.getContent().getFields(), 0);
@@ -218,6 +231,19 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     parent.setProfileData(data);
                     if (parent.getParent() != null) {
                         parent = parent.getParent();
+                    }
+
+                    // New addition:
+                    ITmfEventField content = event.getContent();
+                    for (ITmfEventField field : content.getFields()) {
+                        String info = "instructions";
+                        String lab = field.getValue().toString();
+                        if (lab.contains(info)) {
+                            System.out.println("Instructions" + field.getValue()); // $NON-NLS-1$
+                            Double value = Double.parseDouble(field.getValue().toString());
+                            parent.setInfo(info, value);
+                            parent.getProfileData().addInfo(value.intValue());
+                        }
                     }
                 }
             }
@@ -477,9 +503,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     level++;
                 }
             }
-            if (current.fProfileData.fTestValue > 0) {
-                System.out.println("Label " + current.getNodeLabel() + current.fProfileData.fTestValue);
-            }
+            /*
+             * if (current.fProfileData.fTestValue > 0) {
+             * System.out.println("Label " + current.getNodeLabel() +
+             * current.fProfileData.fTestValue); }
+             */
             // System.out.println("current:" + current + " level " + level + "
             // parent " + current.getParent());
             String label = current.getNodeLabel();
@@ -1881,33 +1909,79 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         return answer;
     }
 
-    // Correlates the the second tracepoint with the duration:
-    public static String correlationInfoTrace() {
+    // Correlation function:
+    public static String correlationInfoTrace(int i) {
         System.out.println("Correlation");
-
-        calculateTraceInfo();
-        ArrayList<Double> durationList = calculateDurationArray();
-
-        // call the correlation:
-        Double result = TestStatistic.calculateCorrelation(durationList, traceInfo);
         String resultString;
-        result = Math.abs(result);
-        if (result >= 0.75) {
-            System.out.print("Strongly correlated");
-            resultString = ("Strongly correlated");
-        } else {
-            if (result <= 0.25) {
-                System.out.print("Not correlated");
-                resultString = ("Not correlated");
+        // correlates with the second tracepoint with the duration:
+        if (i == 1) {
+            calculateTraceInfo();
+            ArrayList<Double> durationList = calculateDurationArray();
+
+            // call the correlation:
+            Double result = TestStatistic.calculateCorrelation(durationList, traceInfo);
+
+            result = Math.abs(result);
+            if (result >= 0.75) {
+                resultString = ("Strongly correlated");
             } else {
-                System.out.print("Weak correlated");
-                resultString = ("Weak correlated");
+                if (result <= 0.25) {
+                    resultString = ("Not correlated");
+                } else {
+                    resultString = ("Weak correlated");
+                }
+            }
+        } else {
+            // Correlates the information in the hash with the duration
+            ArrayList<Double> durationList = calculateDurationArray();
+            System.out.print("Instruments");
+            // Hash info:
+            ArrayList<Double> hashInfo = calculateHashInfo("instructions");
+            // call the correlation:
+            if (hashInfo.size() > 0) {
+                Double result = TestStatistic.calculateCorrelation(durationList, hashInfo);
+                result = Math.abs(result);
+                if (result >= 0.75) {
+                    resultString = ("Strongly correlated");
+                } else {
+                    if (result <= 0.25) {
+                        resultString = ("Not correlated");
+                    } else {
+                        resultString = ("Weak correlated");
+                    }
+                }
+            } else {
+                resultString = ("Empty Comparision");
             }
         }
-
+        System.out.print(resultString);
         return resultString;
     }
 
+    // Takes the information from the hash, which in this case is
+    private static ArrayList<Double> calculateHashInfo(String specificPerf) {
+        double instructions = 0;
+        ArrayList<Double> infoList = new ArrayList<>();
+
+        // Duration:
+        Node<ProfileData> eachTree;
+        for (int i = 0; i < EcctSize; i++) {
+            eachTree = ArrayECCTs.get(i);
+            HashMap<String, Double> info = eachTree.getInfo();
+            // Iterating over the hash:
+            for (String key : info.keySet()) {
+                if (key.contains(specificPerf)) {
+                    instructions = info.get(key);
+                    infoList.add(Double.valueOf(instructions));
+                    System.out.println("Instructions" + instructions);
+                }
+            }
+        }
+
+        return infoList;
+    }
+
+    // This function runs through the array and takes the duration:
     private static ArrayList<Double> calculateDurationArray() {
         double duration;
         ArrayList<Double> durationList = new ArrayList<>();
@@ -1935,6 +2009,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         traceInfo = new ArrayList<>();
         ArrayList<Double> traceInfo1 = new ArrayList<>();
         ArrayList<Double> traceInfo2 = new ArrayList<>();
+        ArrayList<Double> traceInfo3 = new ArrayList<>();
 
         // Tracepoint info:
         for (int i = 0; i < EcctSize; i++) {
@@ -1944,14 +2019,17 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 Node<ProfileData> node = eachECCTs.get(key);
                 // int testedValue = node.fProfileData.fTestValue;
                 if (node != null) {
-                    int testedValue = node.fProfileData.eachInfo.get(0);
-                    if (testedValue > 0) {
-                        value = (double) testedValue;
-                        traceInfo.add((double) testedValue);
-                        infoNodeHash.put(node, value);
+                    if (node.fProfileData.eachInfo.size() > 0) {
+                        int testedValue = node.fProfileData.eachInfo.get(0);
+                        if (testedValue > 0) {
+                            value = (double) testedValue;
+                            traceInfo.add((double) testedValue);
+                            infoNodeHash.put(node, value);
 
-                        traceInfo1.add((double) node.fProfileData.eachInfo.get(0));
-                        traceInfo2.add((double) node.fProfileData.eachInfo.get(1));
+                            traceInfo1.add((double) node.fProfileData.eachInfo.get(0));
+                            traceInfo2.add((double) node.fProfileData.eachInfo.get(1));
+                            traceInfo3.add((double) node.fProfileData.eachInfo.get(2));
+                        }
                     }
                 }
             }
@@ -1980,16 +2058,20 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 Node<ProfileData> node = eachECCTs.get(key);
                 // int testedValue = node.fProfileData.fTestValue;
                 if (node.fProfileData != null) {
-                    traceInfo1.add((double) node.fProfileData.eachInfo.get(0));
-                    traceInfo2.add((double) node.fProfileData.eachInfo.get(1));
+                    if (node.fProfileData.eachInfo.size() > 0) {
+                        traceInfo1.add((double) node.fProfileData.eachInfo.get(0));
+                        traceInfo2.add((double) node.fProfileData.eachInfo.get(1));
+                    }
                 }
             }
         }
-    }
 
-    xList.add(traceInfo1);xList.add(traceInfo2);
+        System.out.print(traceInfo1.size());
+        System.out.print(traceInfo2.size());
+        xList.add(traceInfo1);
+        xList.add(traceInfo2);
 
-    return xList;
+        return xList;
 
     }
 
@@ -2047,7 +2129,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 Matrix X = new Matrix(xList, xList.size());
 
                 Matrix Y = new Matrix(duration);
-
+                System.out.println(duration.size());
                 MultiLinear ml = new MultiLinear(X, Y);
                 Matrix beta = ml.calculate();
                 System.out.println(beta);

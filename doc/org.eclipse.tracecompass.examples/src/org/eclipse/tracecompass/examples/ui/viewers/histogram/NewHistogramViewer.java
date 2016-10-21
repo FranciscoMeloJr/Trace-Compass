@@ -19,7 +19,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.CCTAnalysisModule;
-import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.CCTAnalysisModule.testStatistics;
+import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.TestStatistic;
 import org.eclipse.tracecompass.tmf.core.statistics.ITmfStatistics;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceManager;
@@ -63,11 +63,9 @@ public class NewHistogramViewer extends TmfBarChartViewer {
 
         addSeries("Duration", Display.getDefault().getSystemColor(SWT.COLOR_BLUE).getRGB()); //$NON-NLS-1$
 
-        if(parent.getMenu() != null) {
+        if (parent.getMenu() != null) {
             System.out.print("I do");
-        }
-        else
-        {
+        } else {
             System.out.print("I dont");
         }
     }
@@ -81,7 +79,7 @@ public class NewHistogramViewer extends TmfBarChartViewer {
             Thread thread = new Thread("Histogram viewer update") { //$NON-NLS-1$
                 @Override
                 public void run() {
-                    //double x[] = getXAxis(start, end, number);
+                    // double x[] = getXAxis(start, end, number);
                     final long yLong[] = new long[number];
                     Arrays.fill(y, 0.0);
                     int size = 0;
@@ -99,8 +97,8 @@ public class NewHistogramViewer extends TmfBarChartViewer {
                         if (stats == null) {
                             throw new IllegalStateException();
                         }
-                        if (stats instanceof testStatistics) {
-                            testStatistics tS = (testStatistics) stats;
+                        if (stats instanceof TestStatistic) {
+                            TestStatistic tS = (TestStatistic) stats;
                             size = tS.getSize();
                         }
                         List<Long> values = stats.histogramQuery(start, end, number);
@@ -116,21 +114,23 @@ public class NewHistogramViewer extends TmfBarChartViewer {
                      * for (int i = 0; i < nb; i++) { y[i] += yLong[i]; /*
                      * casting from long to double }
                      */
-                    double xx[] = getXAxisMod(0, size, size+1); //new double[size];
+                    double xx[] = getXAxisMod(0, size, size + 1); // new
+                                                                  // double[size];
                     double yy[] = new double[size];
                     System.out.println("size " + size);
                     for (int i = 0; i < size; i++) {
-                        xx[i] += (i+1);
+                        xx[i] += (i + 1);
                         yy[i] += yLong[i]; /* casting from long to double */
                     }
                     /* Update the viewer */
-                    //chart.getAxisSet().getXAxis(0).setRange(new Range(0, x[x.length - 1]));
+                    // chart.getAxisSet().getXAxis(0).setRange(new Range(0,
+                    // x[x.length - 1]));
                     final int fixedSize = size;
                     drawChart(series, xx, yy);
                     Display.getDefault().asyncExec(new Runnable() {
                         @Override
                         public void run() {
-                            getSwtChart().getAxisSet().getXAxis(0).setRange(new Range(0,fixedSize));
+                            getSwtChart().getAxisSet().getXAxis(0).setRange(new Range(0, fixedSize));
                         }
                     });
 
@@ -157,7 +157,8 @@ public class NewHistogramViewer extends TmfBarChartViewer {
                 }
                 Chart swtChart = getSwtChart();
                 IAxisTick xTick = swtChart.getAxisSet().getXAxis(0).getTick();
-                //xTick.setFormat(new TmfChartTimeStampFormat(getTimeOffset()));
+                // xTick.setFormat(new
+                // TmfChartTimeStampFormat(getTimeOffset()));
                 series.setXSeries(x);
                 series.setYSeries(y);
                 xTick.setTickMarkStepHint(10);
@@ -167,7 +168,6 @@ public class NewHistogramViewer extends TmfBarChartViewer {
             }
         });
     }
-
 
     protected static double[] getXAxisMod(long start, long end, int nb) {
         double timestamps[] = new double[nb];

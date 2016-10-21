@@ -340,6 +340,7 @@ public class KMean {
         // return minp1;
 
         System.out.println("best k " + maxp1);
+        //return minp1;
         return maxp1;
     }
 }

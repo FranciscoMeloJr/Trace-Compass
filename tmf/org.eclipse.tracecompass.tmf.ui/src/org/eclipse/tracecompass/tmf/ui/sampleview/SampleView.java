@@ -70,7 +70,7 @@ import org.eclipse.ui.PlatformUI;
 
 /**
  * @author frank
- * @since 2.1
+ * @since 2.2
  *
  */
 public class SampleView extends AbstractTimeGraphView {
@@ -119,8 +119,9 @@ public class SampleView extends AbstractTimeGraphView {
     List<String> FUNCTION_NAMES = new ArrayList<>();
     private Action fClassificationAction;
     private Action fKDEAction;
-    private Action fInversion; //not been used in the current tests
+    private Action fInversion; // not been used in the current tests
     private Action fTest;
+
     /**
      * The constructor.
      */
@@ -354,13 +355,15 @@ public class SampleView extends AbstractTimeGraphView {
         itemCla.add(getClassificationAction(3));
         itemCla.add(getClassificationAction(4));
         itemCla.add(getClassificationAction(5));
-        itemCla.add(getCorrelationActionDialog("Person Correlation"));//itemCla.add(getCorrelationAction());
+        itemCla.add(getCorrelationActionDialog("Person Correlation"));// itemCla.add(getCorrelationAction());
         manager.add(itemCla);
 
+        // MRL model:
+        manager.add(Actions.getMRLModel());
+        // Test
         fTest = Actions.getTestAction();
         manager.add(fTest);
     }
-
 
     /**
      * Get the invert action - this is used for testing algorithm
@@ -479,6 +482,7 @@ public class SampleView extends AbstractTimeGraphView {
 
         return fDelimitationAction;
     }
+
     /**
      * Get the correlation button
      *
@@ -489,15 +493,15 @@ public class SampleView extends AbstractTimeGraphView {
 
     public Action getCorrelationActionDialog(String initialLabel) {
         Action fCorrelationAction = null;
-        String labelText = initialLabel; //CCTAnalysisModule.correlationInfoTrace();
-        String resultText =  ("The duration and the tracepoint(interval:getinfo) are "+ CCTAnalysisModule.correlationInfoTrace());
+        String labelText = initialLabel; // CCTAnalysisModule.correlationInfoTrace();
+        String resultText = ("The duration and the tracepoint(interval:getinfo) are " + CCTAnalysisModule.correlationInfoTrace(1));
         fCorrelationAction = new Action() {
 
             @Override
             public void runWithEvent(Event event) {
                 final AddDelimiterDialog dialog = new AddDelimiterDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), resultText);
                 if (dialog.open() == Window.OK) {
-                    final String label = CCTAnalysisModule.correlationInfoTrace();
+                    final String label = CCTAnalysisModule.correlationInfoTrace(1);
                 }
             }
         };
@@ -507,6 +511,7 @@ public class SampleView extends AbstractTimeGraphView {
 
         return fCorrelationAction;
     }
+
     /**
      * Get the Merge Action
      *
@@ -1066,7 +1071,7 @@ public class SampleView extends AbstractTimeGraphView {
             fGroup = G;
         }
 
-        //This function will show the Quartiles of the function:
+        // This function will show the Quartiles of the function:
         public Long getVariation() {
             return (long) 1;
         }
@@ -1131,7 +1136,7 @@ public class SampleView extends AbstractTimeGraphView {
             if (element instanceof EventEntry) {
                 EventEntry entry = (EventEntry) element;
                 String result = null;
-                if (columnIndex == 0) { //name
+                if (columnIndex == 0) { // name
                     result = entry.getName();
                 } else if (columnIndex == 2 && entry.getName().length() > 0) { // start
                     ITmfTimestamp ts = TmfTimestamp.fromNanos(entry.getDepth());
