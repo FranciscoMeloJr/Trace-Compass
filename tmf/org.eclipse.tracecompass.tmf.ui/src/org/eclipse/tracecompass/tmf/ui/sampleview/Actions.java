@@ -25,7 +25,7 @@ public class Actions {
             public void run() {
                 System.out.println("Tests");
                 //taking 2 infos from the trace
-                CCTAnalysisModule.correlationInfoTrace(2);
+                CCTAnalysisModule.correlationInfoTrace(2, "instructions");
             }
         };
         fInversion.setText("Test");
@@ -82,7 +82,7 @@ public class Actions {
             @Override
             public void run() {
                 System.out.println("Tests");
-                CCTAnalysisModule.correlationInfoTrace(1);
+                CCTAnalysisModule.correlationInfoTrace(1, null);
             }
         };
 

@@ -19,8 +19,6 @@ public class Node<T extends IProfileData> {
     private String fGroup = new String(Integer.toString(0));
     private Long fVariation = (long) 0;
 
-    private HashMap<String, Double> info = new HashMap();
-
     public Node() {
         fChildren = new ArrayList<>();
         fId = fCounter.getAndIncrement();
@@ -165,19 +163,4 @@ public class Node<T extends IProfileData> {
         return fVariation;
     }
 
-    public void setInfo(String stringInfo, Double valueNew) {
-        if(!info.containsKey(stringInfo)){
-            info.put(stringInfo,valueNew);
-        }else{
-            Double value = info.get(stringInfo);
-            Double delta = valueNew - value;
-            info.put(stringInfo,delta);
-        }
-    }
-    public  HashMap<String, Double> getInfo() {
-        return info;
-    }
-    public Double getInfo(String stringInfo) {
-        return info.get(stringInfo);
-    }
 }

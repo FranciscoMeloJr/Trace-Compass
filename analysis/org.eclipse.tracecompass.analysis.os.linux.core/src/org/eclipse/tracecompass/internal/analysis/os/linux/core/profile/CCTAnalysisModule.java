@@ -181,7 +181,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         // put as a children on a call graph:
                         if (parent != null) {
                             String info = field.getValue().toString();
-                            //parent.getProfileData().addInfo(Integer.parseInt(info));
+                            // parent.getProfileData().addInfo(Integer.parseInt(info));
                         }
                     }
                 }
@@ -203,12 +203,12 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 // New addition:
                 ITmfEventField content = event.getContent();
                 for (ITmfEventField field : content.getFields()) {
-                    String info = "instructions";
-                    String lab = field.getValue().toString();
+                    String info = "context._perf_thread_instructions";
+                    String lab = field.toString();
                     if (lab.contains(info)) {
                         System.out.println("Instructions" + field.getValue()); // $NON-NLS-1$
                         Double value = Double.parseDouble(field.getValue().toString());
-                        parent.setInfo(info, value);
+                        parent.getProfileData().setInfo(info, value);
                         parent.getProfileData().addInfo(value.intValue());
                     }
                 }
@@ -241,7 +241,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                         if (lab.contains(info)) {
                             System.out.println("Instructions" + field.getValue()); // $NON-NLS-1$
                             Double value = Double.parseDouble(field.getValue().toString());
-                            parent.setInfo(info, value);
+                            parent.getProfileData().setInfo(info, value);
                             parent.getProfileData().addInfo(value.intValue());
                         }
                     }
@@ -331,8 +331,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 dur = 0;
                 for (Node<T> node : tempRoot.getChildren()) {
                     profileData = (ProfileData) node.fProfileData;
-                    duration += profileData.getDuration();
-                    dur += node.getDur();
+                    if (profileData != null) {
+                        duration += profileData.getDuration();
+                        dur += node.getDur();
+                    }
                 }
                 profileData = tempRoot.getProfileData();
                 profileData.setDuration(duration);
@@ -1910,7 +1912,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     }
 
     // Correlation function:
-    public static String correlationInfoTrace(int i) {
+    public static String correlationInfoTrace(int i, String probeInfo) {
         System.out.println("Correlation");
         String resultString;
         // correlates with the second tracepoint with the duration:
@@ -1936,7 +1938,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             ArrayList<Double> durationList = calculateDurationArray();
             System.out.print("Instruments");
             // Hash info:
-            ArrayList<Double> hashInfo = calculateHashInfo("instructions");
+            ArrayList<Double> hashInfo = calculateHashInfo(probeInfo);
             // call the correlation:
             if (hashInfo.size() > 0) {
                 Double result = TestStatistic.calculateCorrelation(durationList, hashInfo);
@@ -1962,20 +1964,28 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     private static ArrayList<Double> calculateHashInfo(String specificPerf) {
         double instructions = 0;
         ArrayList<Double> infoList = new ArrayList<>();
+        ArrayList<Double> eachTreeList = null;
 
-        // Duration:
-        Node<ProfileData> eachTree;
+        //private static LinkedHashMap<KeyTree, Node<ProfileData>> hashECCTs[];
+        LinkedHashMap<KeyTree, Node<ProfileData>> eachHash;
         for (int i = 0; i < EcctSize; i++) {
-            eachTree = ArrayECCTs.get(i);
-            HashMap<String, Double> info = eachTree.getInfo();
-            // Iterating over the hash:
-            for (String key : info.keySet()) {
-                if (key.contains(specificPerf)) {
-                    instructions = info.get(key);
-                    infoList.add(Double.valueOf(instructions));
-                    System.out.println("Instructions" + instructions);
+            eachHash = hashECCTs[i];
+            eachTreeList = new ArrayList<>();
+            for ( KeyTree keyTree : eachHash.keySet()) {
+                HashMap<String, Double> each = eachHash.get(keyTree).getProfileData().getInfo();
+                if(each.size() > 0){
+                    HashMap<String, Double> info = each;
+                            // Iterating over the hash:
+                            for (String key : info.keySet()) {
+                                if (key.contains(specificPerf)) {
+                                    instructions = info.get(key);
+                                    eachTreeList.add(Double.valueOf(instructions));
+                                }
+                            }
                 }
             }
+            //add just the first instruction:
+            infoList.add(eachTreeList.get(0));
         }
 
         return infoList;

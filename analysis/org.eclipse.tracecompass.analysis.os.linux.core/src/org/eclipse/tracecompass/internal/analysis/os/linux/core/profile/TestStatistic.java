@@ -65,33 +65,36 @@ public class TestStatistic implements ITmfStatistics {
         Long result = (long) 0;
         Long cov = (long) 0;
 
-        for (int j = 0; j < array.size(); j++) {
-            total += array.get(j);
-        }
+        if (array.size() > 0) {
+            for (int j = 0; j < array.size(); j++) {
+                total += array.get(j);
+            }
 
-        Long mean = total / array.size();
-        for (int j = 0; j < array.size(); j++) {
-            sumTotal += (array.get(j) - mean) * (array.get(j) - mean);
-        }
+            Long mean = total / array.size();
+            for (int j = 0; j < array.size(); j++) {
+                sumTotal += (array.get(j) - mean) * (array.get(j) - mean);
+            }
 
-        Long Variance = (long) (sumTotal / (double) array.size());
+            Long Variance = (long) (sumTotal / (double) array.size());
 
-        // In case of STD:
-        result = (long) Math.sqrt(Variance);
-        if (type == 1) {
-            return result;
-        }
-        // In case of Coefficient of Variation:
-        if (type == 2) {
-            cov = (long) (result / mean);
-            return cov;
+            // In case of STD:
+            result = (long) Math.sqrt(Variance);
+            if (type == 1) {
+                return result;
+            }
+            // In case of Coefficient of Variation:
+            if (type == 2) {
+                cov = (long) (result / mean);
+                return cov;
+            }
         }
         return result;
     }
+
     // Calculates the correlation of two distributions:
     public static Double calculateCorrelation(ArrayList<Double> data1, ArrayList<Double> data2) {
 
-        //Ordering:
+        // Ordering:
         Collections.sort(data1);
         Collections.sort(data2);
 
@@ -139,7 +142,6 @@ public class TestStatistic implements ITmfStatistics {
             total3 += value2;
         }
 
-
         for (int j = 0; j < minSize; j++) {
             xy.add(x.get(j) * y.get(j));
         }
@@ -147,7 +149,7 @@ public class TestStatistic implements ITmfStatistics {
             total1 += xy.get(j);
         }
 
-        //Showing Pearson correlation:
+        // Showing Pearson correlation:
         Double denominator = Math.sqrt((total2 * total3));
         Double result = (total1 / denominator);
 

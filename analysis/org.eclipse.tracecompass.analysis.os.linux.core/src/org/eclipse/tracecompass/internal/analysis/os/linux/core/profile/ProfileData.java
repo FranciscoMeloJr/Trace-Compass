@@ -1,6 +1,7 @@
 package org.eclipse.tracecompass.internal.analysis.os.linux.core.profile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfileData;
 
@@ -20,6 +21,9 @@ public class ProfileData implements IProfileData {
     ArrayList<Long> eachRun;
     ArrayList<Integer> eachInfo; // cache, instruction and other informations
 
+    // All the info:
+    private HashMap<String, Double> info = new HashMap();
+
     // Constructor:
     public ProfileData(int weight, String label) {
         if (weight == 0) {
@@ -31,6 +35,7 @@ public class ProfileData implements IProfileData {
         fDuration = 0;
         eachRun = new ArrayList<>();
         eachInfo = new ArrayList<>();
+        info = new HashMap();
     }
 
     // Constructor:
@@ -53,8 +58,9 @@ public class ProfileData implements IProfileData {
         eachRun = new ArrayList<>();
         eachInfo = new ArrayList<>();
     }
+
     // Constructor:
-    public ProfileData(int weight, String label, Long start, Long end ) {
+    public ProfileData(int weight, String label, Long start, Long end) {
         this(weight, label, start, end, -1);
     }
 
@@ -81,43 +87,53 @@ public class ProfileData implements IProfileData {
         if (fLabel.equals(data.getLabel())) {
             this.fDuration += data.getDuration();
             this.fWeight += data.getDuration();
-            //Test to merge and save the infor
+            // Test to merge and save the infor
             this.eachRun.add(data.getDuration());
+            for (String key : data.getInfo().keySet()) {
+                if (this.info.containsKey(key)) {
+                    // merge with mean:
+                    double newValue = (data.getInfo().get(key) + this.getInfo().get(key)) / 2;
+                    this.info.put(key, newValue);
+                } else {
+                    // add
+                    this.info.put(key, data.getInfo().get(key));
+                }
+            }
         }
 
     }
 
     @Override
     public int minus(IProfileData other, int threshold) {
-        double mult = (100 + threshold)/100;
+        double mult = (100 + threshold) / 100;
 
         if (!(other instanceof ProfileData)) {
             throw new IllegalArgumentException("wrong type for minus operation");
         }
         ProfileData data = (ProfileData) other;
         if (fLabel.equals(data.getLabel())) {
-            //gray:
-            if(this.fDuration == data.getDuration()) {
+            // gray:
+            if (this.fDuration == data.getDuration()) {
                 return 0;
             }
-           //red:
-            if(this.fDuration > (data.getDuration())) {
-                if(this.fDuration > data.getDuration()*mult) {
+            // red:
+            if (this.fDuration > (data.getDuration())) {
+                if (this.fDuration > data.getDuration() * mult) {
                     return 1;
                 }
             }
-            //green:
-            if(this.fDuration < data.getDuration()) {
-                if(this.fDuration*mult < data.getDuration()) {
+            // green:
+            if (this.fDuration < data.getDuration()) {
+                if (this.fDuration * mult < data.getDuration()) {
                     return -1;
                 }
             }
-        //To see the colors:
-            //this.fDuration -= data.getDuration();
-            //this.fWeight -= data.getDuration();
+            // To see the colors:
+            // this.fDuration -= data.getDuration();
+            // this.fWeight -= data.getDuration();
         }
 
-        //gray:
+        // gray:
         return 0;
     }
 
@@ -188,6 +204,7 @@ public class ProfileData implements IProfileData {
         fDuration += duration;
         eachRun.add(duration);
     }
+
     @Override
     public int minus(IProfileData other) {
 
@@ -196,28 +213,47 @@ public class ProfileData implements IProfileData {
         }
         ProfileData data = (ProfileData) other;
         if (fLabel.equals(data.getLabel())) {
-            //gray:
-            if(this.fDuration == data.getDuration()) {
+            // gray:
+            if (this.fDuration == data.getDuration()) {
                 return 0;
             }
-           //red:
-            if(this.fDuration > (data.getDuration())) {
-                    return 1;
+            // red:
+            if (this.fDuration > (data.getDuration())) {
+                return 1;
 
             }
-            //green:
-            if(this.fDuration < data.getDuration()) {
-                    return -1;
+            // green:
+            if (this.fDuration < data.getDuration()) {
+                return -1;
             }
-        //To see the colors:
-            //this.fDuration -= data.getDuration();
-            //this.fWeight -= data.getDuration();
+            // To see the colors:
+            // this.fDuration -= data.getDuration();
+            // this.fWeight -= data.getDuration();
         }
-        //gray:
+        // gray:
         return 0;
     }
 
-    public void addInfo(Integer info) {
-        eachInfo.add(info);
+    public void addInfo(Integer intInfo) {
+        eachInfo.add(intInfo);
+    }
+
+    // Hash:
+    public void setInfo(String stringInfo, Double valueNew) {
+        if (!info.containsKey(stringInfo)) {
+            info.put(stringInfo, valueNew);
+        } else {
+            Double value = info.get(stringInfo);
+            Double delta = valueNew - value;
+            info.put(stringInfo, delta);
+        }
+    }
+
+    public HashMap<String, Double> getInfo() {
+        return info;
+    }
+
+    public Double getInfo(String stringInfo) {
+        return info.get(stringInfo);
     }
 }

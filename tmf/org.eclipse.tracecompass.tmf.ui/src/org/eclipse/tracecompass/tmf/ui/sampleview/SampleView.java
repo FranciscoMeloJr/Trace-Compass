@@ -494,14 +494,14 @@ public class SampleView extends AbstractTimeGraphView {
     public Action getCorrelationActionDialog(String initialLabel) {
         Action fCorrelationAction = null;
         String labelText = initialLabel; // CCTAnalysisModule.correlationInfoTrace();
-        String resultText = ("The duration and the tracepoint(interval:getinfo) are " + CCTAnalysisModule.correlationInfoTrace(1));
+        String resultText = ("The duration and the tracepoint(interval:getinfo) are " + CCTAnalysisModule.correlationInfoTrace(1, null));
         fCorrelationAction = new Action() {
 
             @Override
             public void runWithEvent(Event event) {
                 final AddDelimiterDialog dialog = new AddDelimiterDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), resultText);
                 if (dialog.open() == Window.OK) {
-                    final String label = CCTAnalysisModule.correlationInfoTrace(1);
+                    final String label = CCTAnalysisModule.correlationInfoTrace(1, null);
                 }
             }
         };
