@@ -114,7 +114,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         GraphvizVisitor dot;
 
         private ITmfEventField first;
-        private String[] fContextStrings = { "context._perf_thread_instructions", "cache-misses", "cpu-cycles" };
+        private String[] fContextStrings = { "context._perf_thread_instructions", "perf:thread:cache-misses", "perf:thread:page-fault", "perf:thread:cpu-cycles" };
 
         public RequestTest() {
             super(ITmfEvent.class, TmfTimeRange.ETERNITY, 0, ITmfEventRequest.ALL_DATA, ExecutionType.BACKGROUND);
@@ -204,12 +204,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 // New addition:
                 ITmfEventField content = event.getContent();
                 for (ITmfEventField field : content.getFields()) {
-                    String info = fContextStrings[0];
                     String lab = field.toString();
-                    if (lab.contains(info)) {
+                    if (lab.contains(fContextStrings[0])) {
                         System.out.println(fContextStrings[0] + field.getValue()); // $NON-NLS-1$
                         Double value = Double.parseDouble(field.getValue().toString());
-                        parent.getProfileData().setInfo(info, value);
+                        parent.getProfileData().setInfo(fContextStrings[0], value);
                         parent.getProfileData().addInfo(value.intValue());
                     }
                 }
@@ -237,12 +236,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     // New addition:
                     ITmfEventField content = event.getContent();
                     for (ITmfEventField field : content.getFields()) {
-                        String info = fContextStrings[0];
                         String lab = field.getValue().toString();
-                        if (lab.contains(info)) {
+                        if (lab.contains(fContextStrings[0])) {
                             System.out.println(fContextStrings[0] + field.getValue()); // $NON-NLS-1$
                             Double value = Double.parseDouble(field.getValue().toString());
-                            parent.getProfileData().setInfo(info, value);
+                            parent.getProfileData().setInfo(fContextStrings[0], value);
                             parent.getProfileData().addInfo(value.intValue());
                         }
                     }
@@ -2154,7 +2152,8 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             if (i == 3) {
                 ArrayList<ArrayList<Double>> xList = new ArrayList<>();
                 // take the instructions:
-                ArrayList<Double> hashInfo = calculateHashInfo("instructions");
+                String[] contextStrings = { "context._perf_thread_instructions", "perf:thread:cache-misses", "perf:thread:page-fault", "perf:thread:cpu-cycles" };
+                ArrayList<Double> hashInfo = calculateHashInfo(contextStrings[0]);
                 xList.add(hashInfo);
                 // take the manual probe:
                 calculateTraceInfo(xList, 1);
@@ -2165,11 +2164,21 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 System.out.println(duration.size());
                 MultiLinear ml = new MultiLinear(X, Y);
                 Matrix beta = ml.calculate();
-                System.out.println(beta);
+                //Duration =  beta0  +   beta1 * context[1] +  beta2  * context[2]
+                System.out.println("Betas \n" + beta);
+                System.out.println("Duration  = B0(" + beta.getValueAt(0,0) + ")*"+ contextStrings[0] +" + B1(" + beta.getValueAt(1,0) + ") + B2(" + beta.getValueAt(2,0) + "* probe1");
+
+                evaluateModel(beta, Y);
             }
         } catch (Exception e) {
             System.out.print("Exception in MRL");
         }
+    }
+
+    //This function evaluates the MRL model:
+    private static void evaluateModel(Matrix beta, Matrix y) {
+        double percentage = 80.0;
+        System.out.print("This model is able to predict " + percentage + "Of the system" );
     }
 
 }

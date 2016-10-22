@@ -249,10 +249,12 @@ public class ProfileData implements IProfileData {
         }
     }
 
+    //Return information from the hash:
     public HashMap<String, Double> getInfo() {
         return info;
     }
 
+    //Add information to the hash:
     public Double getInfo(String stringInfo) {
         return info.get(stringInfo);
     }
