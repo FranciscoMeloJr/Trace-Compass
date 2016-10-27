@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.debug.internal.ui.SWTFactory;
+import org.eclipse.debug.internal.ui.actions.breakpointGroups.BreakpointGroupMessages;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -23,7 +25,10 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -359,7 +364,7 @@ public class SampleView extends AbstractTimeGraphView {
         manager.add(itemCla);
 
         // MRL model:
-        manager.add(getMRLActionDialog("MRL Model", "Regression Model", 1));//Actions.getMRLModel());
+        manager.add(getMRLActionDialog("MRL Model"));// Actions.getMRLModel());
         // Test
         fTest = Actions.getTestAction();
         manager.add(fTest);
@@ -482,6 +487,7 @@ public class SampleView extends AbstractTimeGraphView {
 
         return fDelimitationAction;
     }
+
     /**
      * Get the delimitation button. kind depends on each type of button
      *
@@ -490,7 +496,8 @@ public class SampleView extends AbstractTimeGraphView {
      * @return The Action object
      */
 
-    public Action getMRLActionDialog(String labelText, String initialLabel) {
+    public Action getMRLActionDialog(String labelText) {
+        String initialLabel = "/home/frank/Desktop/Research/text.txt";
         Action fModelAction = null;
         fModelAction = new Action() {
 
@@ -513,6 +520,7 @@ public class SampleView extends AbstractTimeGraphView {
 
         return fModelAction;
     }
+
     /**
      * Get the correlation button
      *
@@ -1271,11 +1279,15 @@ public class SampleView extends AbstractTimeGraphView {
 
     }
 
-    //MRL Dialog:
+    // MRL Dialog:
     public class MRLDialog extends MultiLineInputDialog {
 
         private Label thresholdLabel;
         private int fBegin = 0;
+        private Button fAddButton1;
+        private Button fAddButton2;
+        private Button fAddButton3;
+        private Button fAddButton4;
 
         /**
          * Constructor
@@ -1300,22 +1312,71 @@ public class SampleView extends AbstractTimeGraphView {
             colorComposite.moveBelow(getText());
             thresholdLabel = new Label(colorComposite, SWT.NONE);
             thresholdLabel.setText("Threshold");
-            /*fthresholdScale = new Scale(colorComposite, SWT.NONE);
-            fthresholdScale.setMaximum(100);
-            fthresholdScale.setSelection(fBegin);
-            fthresholdScale.setIncrement(1);
-            fthresholdScale.setPageIncrement(16);
-            fthresholdScale.addSelectionListener(new SelectionAdapter() {
-                @Override
-                public void widgetSelected(SelectionEvent e) {
-                    fBegin = fthresholdScale.getSelection();
-                    thresholdLabel.setText(Integer.toString(fBegin));
-                }
-            });*/
+            /*
+             * fthresholdScale = new Scale(colorComposite, SWT.NONE);
+             * fthresholdScale.setMaximum(100);
+             * fthresholdScale.setSelection(fBegin);
+             * fthresholdScale.setIncrement(1);
+             * fthresholdScale.setPageIncrement(16);
+             * fthresholdScale.addSelectionListener(new SelectionAdapter() {
+             *
+             * @Override public void widgetSelected(SelectionEvent e) { fBegin =
+             * fthresholdScale.getSelection();
+             * thresholdLabel.setText(Integer.toString(fBegin)); } });
+             */
+            createButtons(parent);
             thresholdLabel = new Label(colorComposite, SWT.NONE);
             thresholdLabel.setText(Integer.toString(fBegin));
             return areaComposite;
         }
+
+        public void createButtons(Composite parent) {
+            Composite buttonComposite = new Composite(parent, SWT.NONE);
+            buttonComposite.setLayout(new GridLayout());
+            buttonComposite.setLayoutData(new GridData());
+            buttonComposite.setFont(parent.getFont());
+
+            fAddButton1 = SWTFactory.createPushButton(buttonComposite, "MRL model 1", null);
+            fAddButton1.addSelectionListener(fSelectionListener1);
+
+            fAddButton2 = SWTFactory.createPushButton(buttonComposite, "MRL model 2", null);
+            fAddButton2.addSelectionListener(fSelectionListener2);
+
+            fAddButton3 = SWTFactory.createPushButton(buttonComposite, "MRL model 3", null);
+            fAddButton3.addSelectionListener(fSelectionListener3);
+
+            fAddButton4 = SWTFactory.createPushButton(buttonComposite, "MRL model 4", null);
+            fAddButton4.addSelectionListener(fSelectionListener4);
+        }
+
+
+        private SelectionAdapter fSelectionListener1 = new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                CCTAnalysisModule.MRL(1);
+            }
+        };
+
+        private SelectionAdapter fSelectionListener2= new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                CCTAnalysisModule.MRL(2);
+            }
+        };
+
+        private SelectionAdapter fSelectionListener3 = new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                CCTAnalysisModule.MRL(3);
+            }
+        };
+
+        private SelectionAdapter fSelectionListener4 = new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                CCTAnalysisModule.MRL(4);
+            }
+        };
 
     }
 }

@@ -34,6 +34,7 @@ public class Actions {
         fInversion.setToolTipText("Used to test");
         return fInversion;
     }
+
     /**
      * Button used to call the MRL algorithm
      *

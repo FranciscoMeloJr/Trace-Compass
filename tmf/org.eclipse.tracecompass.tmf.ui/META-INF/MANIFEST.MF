@@ -114,6 +114,8 @@ Export-Package: org.eclipse.tracecompass.internal.tmf.ui;x-friends:="org.eclipse
 Import-Package: com.google.common.base,
  com.google.common.cache,
  com.google.common.collect,
+ org.eclipse.debug.internal.ui,
+ org.eclipse.debug.internal.ui.actions.breakpointGroups,
  org.eclipse.emf.common.util,
  org.eclipse.emf.ecore,
 <<<<<<< 7c8526b7fb8edf035df8069a29ff0cad4a62617d
