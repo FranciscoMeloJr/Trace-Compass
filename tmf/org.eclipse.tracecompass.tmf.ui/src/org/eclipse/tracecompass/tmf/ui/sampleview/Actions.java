@@ -25,6 +25,8 @@ public class Actions {
             public void run() {
                 System.out.println("Tests");
                 //taking 2 infos from the trace
+                //CCTAnalysisModule.correlationInfoTrace(2, "instructions");
+                //taking 3 infos from the trace+ external file:
                 CCTAnalysisModule.correlationInfoTrace(2, "instructions");
             }
         };

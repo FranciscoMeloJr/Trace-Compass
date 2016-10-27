@@ -359,7 +359,7 @@ public class SampleView extends AbstractTimeGraphView {
         manager.add(itemCla);
 
         // MRL model:
-        manager.add(Actions.getMRLModel());
+        manager.add(getMRLActionDialog("MRL Model", "Regression Model", 1));//Actions.getMRLModel());
         // Test
         fTest = Actions.getTestAction();
         manager.add(fTest);
@@ -482,7 +482,37 @@ public class SampleView extends AbstractTimeGraphView {
 
         return fDelimitationAction;
     }
+    /**
+     * Get the delimitation button. kind depends on each type of button
+     *
+     * @param initialLabel
+     *            label of the button
+     * @return The Action object
+     */
 
+    public Action getMRLActionDialog(String labelText, String initialLabel) {
+        Action fModelAction = null;
+        fModelAction = new Action() {
+
+            @Override
+            public void runWithEvent(Event event) {
+                final MRLDialog dialog = new MRLDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), initialLabel);
+                if (dialog.open() == Window.OK) {
+                    final String label = dialog.getValue();
+                    System.out.println(label + dialog.fBegin);
+                    // final RGBA rgba = dialog.getColorValue();
+                    // IMarkerEvent bookmark = new MarkerEvent(null, time,
+                    // duration, IMarkerEvent.BOOKMARKS, rgba, label, true);
+
+                }
+            }
+        };
+        fModelAction.setText(labelText);
+        fModelAction.setToolTipText(Messages.TmfTimeGraphViewer_DelimitationText);
+        // fToggleBookmarkAction.setImageDescriptor(ADD_BOOKMARK);
+
+        return fModelAction;
+    }
     /**
      * Get the correlation button
      *
@@ -1241,4 +1271,51 @@ public class SampleView extends AbstractTimeGraphView {
 
     }
 
+    //MRL Dialog:
+    public class MRLDialog extends MultiLineInputDialog {
+
+        private Label thresholdLabel;
+        private int fBegin = 0;
+
+        /**
+         * Constructor
+         *
+         * @param parentShell
+         *            the parent shell
+         * @param initialValue
+         *            the initial input value, or <code>null</code> if none
+         *            (equivalent to the empty string)
+         */
+        public MRLDialog(Shell parentShell, String initialValue) {
+            super(parentShell, "Regression Model", "File adress", initialValue);
+        }
+
+        @Override
+        protected Control createDialogArea(Composite parent) {
+            Composite areaComposite = (Composite) super.createDialogArea(parent);
+            Composite colorComposite = new Composite(areaComposite, SWT.NONE);
+            RowLayout layout = new RowLayout();
+            layout.center = true;
+            colorComposite.setLayout(layout);
+            colorComposite.moveBelow(getText());
+            thresholdLabel = new Label(colorComposite, SWT.NONE);
+            thresholdLabel.setText("Threshold");
+            /*fthresholdScale = new Scale(colorComposite, SWT.NONE);
+            fthresholdScale.setMaximum(100);
+            fthresholdScale.setSelection(fBegin);
+            fthresholdScale.setIncrement(1);
+            fthresholdScale.setPageIncrement(16);
+            fthresholdScale.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    fBegin = fthresholdScale.getSelection();
+                    thresholdLabel.setText(Integer.toString(fBegin));
+                }
+            });*/
+            thresholdLabel = new Label(colorComposite, SWT.NONE);
+            thresholdLabel.setText(Integer.toString(fBegin));
+            return areaComposite;
+        }
+
+    }
 }

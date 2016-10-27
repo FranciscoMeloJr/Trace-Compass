@@ -2,6 +2,10 @@ package org.eclipse.tracecompass.internal.analysis.os.linux.core.profile;
 
 import static org.eclipse.tracecompass.common.core.NonNullUtils.checkNotNull;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -1944,7 +1948,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 result = Math.abs(result);
                 if (result >= 0.75) {
                     resultString = ("Strongly correlated");
-                    CCTAnalysisModule.MRL(3);
+                    CCTAnalysisModule.MRL(4);
                 } else {
                     if (result <= 0.25) {
                         resultString = ("Not correlated");
@@ -1960,7 +1964,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         return resultString;
     }
 
-    // Takes the information from the hash, which in this case is
+    // Takes the information from the hash
     private static ArrayList<Double> calculateHashInfo(String specificPerf) {
         double instructions = 0;
         ArrayList<Double> infoList = new ArrayList<>();
@@ -2164,21 +2168,74 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 System.out.println(duration.size());
                 MultiLinear ml = new MultiLinear(X, Y);
                 Matrix beta = ml.calculate();
-                //Duration =  beta0  +   beta1 * context[1] +  beta2  * context[2]
+                // Duration = beta0 + beta1 * context[1] + beta2 * context[2]
                 System.out.println("Betas \n" + beta);
-                System.out.println("Duration  = B0(" + beta.getValueAt(0,0) + ")*"+ contextStrings[0] +" + B1(" + beta.getValueAt(1,0) + ") + B2(" + beta.getValueAt(2,0) + "* probe1");
+                System.out.println("Duration  = B0(" + beta.getValueAt(0, 0) + ")*" + contextStrings[0] + " + B1(" + beta.getValueAt(1, 0) + ") + B2(" + beta.getValueAt(2, 0) + "* probe1");
 
                 evaluateModel(beta, Y);
+            }
+            // Taking static instrumentation + information from file:
+            if (i == 4) {
+                ArrayList<ArrayList<Double>> xList = new ArrayList<>();
+                // take the instructions:
+                String[] contextStrings = { "context._perf_thread_instructions", "perf:thread:cache-misses", "perf:thread:page-fault", "perf:thread:cpu-cycles" };
+                ArrayList<Double> hashInfo = calculateHashInfo(contextStrings[0]);
+                xList.add(hashInfo);
+                xList.add(readInfoFromFile());
+
+                ArrayList<Double> duration = calculateDurationArray();
+                Matrix X = new Matrix(xList, xList.size());
+
+                Matrix Y = new Matrix(duration);
+                System.out.println(duration.size());
+                MultiLinear ml = new MultiLinear(X, Y);
+                Matrix beta = ml.calculate();
+                // Duration = beta0 + beta1 * context[1] + beta2 * context[2]
+                System.out.println("Betas \n" + beta);
+                System.out.println("Duration  = B0(" + beta.getValueAt(0, 0) + ") + (" + contextStrings[0] + ")*B1(" + beta.getValueAt(1, 0) + ") + B2(" + beta.getValueAt(2, 0) + ")* probe1");
+
+                evaluateModel(beta, Y);
+
             }
         } catch (Exception e) {
             System.out.print("Exception in MRL");
         }
     }
 
-    //This function evaluates the MRL model:
+    // This function evaluates the MRL model:
     private static void evaluateModel(Matrix beta, Matrix y) {
         double percentage = 80.0;
-        System.out.print("This model is able to predict " + percentage + "Of the system" );
+        System.out.print("This model is able to predict " + percentage + "Of the system");
+
+        // ReadFile:
+        try {
+            readInfoFromFile();
+        } catch (FileNotFoundException e) {
+        }
     }
 
+    // This function reads from a file:
+    private static ArrayList<Double> readInfoFromFile() throws FileNotFoundException {
+
+        String file = "/home/frank/Desktop/Research/text.txt";
+        ArrayList<Double> numbers = new ArrayList<>();
+        try {
+
+            for (String line : Files.readAllLines(Paths.get(file))) {
+                // System.out.print(line);
+                if (line.length() > 0) {
+                    for (String part : line.split("\\s+")) {
+                        Integer i = Integer.valueOf(part);
+                        numbers.add((double)i);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.print("Empty file");
+        } finally {
+            System.out.print("Problem to read");
+        }
+
+        return numbers;
+    }
 }
