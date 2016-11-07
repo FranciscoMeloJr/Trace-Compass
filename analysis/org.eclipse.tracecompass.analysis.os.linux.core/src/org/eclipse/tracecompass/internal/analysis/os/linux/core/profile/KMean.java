@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Random;
 
+import org.eclipse.tracecompass.common.core.NonNullUtils;
+
 //from:https://radixcode.com/k-mean-clustering-algorithm-implementation-in-c-java/
 
 /**
@@ -146,7 +148,7 @@ public class KMean {
             // K, size and arraylist of numbers
             group = KMean.KMeanD(j, numbers.size(), numbers);
             // Elbow method:
-            resultSSE.add(KMean.ElbowMethodD(group));
+            resultSSE.add(KMean.ElbowMethodD(group, 1));
         }
 
         System.out.println(resultSSE);
@@ -155,8 +157,9 @@ public class KMean {
     }
 
     // Normal distribution test:
-    public static void testNormal() {
-        System.out.println("test Normal");
+    public static void testNormal(int printFlag) {
+
+        System.out.println("Elapsed Time");
 
         Random randomno = new Random();
 
@@ -177,7 +180,7 @@ public class KMean {
 
         // second Normal:
         stdDev = 15;
-        mean = 100;
+        mean = 35;
         for (int i = 0; i < tam; i++) {
             aux = randomno.nextGaussian() * stdDev + mean;
             Normal.add(aux);
@@ -186,7 +189,74 @@ public class KMean {
         }
 
         // Show:
-        showDistribution(hm);
+        if (printFlag > 0) {
+            showDistribution(hm);
+        }
+
+        ArrayList<Double> resultSSE = new ArrayList<>();
+        // testing all the ks:
+        for (int j = 1; j < Normal.size(); j++) {
+            // K, size and arraylist of numbers
+            ArrayList<ArrayList<Double>> group = KMean.executeD(j, Normal);
+            resultSSE.add(KMean.ElbowMethodD(group, 0));
+        }
+        // biggest gap:
+        int bestk = (calculateBestK(resultSSE) + 1);
+        System.out.println("Best number of groups: " + bestk);
+
+        ArrayList<ArrayList<Double>> group = KMean.executeD(bestk, Normal);
+        KMean.classify(hm, group);
+
+        // System.out.println(group);
+    }
+
+    // This method return a hash map with the best classification:
+    static void classify(LinkedHashMap<Integer, ArrayList<Double>> hm, ArrayList<ArrayList<Double>> group) {
+
+        System.out.println("Classification");
+        // Double vs classification
+        LinkedHashMap<Double, Integer> result = new LinkedHashMap<>();
+
+        ArrayList<Double> temp;
+        Double sample;
+        int value;
+        for (int i = 0; i < group.size(); i++) {
+            temp = group.get(i);
+            for (int j = 0; j < temp.size(); j++) {
+                Double key = temp.get(j);
+                value = (i + 1);
+                // String aux = key + " \t \t \t " + value;
+                // System.out.println(aux);
+                result.put(key, value);
+            }
+        }
+
+        // Show
+        System.out.println("Sample \t \t\t  Tag \t Result Conclusion");
+        int ok = 0;
+        int samples = 0;
+        for (Integer key : hm.keySet()) {
+            ArrayList<Double> array = hm.get(key);
+            if (array != null) {
+                for (int i = 0; i < array.size(); i++) {
+                    sample = array.get(i);
+                    samples++;
+                    if (result.get(sample) != null) {
+                        value = NonNullUtils.checkNotNull(result.get(sample));
+                        if (value == key) {
+                            System.out.println(array.get(i) + "\t " + key + "\t " + value + "\t  OK");
+                            ok += 1;
+                        } else {
+                            System.out.println(array.get(i) + "\t " + key + "\t " + value + "\t  KO");
+                        }
+                    }
+                }
+            }
+        }
+        double recallRate = (double) ok / samples * 100;
+        System.out.println("ok: " + ok);
+        System.out.println("samples: " + samples);
+        System.out.println("recallRate: " + recallRate);
     }
 
     // HashMap add:
@@ -286,6 +356,7 @@ public class KMean {
     // Execute and returns the groups:
     public static ArrayList<ArrayList<Double>> executeD(int givenK, ArrayList<Double> numbers) {
         // K and number of items:
+        Collections.sort(numbers);
         return KMean.KMeanD(givenK, numbers.size(), numbers);
     }
 
@@ -346,7 +417,7 @@ public class KMean {
     }
 
     // This function calculates the ElbowMethod:
-    public static Double ElbowMethodD(ArrayList<ArrayList<Double>> ClassificationGroup) {
+    public static Double ElbowMethodD(ArrayList<ArrayList<Double>> ClassificationGroup, int printFlag) {
         Double SSE = (double) 0;
         // Calculate the SSE for each cluster and then sum them:
         ArrayList<Double> Centroids = new ArrayList<>();
@@ -378,8 +449,9 @@ public class KMean {
                 SSE += eachDistance;
             }
         }
-        System.out.println("K : " + ClassificationGroup.size() + " SSE " + SSE);
-
+        if (printFlag > 0) {
+            System.out.println("K : " + ClassificationGroup.size() + " SSE " + SSE);
+        }
         return SSE;
     }
 
@@ -387,31 +459,32 @@ public class KMean {
     public static int calculateBestK(ArrayList<Double> resultSSE) {
 
         Double gap = (double) 0;
-        Double current;
+        Double currentG;
         int maxp1 = 0;
-        int minp1 = 0;
+        // int minp1 = 0;
         int i;
 
         // Heuristic max:
         for (i = 1; i < resultSSE.size(); i++) {
-            current = resultSSE.get(i - 1) - resultSSE.get(i);
-            if (current > gap) {
-                gap = current;
+            currentG = resultSSE.get(i - 1) - resultSSE.get(i);
+            // System.out.println("gap " + currentG);
+            if (currentG > gap) {
+                gap = currentG;
                 maxp1 = i;
             }
         }
         // Heuristic min:
         gap = (double) 0;
         for (i = 1; i < resultSSE.size(); i++) {
-            current = resultSSE.get(i - 1) - resultSSE.get(i);
-            if (current < gap) {
-                gap = current;
-                minp1 = i;
+            currentG = resultSSE.get(i - 1) - resultSSE.get(i);
+            if (currentG < gap) {
+                gap = currentG;
+                // minp1 = i;
             }
         }
         // return minp1;
 
-        System.out.println("best k " + maxp1);
+        System.out.println("best k " + (maxp1 + 1));
         // return minp1;
         return maxp1;
     }

@@ -29,7 +29,7 @@ public class Actions {
                 //taking 3 infos from the trace+ external file:
                 //CCTAnalysisModule.correlationInfoTrace(2, "instructions");
                 //Normal distributions test:
-                CCTAnalysisModule.RunClassification(-1);
+                CCTAnalysisModule.RunClassification(-2);
             }
         };
         fInversion.setText("Test");

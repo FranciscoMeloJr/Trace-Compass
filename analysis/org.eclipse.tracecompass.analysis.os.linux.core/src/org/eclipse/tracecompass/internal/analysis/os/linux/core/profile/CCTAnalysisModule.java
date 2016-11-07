@@ -1744,6 +1744,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             if (kind == -1) {
                 RunKMean(null, null);
+            }
+            if (kind == -2){
+                NormalTests.testNormal(1);
+
             } else {
                 if (hashECCTs.length > 1) {
 
@@ -1873,7 +1877,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             } else {
                 // Test:
-                KMean.testNormal();
+                KMean.testNormal(0);
             }
         }
 
