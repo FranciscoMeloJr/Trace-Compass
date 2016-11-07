@@ -23,11 +23,13 @@ public class Actions {
         Action fInversion = new Action() {
             @Override
             public void run() {
-                System.out.println("Tests");
+                System.out.println("Test action");
                 //taking 2 infos from the trace
                 //CCTAnalysisModule.correlationInfoTrace(2, "instructions");
                 //taking 3 infos from the trace+ external file:
-                CCTAnalysisModule.correlationInfoTrace(2, "instructions");
+                //CCTAnalysisModule.correlationInfoTrace(2, "instructions");
+                //Normal distributions test:
+                CCTAnalysisModule.RunClassification(-1);
             }
         };
         fInversion.setText("Test");

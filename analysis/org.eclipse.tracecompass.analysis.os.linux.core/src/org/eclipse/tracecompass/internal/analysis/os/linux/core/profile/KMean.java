@@ -4,13 +4,14 @@ import static java.lang.Math.abs;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Random;
 
 //from:https://radixcode.com/k-mean-clustering-algorithm-implementation-in-c-java/
 
 /**
- * @author francisco
- * This Class defines the k-means + Elbow method + max gap heuristic
- * This heuristic does not guarantee the best k
+ * @author francisco This Class defines the k-means + Elbow method + max gap
+ *         heuristic This heuristic does not guarantee the best k
  */
 
 public class KMean {
@@ -135,6 +136,7 @@ public class KMean {
         return groups;
 
     }
+
     // Function to with a given array of doubles:
     public static int test(ArrayList<Double> numbers) {
         ArrayList<Double> resultSSE = new ArrayList<>();
@@ -143,7 +145,7 @@ public class KMean {
         for (int j = 1; j < numbers.size(); j++) {
             // K, size and arraylist of numbers
             group = KMean.KMeanD(j, numbers.size(), numbers);
-            //Elbow method:
+            // Elbow method:
             resultSSE.add(KMean.ElbowMethodD(group));
         }
 
@@ -152,8 +154,78 @@ public class KMean {
         return calculateBestK(resultSSE);
     }
 
+    // Normal distribution test:
+    public static void testNormal() {
+        System.out.println("test Normal");
+
+        Random randomno = new Random();
+
+        ArrayList<Double> Normal = new ArrayList<>();
+        LinkedHashMap<Integer, ArrayList<Double>> hm = new LinkedHashMap<>();
+
+        // first Normal:
+        int tam = 10;
+        int stdDev = 15;
+        int mean = 20;
+        Double aux;
+        for (int i = 0; i < tam; i++) {
+            aux = randomno.nextGaussian() * stdDev + mean;
+            Normal.add(aux);
+            hashAdd(hm, 1, aux);
+            // hm.put(1, aux);
+        }
+
+        // second Normal:
+        stdDev = 15;
+        mean = 100;
+        for (int i = 0; i < tam; i++) {
+            aux = randomno.nextGaussian() * stdDev + mean;
+            Normal.add(aux);
+            hashAdd(hm, 2, aux);
+            // hm.put(2, aux);
+        }
+
+        // Show:
+        showDistribution(hm);
+    }
+
+    // HashMap add:
+    private static void hashAdd(LinkedHashMap<Integer, ArrayList<Double>> hm, Integer key, Double aux) {
+
+        // contains:
+        if (hm.containsKey(key)) {
+
+            ArrayList<Double> array = hm.get(key);
+            if (array != null) {
+                array.add(aux);
+                hm.put(key, array);
+            }
+        } else {
+            ArrayList<Double> array = new ArrayList<>();
+            array.add(aux);
+            hm.put(key, array);
+        }
+    }
+
+    // Show:
+    public static void showDistribution(LinkedHashMap<Integer, ArrayList<Double>> hm) {
+
+        // Show
+        System.out.println("Sample \t \t \t Tag");
+        for (Integer key : hm.keySet()) {
+            ArrayList<Double> array = hm.get(key);
+            if (array != null) {
+                for (int i = 0; i < array.size(); i++) {
+                    System.out.println(array.get(i) + "\t " + key);
+                }
+            }
+        }
+
+    }
+
     // Function to test the OpK-means: k-means + elbow + max gap heuristic
     public static void test() {
+
         ArrayList<Integer> testValues = new ArrayList<>();
         ArrayList<Double> resultSSE = new ArrayList<>();
 
@@ -210,7 +282,8 @@ public class KMean {
         int noOfItems = nItems; // input.nextInt();
         new KMean(k, noOfItems, numbers);
     }
-    //Execute and returns the groups:
+
+    // Execute and returns the groups:
     public static ArrayList<ArrayList<Double>> executeD(int givenK, ArrayList<Double> numbers) {
         // K and number of items:
         return KMean.KMeanD(givenK, numbers.size(), numbers);
@@ -237,76 +310,75 @@ public class KMean {
 
         Double SSE = (double) 0;
 
+        // Calculate the SSE for each cluster and then sum them:
+        ArrayList<Double> Centroids = new ArrayList<>();
 
-            // Calculate the SSE for each cluster and then sum them:
-            ArrayList<Double> Centroids = new ArrayList<>();
+        Double eachDistance;
 
-            Double eachDistance;
-
-            // For each group, calculates the centroid:
-            // System.out.println("Size" + groups.size());
-            for (int i = 0; i < ClassificationGroup.size(); i++) {
-                ArrayList<Integer> x = ClassificationGroup.get(i);
-                Double temp = (double) 0;
-                int j;
-                for (j = 0; j < x.size(); j++) {
-                    temp += x.get(j);
-                }
-                Centroids.add(temp /= j);
-                // System.out.println(Centroids.get(i));
+        // For each group, calculates the centroid:
+        // System.out.println("Size" + groups.size());
+        for (int i = 0; i < ClassificationGroup.size(); i++) {
+            ArrayList<Integer> x = ClassificationGroup.get(i);
+            Double temp = (double) 0;
+            int j;
+            for (j = 0; j < x.size(); j++) {
+                temp += x.get(j);
             }
+            Centroids.add(temp /= j);
+            // System.out.println(Centroids.get(i));
+        }
 
-            // SSE Calculation:
-            // The SSE is defined as the sum of the squared distance between
-            // each member of the cluster and its centered. Mathematically:
-            for (int i = 0; i < ClassificationGroup.size(); i++) {
-                // each group:
-                ArrayList<Integer> x = ClassificationGroup.get(i);
-                int j;
-                for (j = 0; j < x.size(); j++) {
-                    eachDistance = (x.get(j) - Centroids.get(i)) * (x.get(j) - Centroids.get(i));
-                    SSE += eachDistance;
-                }
+        // SSE Calculation:
+        // The SSE is defined as the sum of the squared distance between
+        // each member of the cluster and its centered. Mathematically:
+        for (int i = 0; i < ClassificationGroup.size(); i++) {
+            // each group:
+            ArrayList<Integer> x = ClassificationGroup.get(i);
+            int j;
+            for (j = 0; j < x.size(); j++) {
+                eachDistance = (x.get(j) - Centroids.get(i)) * (x.get(j) - Centroids.get(i));
+                SSE += eachDistance;
             }
-            System.out.println("K : " + ClassificationGroup.size() + " SSE " + SSE);
+        }
+        System.out.println("K : " + ClassificationGroup.size() + " SSE " + SSE);
 
         return SSE;
     }
 
-    //This function calculates the ElbowMethod:
-    public static Double ElbowMethodD(ArrayList<ArrayList<Double>> ClassificationGroup){
-            Double SSE = (double) 0;
-            // Calculate the SSE for each cluster and then sum them:
-            ArrayList<Double> Centroids = new ArrayList<>();
+    // This function calculates the ElbowMethod:
+    public static Double ElbowMethodD(ArrayList<ArrayList<Double>> ClassificationGroup) {
+        Double SSE = (double) 0;
+        // Calculate the SSE for each cluster and then sum them:
+        ArrayList<Double> Centroids = new ArrayList<>();
 
-            Double eachDistance;
+        Double eachDistance;
 
-            // For each group, calculates the centroid:
-            // System.out.println("Size" + groups.size());
-            for (int i = 0; i < ClassificationGroup.size(); i++) {
-                ArrayList<Double> x = ClassificationGroup.get(i);
-                Double temp = (double) 0;
-                int j;
-                for (j = 0; j < x.size(); j++) {
-                    temp += x.get(j);
-                }
-                Centroids.add(temp /= j);
-                // System.out.println(Centroids.get(i));
+        // For each group, calculates the centroid:
+        // System.out.println("Size" + groups.size());
+        for (int i = 0; i < ClassificationGroup.size(); i++) {
+            ArrayList<Double> x = ClassificationGroup.get(i);
+            Double temp = (double) 0;
+            int j;
+            for (j = 0; j < x.size(); j++) {
+                temp += x.get(j);
             }
+            Centroids.add(temp /= j);
+            // System.out.println(Centroids.get(i));
+        }
 
-            // SSE Calculation:
-            // The SSE is defined as the sum of the squared distance between
-            // each member of the cluster and its centered. Mathematically:
-            for (int i = 0; i < ClassificationGroup.size(); i++) {
-                // each group:
-                ArrayList<Double> x = ClassificationGroup.get(i);
-                int j;
-                for (j = 0; j < x.size(); j++) {
-                    eachDistance = (x.get(j) - Centroids.get(i)) * (x.get(j) - Centroids.get(i));
-                    SSE += eachDistance;
-                }
+        // SSE Calculation:
+        // The SSE is defined as the sum of the squared distance between
+        // each member of the cluster and its centered. Mathematically:
+        for (int i = 0; i < ClassificationGroup.size(); i++) {
+            // each group:
+            ArrayList<Double> x = ClassificationGroup.get(i);
+            int j;
+            for (j = 0; j < x.size(); j++) {
+                eachDistance = (x.get(j) - Centroids.get(i)) * (x.get(j) - Centroids.get(i));
+                SSE += eachDistance;
             }
-            System.out.println("K : " + ClassificationGroup.size() + " SSE " + SSE);
+        }
+        System.out.println("K : " + ClassificationGroup.size() + " SSE " + SSE);
 
         return SSE;
     }
@@ -340,7 +412,7 @@ public class KMean {
         // return minp1;
 
         System.out.println("best k " + maxp1);
-        //return minp1;
+        // return minp1;
         return maxp1;
     }
 }

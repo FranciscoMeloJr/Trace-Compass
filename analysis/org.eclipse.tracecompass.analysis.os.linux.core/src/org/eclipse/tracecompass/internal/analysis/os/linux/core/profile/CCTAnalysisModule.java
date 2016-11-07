@@ -1742,40 +1742,44 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             ArrayList<Double> durationList = new ArrayList<>();
             LinkedHashMap<Double, Node<ProfileData>> hash = new LinkedHashMap<>();
 
-            if (hashECCTs.length > 1) {
-
-                for (int i = 0; i < EcctSize; i++) {
-                    eachECCTs = ArrayECCTs.get(i);
-                    duration = eachECCTs.getProfileData().getDuration();
-                    durationList.add(Double.valueOf(duration));
-
-                    // link between node x duration:
-                    hash.put(duration, eachECCTs);
-                }
-
-                // Run the classification method for the whole duration:
-                if (kind == 1) {
-                    RunVariationClassifier(durationList, hash);
-                }
-                // Run the classification method for functions separately
-                if (kind == 2) {
-                    variationClassificationF();
-                }
-                // Run the OptimazedK-Means method for functions separately
-                if (kind == 3) {
-                    RunKMean(durationList, hash);
-                }
-                // Run the KDE method for functions separately
-                if (kind == 4) {
-                    RunKDE(durationList, hash);
-                } else {
-                    // Run the Jenks Natural Breaks method for functions
-                    // separately
-                    callJNB(durationList);
-                }
+            if (kind == -1) {
+                RunKMean(null, null);
             } else {
-                System.out.println("At least more than one group");
-                return false;
+                if (hashECCTs.length > 1) {
+
+                    for (int i = 0; i < EcctSize; i++) {
+                        eachECCTs = ArrayECCTs.get(i);
+                        duration = eachECCTs.getProfileData().getDuration();
+                        durationList.add(Double.valueOf(duration));
+
+                        // link between node x duration:
+                        hash.put(duration, eachECCTs);
+                    }
+
+                    // Run the classification method for the whole duration:
+                    if (kind == 1) {
+                        RunVariationClassifier(durationList, hash);
+                    }
+                    // Run the classification method for functions separately
+                    if (kind == 2) {
+                        variationClassificationF();
+                    }
+                    // Run the OptimazedK-Means method for functions separately
+                    if (kind == 3) {
+                        RunKMean(durationList, hash);
+                    }
+                    // Run the KDE method for functions separately
+                    if (kind == 4) {
+                        RunKDE(durationList, hash);
+                    } else {
+                        // Run the Jenks Natural Breaks method for functions
+                        // separately
+                        callJNB(durationList);
+                    }
+                } else {
+                    System.out.println("At least more than one group");
+                    return false;
+                }
             }
             return true;
         }
@@ -1869,7 +1873,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
 
             } else {
                 // Test:
-                KMean.test();
+                KMean.testNormal();
             }
         }
 
@@ -2206,6 +2210,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     private static void evaluateModel(Matrix beta, Matrix y) {
         double percentage = 80.0;
         System.out.print("This model is able to predict " + percentage + "Of the system");
+        y.getValueAt(1, 0);
 
         // ReadFile:
         try {
@@ -2226,7 +2231,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 if (line.length() > 0) {
                     for (String part : line.split("\\s+")) {
                         Integer i = Integer.valueOf(part);
-                        numbers.add((double)i);
+                        numbers.add((double) i);
                     }
                 }
             }
