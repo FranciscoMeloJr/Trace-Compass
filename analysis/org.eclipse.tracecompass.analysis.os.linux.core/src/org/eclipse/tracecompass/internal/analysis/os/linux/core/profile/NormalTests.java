@@ -357,10 +357,19 @@ public class NormalTests {
         // Run through the abnormal runs:
         System.out.println("Abnormal activity");
         System.out.println("Run id \t\t elapsed cpu write");
+
+        int[] groups = new int[3];
+
         for (int i = 0; i < abnormal.size(); i++) {
             Run eachRun = abnormal.get(i);
             System.out.println("Run id \t" + eachRun.getId() + " \t " + eachRun.getGroupElapsed() + "  \t " + eachRun.getGroupCpu() + " \t " + eachRun.getGroupWrite());
+            int group = eachRun.getGroupCpu();
+
+            //Do a histogram according to the group:
+            groups[group]+=1;
         }
+        System.out.println("Groups abnormal dist with group cpu 1: "+ groups[1]+ "group cpu 2: " + groups[2]);
+        System.out.println(((double) groups[2]/abnormal.size())*100);
     }
 
     // This function classify an array with the best k:
