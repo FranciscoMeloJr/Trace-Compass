@@ -300,6 +300,17 @@ public class NormalTests {
         ArrayList<Run> normal = new ArrayList<>();
         ArrayList<Run> abnormal = new ArrayList<>();
 
+        ArrayList<ArrayList<Double>> resultET;
+        ArrayList<ArrayList<Double>> resultCPU;
+        ArrayList<ArrayList<Double>> resultWrite;
+
+        int[] histogramGroups = new int[3];
+        int ngET;
+        int ngCPU;
+        int ngW;
+
+        ArrayList<Run> Runs;
+
         // Show:
         if (printFlag > 0) {
             System.out.println("Distributions");
@@ -309,9 +320,14 @@ public class NormalTests {
 
         }
 
-        ArrayList<ArrayList<Double>> resultET = classification(a.getElapsed(), 0);
-        ArrayList<ArrayList<Double>> resultCPU = classification(a.getCpu(), 0);
-        ArrayList<ArrayList<Double>> resultWrite = classification(a.getWrite(), 0);
+        resultET = classification(a.getElapsed(), 0);
+        resultCPU = classification(a.getCpu(), 0);
+        resultWrite = classification(a.getWrite(), 0);
+
+        // size of each group:
+        ngET = resultET.size();
+        ngCPU = resultCPU.size();
+        ngW = resultWrite.size();
 
         // print:
         if (printFlag > 0) {
@@ -320,7 +336,7 @@ public class NormalTests {
             System.out.println(resultWrite);
         }
 
-        ArrayList<Run> Runs = a.getRuns();
+        Runs = a.getRuns();
 
         // Set the groups for the runs:
         for (int i = 0; i < Runs.size(); i++) {
@@ -333,7 +349,11 @@ public class NormalTests {
             eachRun.setGroupElapsed(groupET);
             eachRun.setGroupCpu(groupCPU);
             eachRun.setGroupWrite(groupWrite);
+        }
 
+        // Histogram:
+        for (int i = 0; i < Runs.size(); i++) {
+            Run eachRun = Runs.get(i);
             // fast:
             if (eachRun.getGroupElapsed() == 1) {
                 normal.add(eachRun);
@@ -341,35 +361,60 @@ public class NormalTests {
             else {
                 abnormal.add(eachRun);
             }
-
         }
 
         if (printFlag > 0) {
             // System.out.println("Run ids \t elapsed cpu write \t");
             for (int i = 0; i < Runs.size(); i++) {
                 Run eachRun = Runs.get(i);
-                // System.out.println("Run id \t" + eachRun.getId() + " \t " +
-                // eachRun.getGroupElapsed() + " \t " + eachRun.getGroupCpu() +
-                // " \t " + eachRun.getGroupWrite());
+                System.out.println("Run id \t" + eachRun.getId() + " \t " +
+                        eachRun.getGroupElapsed() + " \t " + eachRun.getGroupCpu() +
+                        " \t " + eachRun.getGroupWrite());
             }
         }
 
-        // Run through the abnormal runs:
-        System.out.println("Abnormal activity");
+        createHistograms(normal, ngCPU, ngW);
+        createHistograms(abnormal, ngCPU, ngW);
+
+    }
+
+    // This function correlates the groups:
+    private static void createHistograms(ArrayList<Run> array, int gCPU, int gWrite) {
+        System.out.println("Create histograms");
         System.out.println("Run id \t\t elapsed cpu write");
 
-        int[] groups = new int[3];
+        int[] histogramGroupsCPU = new int[gCPU + 1];
+        int[] histogramGroupsWrite = new int[gWrite + 1];
 
-        for (int i = 0; i < abnormal.size(); i++) {
-            Run eachRun = abnormal.get(i);
+        for (int i = 0; i < array.size(); i++) {
+            Run eachRun = array.get(i);
             System.out.println("Run id \t" + eachRun.getId() + " \t " + eachRun.getGroupElapsed() + "  \t " + eachRun.getGroupCpu() + " \t " + eachRun.getGroupWrite());
-            int group = eachRun.getGroupCpu();
+            int groupC = eachRun.getGroupCpu();
+            int groupW = eachRun.getGroupWrite();
 
-            //Do a histogram according to the group:
-            groups[group]+=1;
+            // Do a histogram according to the group:
+            histogramGroupsCPU[groupC] += 1;
+            histogramGroupsWrite[groupW] += 1;
+
         }
-        System.out.println("Groups abnormal dist with group cpu 1: "+ groups[1]+ "group cpu 2: " + groups[2]);
-        System.out.println(((double) groups[2]/abnormal.size())*100);
+
+        System.out.println("Cpu");
+        for (int i = 1; i < histogramGroupsCPU.length; i++) {
+            if (histogramGroupsCPU[i] > 0) {
+                System.out.println("Group " + i + " quantity: " + histogramGroupsCPU[i] + " Percentage: " + ((double) histogramGroupsCPU[i] * 100 / array.size()) + " %");
+            } else {
+                System.out.println("Group " + i + " quantity: " + histogramGroupsCPU[i] + " Percentage: 0%");
+            }
+        }
+        System.out.println("Write");
+        for (int i = 1; i < histogramGroupsWrite.length; i++) {
+            if (histogramGroupsWrite[i] > 0) {
+                System.out.println("Group " + i + " quantity: " + histogramGroupsWrite[i] + " Percentage: " + ((double) histogramGroupsWrite[i] * 100 / array.size()) + " %");
+            } else {
+                System.out.println("Group " + i + " quantity: " + histogramGroupsWrite[i] + " Percentage: 0%");
+            }
+        }
+
     }
 
     // This function classify an array with the best k:
