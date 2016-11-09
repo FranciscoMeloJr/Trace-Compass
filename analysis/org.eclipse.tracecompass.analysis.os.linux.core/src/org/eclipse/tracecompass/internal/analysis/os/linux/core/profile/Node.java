@@ -1,7 +1,6 @@
 package org.eclipse.tracecompass.internal.analysis.os.linux.core.profile;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Node<T extends IProfileData> {

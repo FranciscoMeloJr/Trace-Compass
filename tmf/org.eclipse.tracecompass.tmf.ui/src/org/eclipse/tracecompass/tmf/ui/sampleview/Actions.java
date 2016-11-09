@@ -26,10 +26,15 @@ public class Actions {
                 System.out.println("Test action");
                 //taking 2 infos from the trace
                 //CCTAnalysisModule.correlationInfoTrace(2, "instructions");
+
                 //taking 3 infos from the trace+ external file:
                 //CCTAnalysisModule.correlationInfoTrace(2, "instructions");
+
                 //Normal distributions test:
-                CCTAnalysisModule.RunClassification(-2);
+                //CCTAnalysisModule.RunClassification(-2);
+
+                //CSV classification test:
+                CCTAnalysisModule.RunClassification(-3);
             }
         };
         fInversion.setText("Test");

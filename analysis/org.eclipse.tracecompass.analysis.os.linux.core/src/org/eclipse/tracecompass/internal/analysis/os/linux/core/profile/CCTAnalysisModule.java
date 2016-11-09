@@ -1746,7 +1746,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             if (kind == -2){
                 NormalTests.testNormal(1);
 
-            } else {
+            }
+            if (kind == -3){
+                NormalTests.testCSV();
+
+            }else {
                 if (hashECCTs.length > 1) {
 
                     for (int i = 0; i < EcctSize; i++) {

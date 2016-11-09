@@ -59,6 +59,7 @@ import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimestamp;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
 import org.eclipse.tracecompass.tmf.core.trace.TmfTraceUtils;
 import org.eclipse.tracecompass.tmf.ui.editors.ITmfTraceEditor;
+import org.eclipse.tracecompass.tmf.ui.sampleview.SampleView.AddDelimiterDialog;
 import org.eclipse.tracecompass.tmf.ui.sampleview.SampleViewPresentationProvider;
 import org.eclipse.tracecompass.tmf.ui.symbols.TmfSymbolProviderUpdatedSignal;
 import org.eclipse.tracecompass.tmf.ui.views.TmfView;
@@ -295,17 +296,20 @@ public class FlameGraphView extends TmfView {
             }
             result.add(current);
 
-        // run over the threads
-        // each thread has a list of aggregated called functions, which have
-        // their own list <aggregated functions>
-        for (ThreadNode eachThreadNode : listThreads) {
+            Object listThreads;
+            // run over the threads
+            // each thread has a list of aggregated called functions, which have
+            // their own list <aggregated functions>
+            for (ThreadNode eachThreadNode : listThreads) {
 
-            /*
-             * @NonNull Collection<@NonNull AggregatedCalledFunction> x =
-             * eachThreadNode.getChildren();
-             * System.out.println(eachThreadNode.getSymbol() + " " + x.size());
-             */
-            CallGraphAnalysis.levelOrderTraversal(eachThreadNode);
+                /*
+                 * @NonNull Collection<@NonNull AggregatedCalledFunction> x =
+                 * eachThreadNode.getChildren();
+                 * System.out.println(eachThreadNode.getSymbol() + " " +
+                 * x.size());
+                 */
+                CallGraphAnalysis.levelOrderTraversal(eachThreadNode);
+            }
         }
     }
 
@@ -458,7 +462,11 @@ public class FlameGraphView extends TmfView {
     protected void fillLocalMenu(IMenuManager manager) {
         // super.fillLocalMenu(manager);
 
-        manager.add(getSortByUnknown());
+        manager.add(getReset());
+
+        manager.add(getInvertion());
+        manager.add(new Separator());
+        manager.add(getDifferential());
 
         MenuManager itemA = new MenuManager("Select Execution A: ");
         // fFlatAction = createFlatAction();
@@ -467,13 +475,16 @@ public class FlameGraphView extends TmfView {
         // Test just to put information on the
         // System.out.println(FUNCTION_NAMES.size());
         int size = 10;
-        if (fRoots != null) {
-            size = fRoots.size();
+        List<ThreadNode> listThreads = callGraphAnalysis.getThreadNodes();
+
+        if (listThreads != null) {
+            size = listThreads.size();
         }
+
         for (int i = 0; i < size; i++) {
             itemA.add(createTreeSelection(Integer.toString(i), 1));
         }
-        manager.add(new Separator());
+        // manager.add(new Separator());
         manager.add(itemA);
         // ItemB
         MenuManager itemB = new MenuManager("Select Execution B: ");
@@ -483,19 +494,17 @@ public class FlameGraphView extends TmfView {
             itemB.add(createTreeSelection(Integer.toString(i), 2));
         }
 
-        manager.add(new Separator());
         manager.add(itemB);
 
         // Threshold:
         MenuManager itemTh = new MenuManager("Select threshold:");
 
         // Test just to put information on the
-        int sizeT = 10;
-        for (int i = 0; i <= sizeT; i++) {
+        int sizeThreshold = 10;
+        for (int i = 0; i <= sizeThreshold; i++) {
             itemTh.add(selectThreshold(i));
         }
 
-        manager.add(new Separator());
         manager.add(itemTh);
         // Merger:
         manager.add(new Separator());
@@ -597,66 +606,8 @@ public class FlameGraphView extends TmfView {
 
     private Action fInvertionAction;
 
-    // Mod:
-    // This function is for a small selection menu - size is hard coded:
-    protected void fillLocalMenu(IMenuManager manager) {
-        // super.fillLocalMenu(manager);
+    private Object fDifferential;
 
-        manager.add(getReset());
-
-        manager.add(getInvertion());
-        manager.add(new Separator());
-        manager.add(getDifferential());
-
-        MenuManager itemA = new MenuManager("Select Execution A: ");
-        // fFlatAction = createFlatAction();
-        // fFlatAction = createFlatAction();
-
-        // Test just to put information on the
-        // System.out.println(FUNCTION_NAMES.size());
-        int size = 10;
-        List<ThreadNode> listThreads = callGraphAnalysis.getThreadNodes();
-
-        if (listThreads != null) {
-            size = listThreads.size();
-        }
-
-        for (int i = 0; i < size; i++) {
-            itemA.add(createTreeSelection(Integer.toString(i), 1));
-        }
-        // manager.add(new Separator());
-        manager.add(itemA);
-        // ItemB
-        MenuManager itemB = new MenuManager("Select Execution B: ");
-
-        // Test just to put information on the
-        for (int i = 0; i < size; i++) {
-            itemB.add(createTreeSelection(Integer.toString(i), 2));
-        }
-
-        manager.add(itemB);
-
-        // Threshold:
-        MenuManager itemTh = new MenuManager("Select threshold:");
-
-        // Test just to put information on the
-        int sizeThreshold = 10;
-        for (int i = 0; i <= sizeThreshold; i++) {
-            itemTh.add(selectThreshold(i));
-        }
-
-        manager.add(itemTh);
-        // Merger:
-        manager.add(new Separator());
-        manager.add(getMergeAction());
-
-        // Delimiters
-        manager.add(new Separator());
-
-        // Classification
-        manager.add(getClassificationAction());
-
-    }
 
     // this function is related with the threshold comparison:
     private IAction selectThreshold(int i) {
@@ -725,7 +676,7 @@ public class FlameGraphView extends TmfView {
                     // Redraw ():
                     System.out.println("Differential");
 
-                    List<ThreadNode> result = callGraphAnalysis.differential(Dif);
+                    List<ThreadNode> result = (List<ThreadNode>) callGraphAnalysis.differential(Dif);
                     callGraphAnalysis.setThreadNodes(result);
                 }
             };
@@ -746,7 +697,6 @@ public class FlameGraphView extends TmfView {
         }
         return fInvertion;
     }
-
 
     private static IAction createTreeSelection(String name, int i) {
         IAction action = new Action(name, IAction.AS_CHECK_BOX) { // AS_DROP_DOWN_MENU
@@ -779,7 +729,6 @@ public class FlameGraphView extends TmfView {
         Action fToggleBookmarkAction = null;
         fToggleBookmarkAction = new Action() {
 
-            @Override
             public void runWithEvent(Event event) {
                 final AddDelimiterDialog dialog = new AddDelimiterDialog(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), initialLabel);
                 if (dialog.open() == Window.OK) {

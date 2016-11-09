@@ -1,5 +1,9 @@
 package org.eclipse.tracecompass.internal.analysis.os.linux.core.profile;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -54,7 +58,7 @@ public class NormalTests {
 
         private void fulfilNotRandom(ArrayList<Double> distribution, LinkedHashMap<Integer, ArrayList<Double>> hm, int ngroups) {
 
-            //create 2 groups distribution:
+            // create 2 groups distribution:
             if (ngroups == 2) {
                 double[] aux = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150 };
                 int[] type = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2 };
@@ -64,9 +68,8 @@ public class NormalTests {
                     hashAdd(hm, type[i], aux[i]);
                     // hm.put(1, aux);
                 }
-            }
-            else{//create 3 groups distribution:
-                double[] aux = { 1, 2, 3, 4, 5, 6, 7, 600, 700, 800, 900,1000,1100, 1200,1300, 1200000, 1300000, 1400000, 1500000, 1600000};
+            } else {// create 3 groups distribution:
+                double[] aux = { 1, 2, 3, 4, 5, 6, 7, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1200000, 1300000, 1400000, 1500000, 1600000 };
                 int[] type = { 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3 };
                 // first Normal:
                 for (int i = 0; i < this.tam * 2; i++) {
@@ -280,11 +283,27 @@ public class NormalTests {
         int GElapsed;
         int GWrite;
 
+        // Info:
+        int fslow;
+        Double fdelta;
+        Double finst;
+        Double fcpu;
+        Double fmiss;
+
         Run(int identification, double c, double e, double w) {
             this.cpu = c;
             this.elapsed = e;
             this.writes = w;
             this.id = identification;
+        }
+
+        //Trouble tests:
+        Run(int fs, double d, double i, double c, double m) {
+            fslow = fs;
+            fdelta = d;
+            finst = i;
+            fcpu = c;
+            fmiss = m;
         }
 
         // getters:
@@ -342,6 +361,7 @@ public class NormalTests {
             this.elapsed = e;
         }
     }
+
     // This function correlates the groups:
     private static void createHistograms(ArrayList<Run> array, int gCPU, int gWrite) {
         System.out.println("Create histograms");
@@ -443,7 +463,7 @@ public class NormalTests {
         // Shuffle the runs:
         a.shuffle();
         // link of cpu time and elapsed time:
-        //a.connect1();
+        // a.connect1();
 
         ArrayList<ArrayList<Run>> merge = new ArrayList<>();
         ArrayList<Run> temp;
@@ -529,4 +549,109 @@ public class NormalTests {
 
     }
 
+    // Test with Trouble and csv file:
+    public static void testCSV() {
+        CSVReader reader = new CSVReader();
+        reader.read();
+        ArrayList<ArrayList<Double>> readInfo = reader.getInfo();
+
+        ArrayList<ArrayList<Double>> result[] = new ArrayList[readInfo.size()];
+
+        int printFlag = 1;
+
+        ArrayList<Run> Runs = reader.getRuns();
+
+        // iteration over the information got:
+        for (int i = 0; i < readInfo.size(); i++) {
+            // Classification with the best k:
+            result[i] = classification(readInfo.get(i), 0);
+            // print:
+            if (printFlag > 0) {
+                System.out.println(result[i]);
+            }
+        }
+
+    }
+
+    // This is a Class to read the csv file and do the tests:
+    public static class CSVReader {
+
+        ArrayList<Double> info1;
+        ArrayList<Double> info2;
+        ArrayList<Double> info3;
+        ArrayList<Double> info4;
+
+        ArrayList<ArrayList<Double>> totalInfo;
+
+        ArrayList<Run> Runs;
+        // Constructor:
+        CSVReader() {
+            info1 = new ArrayList<>();
+            info2 = new ArrayList<>();
+            info3 = new ArrayList<>();
+            info4 = new ArrayList<>();
+
+            totalInfo = new ArrayList<>();
+            Runs = new ArrayList<>();
+        }
+
+        // read function:
+        public void read() {
+
+            String csvFile = "/home/frank/Desktop/build-trouble-Desktop-Debug/troubleSample.csv";
+            BufferedReader br = null;
+            String line = "";
+            String cvsSplitBy = ",";
+            Run temp;
+            try {
+
+                br = new BufferedReader(new FileReader(csvFile));
+                while ((line = br.readLine()) != null) {
+
+                    // use comma as separator
+                    String[] run = line.split(cvsSplitBy);
+
+                    System.out.println(run[0] + " " + run[1] + " " + run[2] + " " + run[3] + " " + run[4]);
+                    info1.add(Double.parseDouble(run[0]));
+                    info2.add(Double.parseDouble(run[1]));
+                    info3.add(Double.parseDouble(run[2]));
+                    info4.add(Double.parseDouble(run[4]));
+
+                    temp = new Run(Integer.parseInt(run[0]), Double.parseDouble(run[1]), Double.parseDouble(run[2]), Double.parseDouble(run[3]), Double.parseDouble(run[4]));
+                    Runs.add(temp);
+                }
+                // Add the info in the arraylist:
+
+                totalInfo.add(info1);
+                totalInfo.add(info2);
+                totalInfo.add(info3);
+                totalInfo.add(info4);
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (br != null) {
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+        }
+
+        // This function returns the information from the csv:
+        public ArrayList<ArrayList<Double>> getInfo() {
+            return totalInfo;
+        }
+
+     // This function returns the information from the csv:
+        public ArrayList<Run> getRuns() {
+
+            return Runs;
+        }
+    }
 }
