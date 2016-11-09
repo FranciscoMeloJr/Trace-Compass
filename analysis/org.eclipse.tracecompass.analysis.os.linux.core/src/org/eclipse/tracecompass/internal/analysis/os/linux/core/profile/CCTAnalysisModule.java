@@ -555,11 +555,9 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     /**
      * This function merge similar trees
      *
-     * @param root1:
-     *            tree for merging 1
+     * @param root1 tree for merging 1
      *
-     * @param root2:
-     *            tree for merging 2
+     * @param root2 tree for merging 2
      * @return the resulting tree
      */
     public static LinkedHashMap<KeyTree, Node<ProfileData>> mergeSimilarTree(LinkedHashMap<KeyTree, Node<ProfileData>> hmap1, LinkedHashMap<KeyTree, Node<ProfileData>> hmap2) {

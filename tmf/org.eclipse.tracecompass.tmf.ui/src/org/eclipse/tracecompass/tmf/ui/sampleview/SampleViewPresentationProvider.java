@@ -24,7 +24,7 @@ import org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets.Utils;
 
 /**
  * @author francisco
- * @since 2.1
+ * @since 2.2
  *
  */
 // Class Presentation Provider:

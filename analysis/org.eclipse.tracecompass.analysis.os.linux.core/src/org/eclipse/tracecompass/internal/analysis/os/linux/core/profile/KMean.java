@@ -30,7 +30,7 @@ public class KMean {
      * @param k
      * @param noOfItems1
      * @param numbers
-     * @return
+     * @return groupsD
      */
     public static ArrayList<ArrayList<Double>> KMeanD(int numberGroups, int numberItems, ArrayList<Double> numbers) {
 

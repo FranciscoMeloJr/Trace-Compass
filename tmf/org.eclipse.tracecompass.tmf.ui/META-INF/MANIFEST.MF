@@ -110,18 +110,14 @@ Export-Package: org.eclipse.tracecompass.internal.tmf.ui;x-friends:="org.eclipse
  org.eclipse.tracecompass.tmf.ui.widgets.timegraph.model,
  org.eclipse.tracecompass.tmf.ui.widgets.timegraph.widgets,
  org.eclipse.tracecompass.tmf.ui.widgets.virtualtable,
- org.eclipse.tracecompass.tmf.ui.sampleview,
-Import-Package: com.google.common.base,
+ org.eclipse.tracecompass.tmf.ui.sampleview
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
  com.google.common.cache,
  com.google.common.collect,
  org.eclipse.debug.internal.ui,
  org.eclipse.debug.internal.ui.actions.breakpointGroups,
  org.eclipse.emf.common.util,
  org.eclipse.emf.ecore,
-<<<<<<< 7c8526b7fb8edf035df8069a29ff0cad4a62617d
- com.google.common.annotations,
- org.eclipse.tracecompass.internal.analysis.os.linux.core.profile
-=======
  org.eclipse.tracecompass.internal.analysis.os.linux.core.profile,
  org.eclipse.tracecompass.internal.analysis.timing.core.callgraph
->>>>>>> AggregatedCalled: fColor change. FlameGraphView: inclusion of SampleViewPresentationProvider: getStateTableIndex function.
