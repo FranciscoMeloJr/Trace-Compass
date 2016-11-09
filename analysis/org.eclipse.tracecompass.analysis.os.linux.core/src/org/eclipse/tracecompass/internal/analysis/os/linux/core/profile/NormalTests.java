@@ -384,8 +384,8 @@ public class NormalTests {
     // This function classify an array with the best k:
     private static ArrayList<ArrayList<Double>> classification(ArrayList<Double> array, int printFlag) {
         ArrayList<Double> resultSSE = new ArrayList<>();
-        // learn the best k
-        for (int j = 2; j < array.size(); j++) {
+        // learn the best k - problem when j starts with 1:
+        for (int j = 1; j < array.size(); j++) {
             // K, size and arraylist of numbers
             ArrayList<ArrayList<Double>> group = KMean.executeD(j, array);
             resultSSE.add(KMean.ElbowMethodD(group, 0));
