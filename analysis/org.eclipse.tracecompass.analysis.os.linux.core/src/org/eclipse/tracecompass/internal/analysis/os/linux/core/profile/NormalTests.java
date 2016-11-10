@@ -273,11 +273,10 @@ public class NormalTests {
 
     // Each execution:
     static class Run {
+        int id;
         Double cpu;
         Double elapsed;
         Double writes;
-
-        int id;
 
         int GCpu;
         int GElapsed;
@@ -290,6 +289,13 @@ public class NormalTests {
         Double fcpu;
         Double fmiss;
 
+        // Group:
+        int gslow;
+        int gdelta;
+        int gmiss;
+        int gcpu;
+        int ginst;
+
         Run(int identification, double c, double e, double w) {
             this.cpu = c;
             this.elapsed = e;
@@ -297,7 +303,7 @@ public class NormalTests {
             this.id = identification;
         }
 
-        //Trouble tests:
+        // Trouble tests:
         Run(int fs, double d, double i, double c, double m) {
             fslow = fs;
             fdelta = d;
@@ -308,7 +314,10 @@ public class NormalTests {
 
         // getters:
         Double getCpu() {
-            return cpu;
+            if (cpu != null) {
+                return cpu;
+            }
+            return fcpu;
         }
 
         Double getElapsed() {
@@ -336,6 +345,49 @@ public class NormalTests {
             return GWrite;
         }
 
+        // setters for trouble:
+        void setgcpu(int g) {
+            gcpu = g;
+        }
+
+        void setginst(int g) {
+            ginst = g;
+        }
+
+        void setgslow(int gS) {
+            gslow = gS;
+        }
+
+        void setgdelta(int gD) {
+            gdelta = gD;
+        }
+
+        void setgmiss(int gM) {
+            gmiss = gM;
+        }
+
+        // getters for trouble:
+        int getgcpu() {
+            return gcpu;
+        }
+
+        int getginst() {
+            return ginst;
+        }
+
+        int getgslow() {
+            return gslow;
+        }
+
+        int getgdelta() {
+            return gdelta;
+        }
+
+        int getgmiss() {
+            return gmiss;
+        }
+
+        // setter:
         // setters:
         void setGroupCpu(int a) {
             GCpu = a;
@@ -359,6 +411,22 @@ public class NormalTests {
 
         void setElapsed(Double e) {
             this.elapsed = e;
+        }
+
+        public double getSlow() {
+            return fslow;
+        }
+
+        public double getDelta() {
+            return fdelta;
+        }
+
+        public double getInst() {
+            return finst;
+        }
+
+        public double getMiss() {
+            return fmiss;
         }
     }
 
@@ -423,13 +491,16 @@ public class NormalTests {
     }
 
     // HashMap add:
-    private static int findGroup(ArrayList<ArrayList<Double>> array, double number) {
-        ArrayList<Double> temp;
+    private static int findGroup(ArrayList<ArrayList<Double>> array, double number, int flagPrint) {
+        if (flagPrint > 0) {
+            System.out.println(array);
+        }
+        ArrayList<Double> temp = null;
         for (int i = 0; i < array.size(); i++) {
             temp = array.get(i);
             for (int j = 0; j < temp.size(); j++) {
                 if (temp.get(j) == number) {
-                    return i + 1;
+                    return i;
                 }
             }
         }
@@ -509,9 +580,9 @@ public class NormalTests {
         for (int i = 0; i < Runs.size(); i++) {
             Run eachRun = Runs.get(i);
 
-            int groupET = findGroup(resultET, eachRun.getElapsed());
-            int groupCPU = findGroup(resultCPU, eachRun.getCpu());
-            int groupWrite = findGroup(resultWrite, eachRun.getWrite());
+            int groupET = findGroup(resultET, eachRun.getElapsed(), 0);
+            int groupCPU = findGroup(resultCPU, eachRun.getCpu(), 0);
+            int groupWrite = findGroup(resultWrite, eachRun.getWrite(), 0);
 
             eachRun.setGroupElapsed(groupET);
             eachRun.setGroupCpu(groupCPU);
@@ -569,6 +640,83 @@ public class NormalTests {
             if (printFlag > 0) {
                 System.out.println(result[i]);
             }
+
+        }
+        // Classify the runs in groups:
+        group(result, Runs, 0);
+
+        // Analysis the result:
+        analysis(Runs, 1);
+    }
+
+    // This function put the result in groups:
+    private static void group(ArrayList<ArrayList<Double>>[] result, ArrayList<Run> runs, int printFlag) {
+
+        ArrayList<Integer> temp;
+        // Set the groups for the runs:
+        for (int i = 0; i < runs.size(); i++) {
+            Run eachRun = runs.get(i);
+            temp = new ArrayList<>();
+            // Run(int fs, double d, double i, double c, double m) {
+            int gslow = findGroup(result[0], eachRun.getSlow(), 0);
+            int gdelta = findGroup(result[1], eachRun.getDelta(), 0);
+            int ginst = findGroup(result[2], eachRun.getInst(), 0);
+            int gcpu = findGroup(result[3], eachRun.getCpu(), 0);
+            int gmiss = findGroup(result[4], eachRun.getMiss(), 0);
+
+            eachRun.setgcpu(gcpu);
+            eachRun.setgdelta(gdelta);
+            eachRun.setginst(ginst);
+            eachRun.setgmiss(gmiss);
+            eachRun.setgslow(gslow);
+
+            temp.add(gslow);
+            temp.add(gdelta);
+            temp.add(gcpu);
+            temp.add(gcpu);
+            temp.add(gmiss);
+
+            if (printFlag > 0) {
+                // print:
+                for (int j = 0; j < temp.size(); j++) {
+                    System.out.print(temp.get(j) + " ");
+                }
+                System.out.print(" \n");
+            }
+        }
+    }
+
+    // This function takes the classification and merge with the runs to have
+    // meaning info
+    private static void analysis(ArrayList<Run> runs, int printFlag) {
+
+        // run through the runs:
+        ArrayList<ArrayList<Integer>> resultRuns = new ArrayList<>();
+        ArrayList<Integer> temp;
+
+        for (int i = 0; i < runs.size(); i++) {
+            temp = new ArrayList<>();
+            Run eachRun = runs.get(i);
+            eachRun.getgcpu();
+            eachRun.getgdelta();
+            eachRun.getginst();
+            eachRun.getgmiss();
+            eachRun.getgslow();
+
+            temp.add(eachRun.getgslow());
+            temp.add(eachRun.getgdelta());
+            temp.add(eachRun.getginst());
+            temp.add(eachRun.getgcpu());
+            temp.add(eachRun.getgmiss());
+
+            resultRuns.add(temp);
+            if (printFlag > 0) {
+                // print:
+                for (int j = 0; j < temp.size(); j++) {
+                    System.out.print(temp.get(j) + " ");
+                }
+                System.out.print(" \n");
+            }
         }
 
     }
@@ -576,6 +724,7 @@ public class NormalTests {
     // This is a Class to read the csv file and do the tests:
     public static class CSVReader {
 
+        ArrayList<Double> info0;
         ArrayList<Double> info1;
         ArrayList<Double> info2;
         ArrayList<Double> info3;
@@ -584,8 +733,10 @@ public class NormalTests {
         ArrayList<ArrayList<Double>> totalInfo;
 
         ArrayList<Run> Runs;
+
         // Constructor:
         CSVReader() {
+            info0 = new ArrayList<>();
             info1 = new ArrayList<>();
             info2 = new ArrayList<>();
             info3 = new ArrayList<>();
@@ -603,6 +754,7 @@ public class NormalTests {
             String line = "";
             String cvsSplitBy = ",";
             Run temp;
+            System.out.println("slow   \tdelta inst   cpu   miss");
             try {
 
                 br = new BufferedReader(new FileReader(csvFile));
@@ -611,10 +763,11 @@ public class NormalTests {
                     // use comma as separator
                     String[] run = line.split(cvsSplitBy);
 
-                    System.out.println(run[0] + " " + run[1] + " " + run[2] + " " + run[3] + " " + run[4]);
-                    info1.add(Double.parseDouble(run[0]));
-                    info2.add(Double.parseDouble(run[1]));
-                    info3.add(Double.parseDouble(run[2]));
+                    System.out.println(run[0] + " \t" + run[1] + " " + run[2] + " " + run[3] + " " + run[4]);
+                    info0.add(Double.parseDouble(run[0]));
+                    info1.add(Double.parseDouble(run[1]));
+                    info2.add(Double.parseDouble(run[2]));
+                    info3.add(Double.parseDouble(run[3]));
                     info4.add(Double.parseDouble(run[4]));
 
                     temp = new Run(Integer.parseInt(run[0]), Double.parseDouble(run[1]), Double.parseDouble(run[2]), Double.parseDouble(run[3]), Double.parseDouble(run[4]));
@@ -622,6 +775,7 @@ public class NormalTests {
                 }
                 // Add the info in the arraylist:
 
+                totalInfo.add(info0);
                 totalInfo.add(info1);
                 totalInfo.add(info2);
                 totalInfo.add(info3);
@@ -648,7 +802,7 @@ public class NormalTests {
             return totalInfo;
         }
 
-     // This function returns the information from the csv:
+        // This function returns the information from the csv:
         public ArrayList<Run> getRuns() {
 
             return Runs;
