@@ -555,9 +555,11 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
     /**
      * This function merge similar trees
      *
-     * @param root1 tree for merging 1
+     * @param root1
+     *            tree for merging 1
      *
-     * @param root2 tree for merging 2
+     * @param root2
+     *            tree for merging 2
      * @return the resulting tree
      */
     public static LinkedHashMap<KeyTree, Node<ProfileData>> mergeSimilarTree(LinkedHashMap<KeyTree, Node<ProfileData>> hmap1, LinkedHashMap<KeyTree, Node<ProfileData>> hmap2) {
@@ -1530,6 +1532,37 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
         }
 
+        // bands classification:
+        public static ArrayList<ArrayList<Double>> getBands(ArrayList<Double> list, int numclass, int flagPrint) {
+
+            int quantity = list.size() / numclass;
+
+            ArrayList<ArrayList<Double>> result = new ArrayList<>();
+            ArrayList<Double> temp = null;
+
+            for (int i = 0; i < list.size(); i += quantity) {
+                temp = new ArrayList<>();
+                for (int j = i; j < (quantity + i); j++) {
+                    if (j < list.size() && list.get(j) != null) {
+                        temp.add(list.get(j));
+                    }
+                }
+                result.add(temp);
+            }
+
+            /*
+             * temp = new ArrayList<>(); for (int i = 0; i < list.size(); i++) {
+             *
+             * if (i % quantity == 0 && i != 0) { result.add(temp); temp = new
+             * ArrayList<>(); temp.add(list.get(i)); } else {
+             * temp.add(list.get(i)); } } result.add(temp);
+             */
+            if(flagPrint>0){
+                System.out.println(result);
+            }
+            return result;
+        }
+
         // JNB
         /**
          * @return int[]
@@ -1736,58 +1769,99 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             // Getting the data:
             Node<ProfileData> eachECCTs;
             double duration;
+            boolean valid = false;
 
             ArrayList<Double> durationList = new ArrayList<>();
             LinkedHashMap<Double, Node<ProfileData>> hash = new LinkedHashMap<>();
 
+            if (hashECCTs.length > 1) {
+
+                for (int i = 0; i < EcctSize; i++) {
+                    eachECCTs = ArrayECCTs.get(i);
+                    duration = eachECCTs.getProfileData().getDuration();
+                    durationList.add(Double.valueOf(duration));
+
+                    // link between node x duration:
+                    hash.put(duration, eachECCTs);
+                }
+                valid = true;
+            }
             if (kind == -1) {
                 RunKMean(null, null);
             }
-            if (kind == -2){
+            if (kind == -2) {
                 NormalTests.testNormal(1);
-
             }
-            if (kind == -3){
+            if (kind == -3) {
                 NormalTests.testCSV();
+            }
+            if (kind == -4) {
+                // test JNB:
+                ArrayList<Integer> list = new ArrayList<>();
+                for (int i = 0; i < 10; i++) {
+                    list.add(i);
+                }
+                for (int i = 100; i < 1000; i += 100) {
+                    list.add(i);
+                }
 
-            }else {
-                if (hashECCTs.length > 1) {
+                getJenksBreaks(list, 2);
+            }
 
-                    for (int i = 0; i < EcctSize; i++) {
-                        eachECCTs = ArrayECCTs.get(i);
-                        duration = eachECCTs.getProfileData().getDuration();
-                        durationList.add(Double.valueOf(duration));
+            if (kind == -5) {
+                HashMap<Integer, Double> hm = new HashMap<>();
 
-                        // link between node x duration:
-                        hash.put(duration, eachECCTs);
-                    }
+                System.out.println("Bands division");
+                // test band division:
+                ArrayList<Double> list = new ArrayList<>();
+                for (double i = 0; i < 10.0; i += 1) {
+                    list.add(i);
+                }
 
-                    // Run the classification method for the whole duration:
-                    if (kind == 1) {
-                        RunVariationClassifier(durationList, hash);
+                ArrayList<Double> resultSSE = new ArrayList<>();
+                // learn the best k - problem when j starts with 1:
+                for (int j = 2; j < list.size(); j++) {
+                    // K, size and arraylist of numbers
+                    ArrayList<ArrayList<Double>> group = getBands(list, j, 1);
+                    Double sse = KMean.ElbowMethodD(group, 1);
+                    resultSSE.add(sse);
+                    hm.put(group.size(), sse);
+                }
+                // heuristic validation in learning:
+                int maxg = KMean.calculateBestK(resultSSE, 0);
+                Double bestsse = resultSSE.get(maxg);
+                for (Integer key : hm.keySet()) {
+                    Double value = hm.get(key);
+                    if (value == bestsse) {
+                        System.out.println("Best k " + key);
                     }
-                    // Run the classification method for functions separately
-                    if (kind == 2) {
-                        variationClassificationF();
-                    }
-                    // Run the OptimazedK-Means method for functions separately
-                    if (kind == 3) {
-                        RunKMean(durationList, hash);
-                    }
-                    // Run the KDE method for functions separately
-                    if (kind == 4) {
-                        RunKDE(durationList, hash);
-                    } else {
-                        // Run the Jenks Natural Breaks method for functions
-                        // separately
-                        callJNB(durationList);
-                    }
-                } else {
-                    System.out.println("At least more than one group");
-                    return false;
                 }
             }
+            // Run the classification method for the whole duration:
+            if (kind == 1 && valid) {
+                RunVariationClassifier(durationList, hash);
+            }
+            // Run the classification method for functions separately
+            if (kind == 2) {
+                variationClassificationF();
+            }
+            // Run the OptimazedK-Means method for functions separately
+            if (kind == 3 && valid) {
+                RunKMean(durationList, hash);
+            }
+            // Run the KDE method for functions separately
+            if (kind == 4 && valid) {
+                RunKDE(durationList, hash);
+            }
+            if (kind == 5 && valid) {
+                callJNB(durationList);
+            }
+            if (!valid) {
+                System.out.println("At least more than one group");
+                return false;
+            }
             return true;
+
         }
 
         // CAll Weka Tests:
@@ -1896,6 +1970,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
             }
             return 0;
         }
+
     }
 
     // Calculate the STD for each function in the executions:

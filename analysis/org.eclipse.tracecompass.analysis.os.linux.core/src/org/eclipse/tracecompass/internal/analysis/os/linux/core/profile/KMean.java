@@ -456,7 +456,7 @@ public class KMean {
     }
 
     // Heuristic to get the best k: maximum gap distance
-    public static int calculateBestK(ArrayList<Double> resultSSE) {
+    public static int calculateBestK(ArrayList<Double> resultSSE, int printFlag) {
 
         Double gap = (double) 0;
         Double currentG;
@@ -484,7 +484,10 @@ public class KMean {
         }
         // return minp1;
 
-        System.out.println("best k " + (maxp1 + 1));
+        if (printFlag > 0) {
+            System.out.println("best k " + (maxp1 + 1));
+            System.out.println("best SSE " + resultSSE.get(maxp1));
+        }
         // return minp1;
         return maxp1;
     }

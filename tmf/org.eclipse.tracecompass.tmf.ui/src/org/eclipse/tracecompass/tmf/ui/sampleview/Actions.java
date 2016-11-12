@@ -24,17 +24,23 @@ public class Actions {
             @Override
             public void run() {
                 System.out.println("Test action");
-                //taking 2 infos from the trace
-                //CCTAnalysisModule.correlationInfoTrace(2, "instructions");
+                // taking 2 infos from the trace
+                // CCTAnalysisModule.correlationInfoTrace(2, "instructions");
 
-                //taking 3 infos from the trace+ external file:
-                //CCTAnalysisModule.correlationInfoTrace(2, "instructions");
+                // taking 3 infos from the trace+ external file:
+                // CCTAnalysisModule.correlationInfoTrace(2, "instructions");
 
-                //Normal distributions test:
-                //CCTAnalysisModule.RunClassification(-2);
+                // Normal distributions test:
+                // CCTAnalysisModule.RunClassification(-2);
 
                 //CSV classification test:
                 CCTAnalysisModule.RunClassification(-3);
+
+                // Jenks natural breaks classification:
+                //CCTAnalysisModule.RunClassification(-4);
+
+                // Bands division test:
+                //CCTAnalysisModule.RunClassification(-5);
             }
         };
         fInversion.setText("Test");
@@ -53,7 +59,7 @@ public class Actions {
             @Override
             public void run() {
                 System.out.println("MRL");
-                //taking 2 infos from the trace
+                // taking 2 infos from the trace
                 CCTAnalysisModule.MRL(2);
             }
         };
@@ -61,6 +67,7 @@ public class Actions {
         fModel.setToolTipText("Used to test");
         return fModel;
     }
+
     /**
      * Get the Inversion action
      *

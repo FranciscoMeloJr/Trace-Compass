@@ -479,7 +479,7 @@ public class NormalTests {
             resultSSE.add(KMean.ElbowMethodD(group, 0));
         }
         // heuristic validation in learning:
-        int bestk = (KMean.calculateBestK(resultSSE) + 1);
+        int bestk = (KMean.calculateBestK(resultSSE, 0) + 1);
         if (printFlag > 0) {
             System.out.println("Best number of groups: " + bestk);
         }
