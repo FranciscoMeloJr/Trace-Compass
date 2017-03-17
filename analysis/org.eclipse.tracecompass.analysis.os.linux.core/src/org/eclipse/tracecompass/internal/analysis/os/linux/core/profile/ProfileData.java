@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.IProfileData;
+import org.eclipse.tracecompass.segmentstore.core.ISegment;
 
 /**
  * @author frank

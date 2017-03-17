@@ -17,15 +17,21 @@ import java.util.Random;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.tracecompass.analysis.timing.core.segmentstore.IAnalysisProgressListener;
+import org.eclipse.tracecompass.analysis.timing.core.segmentstore.ISegmentStoreProvider;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.ProfileTraversal.KeyTree;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.MLR.Matrix;
 import org.eclipse.tracecompass.internal.analysis.os.linux.core.profile.MLR.MultiLinear;
+import org.eclipse.tracecompass.segmentstore.core.ISegment;
+import org.eclipse.tracecompass.segmentstore.core.ISegmentStore;
+import org.eclipse.tracecompass.segmentstore.core.SegmentStoreFactory;
 import org.eclipse.tracecompass.tmf.core.analysis.TmfAbstractAnalysisModule;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEvent;
 import org.eclipse.tracecompass.tmf.core.event.ITmfEventField;
 import org.eclipse.tracecompass.tmf.core.exceptions.TmfAnalysisException;
 import org.eclipse.tracecompass.tmf.core.request.ITmfEventRequest;
 import org.eclipse.tracecompass.tmf.core.request.TmfEventRequest;
+import org.eclipse.tracecompass.tmf.core.segment.ISegmentAspect;
 import org.eclipse.tracecompass.tmf.core.statistics.ITmfStatistics;
 import org.eclipse.tracecompass.tmf.core.timestamp.TmfTimeRange;
 import org.eclipse.tracecompass.tmf.core.trace.ITmfTrace;
@@ -36,12 +42,13 @@ import com.google.common.collect.Iterables;
  * @author francisco
  *
  */
-public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
+public class CCTAnalysisModule extends TmfAbstractAnalysisModule implements ISegmentStoreProvider {
     /**
      * Analysis ID, it should match that in the plugin.xml file
      */
     public static final @NonNull String ID = "org.eclipse.tracecompass.analysis.os.linux.core.profile.cctanalysis.module"; //$NON-NLS-1$
 
+    private static final String[] CONTEXT_STRINGS = { "context._perf_thread_instructions", "perf:thread:cache-misses", "perf:thread:page-fault", "perf:thread:cpu-cycles" };
     // ArrayList of ECCTs, which are delimited by static implementation
     private static ArrayList<Node<ProfileData>> ArrayECCTs;
     private static LinkedHashMap<KeyTree, Node<ProfileData>> hashECCTs[];
@@ -118,7 +125,7 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         GraphvizVisitor dot;
 
         private ITmfEventField first;
-        private String[] fContextStrings = { "context._perf_thread_instructions", "perf:thread:cache-misses", "perf:thread:page-fault", "perf:thread:cpu-cycles" };
+
 
         public RequestTest() {
             super(ITmfEvent.class, TmfTimeRange.ETERNITY, 0, ITmfEventRequest.ALL_DATA, ExecutionType.BACKGROUND);
@@ -209,10 +216,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                 ITmfEventField content = event.getContent();
                 for (ITmfEventField field : content.getFields()) {
                     String lab = field.toString();
-                    if (lab.contains(fContextStrings[0])) {
-                        System.out.println(fContextStrings[0] + field.getValue()); // $NON-NLS-1$
+                    if (lab.contains(CONTEXT_STRINGS[0])) {
+                        System.out.println(CONTEXT_STRINGS[0] + field.getValue()); // $NON-NLS-1$
                         Double value = Double.parseDouble(field.getValue().toString());
-                        parent.getProfileData().setInfo(fContextStrings[0], value);
+                        parent.getProfileData().setInfo(CONTEXT_STRINGS[0], value);
                         parent.getProfileData().addInfo(value.intValue());
                     }
                 }
@@ -241,10 +248,10 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
                     ITmfEventField content = event.getContent();
                     for (ITmfEventField field : content.getFields()) {
                         String lab = field.getValue().toString();
-                        if (lab.contains(fContextStrings[0])) {
-                            System.out.println(fContextStrings[0] + field.getValue()); // $NON-NLS-1$
+                        if (lab.contains(CONTEXT_STRINGS[0])) {
+                            System.out.println(CONTEXT_STRINGS[0] + field.getValue()); // $NON-NLS-1$
                             Double value = Double.parseDouble(field.getValue().toString());
-                            parent.getProfileData().setInfo(fContextStrings[0], value);
+                            parent.getProfileData().setInfo(CONTEXT_STRINGS[0], value);
                             parent.getProfileData().addInfo(value.intValue());
                         }
                     }
@@ -2248,5 +2255,60 @@ public class CCTAnalysisModule extends TmfAbstractAnalysisModule {
         }
 
         return numbers;
+    }
+
+    @Override
+    public void addListener(@NonNull IAnalysisProgressListener listener) {
+        // Look at the AbstractSegmentStore analysis and copy paste from there
+    }
+
+    @Override
+    public void removeListener(@NonNull IAnalysisProgressListener listener) {
+        // Look at the AbstractSegmentStore analysis and copy paste from there
+    }
+
+    @Override
+    public @NonNull Iterable<@NonNull ISegmentAspect> getSegmentAspects() {
+        for (String context : CONTEXT_STRINGS) {
+            // put aspects in a list and return that list
+            ISegmentAspect aspect = new ISegmentAspect() {
+
+                private String fString = context;
+
+                @Override
+                public @NonNull String getName() {
+                    return fString;
+                }
+
+                @Override
+                public @NonNull String getHelpText() {
+                    return fString;
+                }
+
+                @Override
+                public @Nullable Comparator<?> getComparator() {
+                    return null;
+                }
+
+                @Override
+                public @Nullable Object resolve(@NonNull ISegment segment) {
+                    // get the metric from the segment
+//                    if (segment instanceof YourSegmentClass) {
+//                }
+                    return null;
+                }
+
+            };
+        }
+        return Collections.EMPTY_LIST;
+    }
+
+    @Override
+    public @Nullable ISegmentStore<@NonNull ISegment> getSegmentStore() {
+        // TODO Take the tree and transform it to a segment store
+        // node or profile data will implement ISegment
+        ISegmentStore<@NonNull ISegment> store = SegmentStoreFactory.createSegmentStore();
+        // Add segments to the store from your tree
+        return store;
     }
 }
